@@ -1,0 +1,31 @@
+{
+    "name": "windy-plugin-soarcalc",
+    "version": "1.0.0",
+    "description": "Soaring Calculations",
+    "main": "dist/plugin.min.js",
+    "type": "module",
+    "scripts": {
+        "build": "rm -rf dist && mkdir dist && SERVE=false rollup -c && cp package.json dist/",
+        "start": "rollup -w -c",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/windycom/windy-plugin-soarcalc.git"
+    },
+    "keywords": [
+        "windy",
+        "windy.com",
+        "plugins"
+    ],
+    "author": "@tomA27",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/windycom/windy-plugin-soarcalc/issues"
+    },
+    "homepage": "https://docs.windy-plugins.com/",
+    "dependencies": {
+        "@windycom/plugin-devtools": "^2.0.0",
+        "suncalc": "^1.9.0"
+    }
+}
