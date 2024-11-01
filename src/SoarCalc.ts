@@ -47,7 +47,7 @@ export class Sounding
 		{
 			const packetTv: num = Tv[0] + adiabaticLapseRate * (h[i] - h[0]);
 			const eLR = (Tv[i] - Tv[i-1]) / (h[i] - h[i-1]);
-			console.log(i + ': ' + this.levels[i].name + ' h=' + h[i] + ', packetT=' + (packetTv-zeroC).toFixed(3) +', T=' + (Tv[i]-zeroC).toFixed(3) + ', elr=' + eLR.toFixed(6));
+			//console.log(i + ': ' + this.levels[i].name + ' h=' + h[i] + ', packetT=' + (packetTv-zeroC).toFixed(3) +', T=' + (Tv[i]-zeroC).toFixed(3) + ', elr=' + eLR.toFixed(6));
 			if (Tv[i] > packetTv)
 			{
 				this.blTop = (Tv[0] - Tv[i-1] + h[i-1] * eLR - h[0] * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
@@ -73,7 +73,7 @@ export class Sounding
 		if (this.Qs != null)
 		{
 			this.Wstar = getWstar(this.Qs, this.blDepth, this.levels[0].U);
-			this.Hcrit = surfaceGh + getZcrit(0.8, this.Wstar) * this.blDepth;
+			this.Hcrit = surfaceGh + getZcrit(0.875, this.Wstar) * this.blDepth;
 		}
 		console.log("/Sounding.constructor:", this);
 	}
@@ -102,7 +102,7 @@ export class SoundingLevel
 	    this.U = getMixingRatio(rh, T, p);
 	    this.Tv = getVirtualTemp(T, this.U);
 	    this.Us = getSaturationMixingRatio(T, p);
-	    console.log(this);
+	    //console.log(this);
 	}
 }
 function getPressure(P0: number, h: number): number
@@ -163,7 +163,7 @@ function getZcrit(wCrit: num, wStar: num): num
 	// employ Newton–Raphson method to find z (z/blDepth) for given value of w (Wcrit/Wstar)
 	console.log("getZcrit:", wCrit, wStar);
 	var z: num;
-	if (wCrit > 0.457 * wStar)
+	if (wCrit > wStar)
 	{
 		z = 0;
 	}
@@ -183,8 +183,8 @@ function getZcrit(wCrit: num, wStar: num): num
 		z = 0.9;
 		do
 		{
-			w = Math.pow(z, 1/3) * (1 - 1.1*z);
-			dwdz = 1/3 * Math.pow(z, -2/3) * (1 - 1.1*z) - 1.1 * Math.pow(z, 1/3);
+			w = 2.2 * Math.pow(z, 1/3) * (1 - 1.1*z);
+			dwdz = 2.2 * (1/3 * Math.pow(z, -2/3) * (1 - 1.1*z) - 1.1 * Math.pow(z, 1/3));
 			dz = (w - w0)/dwdz;
 			console.log("z=", z, "w=", w, "dwdz=", dwdz, "dz=", dz);
 			z = z - dz;
