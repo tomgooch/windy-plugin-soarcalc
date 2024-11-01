@@ -2,7 +2,7 @@ import type { ExternalPluginConfig } from '@windy/interfaces';
 
 const config: ExternalPluginConfig = {
     name: 'windy-plugin-soarcalc',
-    version: '0.1.1',
+    version: '0.1.2',
     title: 'SoarCalc',
     icon: '🌤️',
     description: 'Displays Soaring parameters for any location on map.',
