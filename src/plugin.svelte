@@ -8,13 +8,13 @@
 <table style="width:100%">
 <tr>
 <td style=";text-align:right;vertical-align:top">
-    T: {format_temp(_sounding?.levels[0].T)}
-    <br>Tdew: {format_temp(_sounding?.levels[0].dewPoint)}
-    <br>Tv: {format_temp(_sounding?.levels[0].Tv)}
+    T: {format_temp(_sounding?.surfaceT)}
+    <br>Tdew: {format_temp(_sounding?.surfaceDewPoint)}
+    <br>Tv: {format_temp(_sounding?.surfaceTv)}
     <br>B/S: {format_number(_sounding?.Ri, 2)}
 </td>
 <td style=";text-align:right;vertical-align:top">
-    {#if _sounding?.blTop < _sounding?.levels[0].gh + 10}
+    {#if _sounding?.blTop < _sounding?.surfaceGh + 10}
     	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop)}</span>
     {:else}
     	BL top: {format_height(_sounding?.blTop)}
@@ -29,13 +29,13 @@
     {:else}
     	<br>OD base: {format_height(_sounding?.odBase)}
     {/if}
-    <br>Elev: {format_height(_sounding?.levels[0].gh)}
+    <br>Elev: {format_height(_sounding?.surfaceGh)}
 </td>
 <td style=";text-align:right;vertical-align:top">
     Cloud: {format_number(_sounding?.cloud, 2)}
     <br>Qs: {format_number(_sounding?.Qs, 0)}
     <br>W*: {format_number(_sounding?.Wstar, 2)}
-    {#if _sounding?.Hcrit < _sounding?.levels[0].gh + 10}
+    {#if _sounding?.Hcrit < _sounding?.surfaceGh + 10}
     	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
     {:else}
     	<br>Hcrit: {format_height(_sounding?.Hcrit)}

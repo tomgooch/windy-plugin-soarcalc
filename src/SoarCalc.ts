@@ -11,15 +11,19 @@ export class Sounding
 	n: number = 0;					// number of levels
 	levels: SoundingLevel[];		// data for each level
 	
-	blTop: number = 0;				// boundary layer height i.e. height of blue thermal (m)
-	blDepth: number;				// boundary layer depth i.e. blTop - surface (m)
-	cuBase: number;					// Cu cloud base (LCL) (m)
-	Qs: number | null;				// heat flux arriving at the surface (Wm-2)
-	cloud: number | null;			// cloud cover ratio
-	Wstar: number | null = null;	// characteristic thermal updraft velocity (ms-2)
-	Hcrit: number | null = null;	// height of critical updraft strength
-	odBase: number | null = null;	// OD cloud base (CCL) (m)
-	Ri: number | null = null;		// B/S ratio (Richardson number)
+	surfaceGh: number | null = null;
+	surfaceDewPoint: number | null = null;
+	surfaceT: number | null = null;
+	surfaceTv: number | null = null;	// surface vertual temperature
+	blTop: number | null = null;		// boundary layer height i.e. height of blue thermal (m)
+	blDepth: number | null = null;		// boundary layer depth i.e. blTop - surface (m)
+	cuBase: number | null = null;		// Cu cloud base (LCL) (m)
+	Qs: number | null;					// heat flux arriving at the surface (Wm-2)
+	cloud: number | null;				// cloud cover ratio
+	Wstar: number | null = null;		// characteristic thermal updraft velocity (ms-2)
+	Hcrit: number | null = null;		// height of critical updraft strength
+	odBase: number | null = null;		// OD cloud base (CCL) (m)
+	Ri: number | null = null;			// B/S ratio (Richardson number)
 	
 	constructor(meteogramForecast, hour: number, Qs: number, cloud: number)
 	{
@@ -28,14 +32,20 @@ export class Sounding
 		this.cloud = cloud;
 		this.levels = Array<SoundingLevel>();
         const md = meteogramForecast.data.data;
+        this.surfaceGh = meteogramForecast.data.header.modelElevation;
         const t: number = md.hours.indexOf(hour);
-        const surfaceGh = meteogramForecast.data.header.modelElevation;
+        
+        if (t < 0) return;		// user has requested a time beyond the limit of the forecast availability
+
 
         const P0: number = getSeaLevelPressure(95000, md['gh-950h'][t]);
         var Vx: number;		// wind velocity x at blTop
         var Vy: number;		// wind velocity y at blTop
        
-		this.levels[this.n++] = new SoundingLevel('surface', surfaceGh, getPressure(P0, surfaceGh), md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
+		this.levels[this.n++] = new SoundingLevel('surface', this.surfaceGh, getPressure(P0, this.surfaceGh), md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
+		this.surfaceDewPoint = this.levels[0].dewPoint;
+		this.surfaceT = this.levels[0].T;
+		this.surfaceTv = this.levels[0].Tv;
 
 		for (const x of ['1000h', '950h', '925h', '900h', '850h', '800h', '700h', '600h', '500h', '400h', '300h', '200h', '150h'])
 		{
@@ -44,8 +54,6 @@ export class Sounding
 				this.levels[this.n++] = new SoundingLevel(x, gh, Number(x.substring(0, x.length - 1)) * 100, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
 		}
 			
-//		const T = Array.from(this.levels, (x) => x.T));
-//		Tv[0] = this.levels[0].Tv;
 		const Tv = Array.from(this.levels, (x) => x.Tv));
 		const h = Array.from(this.levels, (x) => x.gh));
 
@@ -61,6 +69,12 @@ export class Sounding
 				Vy =  this.levels[i-1].Vy + (this.levels[i].Vy - this.levels[i-1].Vy) * (this.blTop - h[i-1]) / (h[i] - h[i-1]);
 				break;
 			}
+		}
+		if (this.blTop == null)
+		{
+			this.blTop = h[n-1];
+			Vx = this.levels[this.n-1].Vx;
+			Vy = this.levels[this.n-1].Vy;
 		}
 		const Us = Array.from(this.levels, (x) => x.Us));
 		const U = this.levels[0].U;
@@ -81,7 +95,7 @@ export class Sounding
 		if (this.Qs != null)
 		{
 			this.Wstar = getWstar(this.Qs, this.blDepth, this.levels[0].U);
-			this.Hcrit = surfaceGh + getZcrit(0.875, this.Wstar) * this.blDepth;
+			this.Hcrit = this.surfaceGh + getZcrit(0.875, this.Wstar) * this.blDepth;
 		}
 		
 		// Buoyancy/Shear ratio
