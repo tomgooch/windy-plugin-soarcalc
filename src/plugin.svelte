@@ -34,7 +34,7 @@
 <td style=";text-align:right;vertical-align:top">
     Cloud: {format_number(_sounding?.cloud, 2)}
     <br>Qs: {format_number(_sounding?.Qs, 0)}
-    <br>W*: {format_number(_sounding?.Wstar, 2)}
+    <br>W*: {format_velocity(_sounding?.Wstar)}
     {#if _sounding?.Hcrit < _sounding?.surfaceGh + 10}
     	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
     {:else}
@@ -119,12 +119,10 @@
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
     export const onopen = (location?: LatLon) => {
-        if (_model == null)
-        	_model = store.get('product');
         if (isValidLatLonObj(location)) {
        		_loc = location;
         	showMarker();
-            updateForecast();
+            updateInterpolator(store.get('product'), store.get('overlay'));
         }
         console.log('markers', markers);
     };
@@ -146,16 +144,21 @@
 	{
 		console.log('onRedrawFinished', params);
 		_interpolator = null;
+		_level = params.level;
+		_path = params.path;
+		const dateString: string = _path.substring(0,4) + '-' + _path.substring(4,6) + '-' + _path.substring(6,8) + 'T' + _path.substring(8,10) + ':00:00Z';
+		_hour = new Date(dateString).getTime();
+		updateInterpolator(params.product, params.overlay);
+	}
+	function updateInterpolator(model: string, overlay: string)
+	{
+		console.log('updateInterpolator', model, overlay);
 	    getLatLonInterpolator().then((interpolator) => {
 			_interpolator = interpolator;
-			_overlay = params.overlay;
-			_level = params.level;
-			_path = params.path;
-			const dateString: string = _path.substring(0,4) + '-' + _path.substring(4,6) + '-' + _path.substring(6,8) + 'T' + _path.substring(8,10) + ':00:00Z';
-			_hour = new Date(dateString).getTime();
-			if (params.product != _model)
+			_overlay = overlay;
+			if (model != _model)
 			{
-				_model = params.product;
+				_model = model;
 				updateForecast();
 			}
 			else
