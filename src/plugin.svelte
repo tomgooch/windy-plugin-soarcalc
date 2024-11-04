@@ -2,7 +2,7 @@
     {title}
 </div>
 <div>
-	<div style="color:yellow">SoarCalc: {_model} : {format_time(_hour)}</div>
+	<div style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}</div>
 	<span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
 	
 <table style="width:100%">
@@ -77,7 +77,7 @@
     let _path: string | null = null;
     let _hour: number | null = null;
    
-    const { title, name } = config;
+    const { title, name, version } = config;
 
     const draggablePulsatingIcon = new L.DivIcon({
         className: 'icon-dot wp-mb-mg-cursor-move',
@@ -306,7 +306,7 @@
     	if (d == null) return '';
     	const days: string[] = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
     	const dt = new Date(d);
-		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + dt.getUTCHours() + ':00';
+		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ', ' + dt.getUTCHours() + ':00';
     }
     function format_number(x: number, n: number): string
     {
