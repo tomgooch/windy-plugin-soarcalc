@@ -19,7 +19,7 @@ export class Sounding
 	Wstar: number | null = null;	// characteristic thermal updraft velocity (ms-2)
 	Hcrit: number | null = null;	// height of critical updraft strength
 	odBase: number | null = null;	// OD cloud base (CCL) (m)
-	Ri: number;						// B/S ratio (Richardson number)
+	Ri: number | null = null;		// B/S ratio (Richardson number)
 	
 	constructor(meteogramForecast, hour: number, Qs: number, cloud: number)
 	{
@@ -86,9 +86,21 @@ export class Sounding
 		
 		// Buoyancy/Shear ratio
 		// we take wind half way between surface and blTop
-		const dVx: number = (Vx - this.levels[0].Vx) / 2;
-		const dVy: number = (Vy - this.levels[0].Vy) / 2;
-		this.Ri = this.Wstar * this.Wstar / ( dVx * dVx + dVy * dVy)
+		if (this.Wstar != null)
+		{
+			if (this.Wstar == 0)
+			{
+				this.Ri = 0;
+			}
+			else
+			{
+				const dVx: number = (Vx - this.levels[0].Vx) / 2;
+				const dVy: number = (Vy - this.levels[0].Vy) / 2;
+				const dV2: number = dVx * dVx + dVy * dVy;
+				if (dV2 > 0.000001)
+					this.Ri = this.Wstar * this.Wstar / dV2;
+			}
+		}
 		console.log("/Sounding.constructor:", this);
 	}
 }

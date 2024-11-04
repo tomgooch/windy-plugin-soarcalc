@@ -254,38 +254,6 @@
         }
     }
 // **********************************************************
-	function getBlTop(sounding: Sounding): string
-	{
-		if (sounding == null) return '';
-		if (sounding.blTop < sounding.levels[0].gh + 10)
-			return '<span style="opacity: 0.6">' + format_height(sounding.blTop) + '</span>'
-		else
-			return format_height(sounding.blTop);
-	}
-	function getHcrit(sounding: Sounding): string
-	{
-		if (sounding == null) return '';
-		if (sounding.Hcrit < sounding.levels[0].gh + 10)
-			return '<span style="opacity: 0.6">' + format_height(sounding.Hcrit) + '</span>'
-		else
-			return format_height(sounding.Hcrit);
-	}
-	function getCuBase(sounding: Sounding): string
-	{
-		if (sounding == null) return '';
-		if (sounding.cuBase > sounding.blTop)
-			return '<span style="opacity: 0.6">' + format_height(sounding.cuBase) + '</span>'
-		else
-			return format_height(sounding.cuBase);
-	}
-	function getOdBase(sounding: Sounding): string
-	{
-		if (sounding == null) return '';
-		if (sounding.odBase > sounding.blTop)
-			return '<span style="opacity: 0.6">' + format_height(sounding.odBase) + '</span>'
-		else
-			return format_height(sounding.odBase);
-	}
     function format_height(x: number): string
     {
     	if (x == null) return '';
