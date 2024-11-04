@@ -14,28 +14,34 @@ export class Sounding
 	blTop: number = 0;				// boundary layer height i.e. height of blue thermal (m)
 	blDepth: number;				// boundary layer depth i.e. blTop - surface (m)
 	cuBase: number;					// Cu cloud base (LCL) (m)
-	Qs: number  | null;				// heat flux arriving at the surface (Wm-2)
+	Qs: number | null;				// heat flux arriving at the surface (Wm-2)
+	cloud: number | null;			// cloud cover ratio
 	Wstar: number | null = null;	// characteristic thermal updraft velocity (ms-2)
 	Hcrit: number | null = null;	// height of critical updraft strength
 	odBase: number | null = null;	// OD cloud base (CCL) (m)
+	Ri: number;						// B/S ratio (Richardson number)
 	
-	constructor(meteogramForecast, hour: number, Qs: number)
+	constructor(meteogramForecast, hour: number, Qs: number, cloud: number)
 	{
-    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs);
+    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
 		this.Qs = Qs;
+		this.cloud = cloud;
 		this.levels = Array<SoundingLevel>();
         const md = meteogramForecast.data.data;
         const t: number = md.hours.indexOf(hour);
-        const Pmsl: number = getSeaLevelPressure(95000, md['gh-950h'][t]);
         const surfaceGh = meteogramForecast.data.header.modelElevation;
+
+        const P0: number = getSeaLevelPressure(95000, md['gh-950h'][t]);
+        var Vx: number;		// wind velocity x at blTop
+        var Vy: number;		// wind velocity y at blTop
        
-		this.levels[this.n++] = new SoundingLevel('surface', surfaceGh, getPressure(Pmsl, surfaceGh), md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t]);
+		this.levels[this.n++] = new SoundingLevel('surface', surfaceGh, getPressure(P0, surfaceGh), md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
 
 		for (const x of ['1000h', '950h', '925h', '900h', '850h', '800h', '700h', '600h', '500h', '400h', '300h', '200h', '150h'])
 		{
 			const gh = md['gh-' + x][t];
 			if (gh > this.levels[0].gh)
-				this.levels[this.n++] = new SoundingLevel(x, gh, Number(x.substring(0, x.length - 1)) * 100, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t]);
+				this.levels[this.n++] = new SoundingLevel(x, gh, Number(x.substring(0, x.length - 1)) * 100, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
 		}
 			
 //		const T = Array.from(this.levels, (x) => x.T));
@@ -51,6 +57,8 @@ export class Sounding
 			if (Tv[i] > packetTv)
 			{
 				this.blTop = (Tv[0] - Tv[i-1] + h[i-1] * eLR - h[0] * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
+				Vx =  this.levels[i-1].Vx + (this.levels[i].Vx - this.levels[i-1].Vx) * (this.blTop - h[i-1]) / (h[i] - h[i-1]);
+				Vy =  this.levels[i-1].Vy + (this.levels[i].Vy - this.levels[i-1].Vy) * (this.blTop - h[i-1]) / (h[i] - h[i-1]);
 				break;
 			}
 		}
@@ -75,6 +83,12 @@ export class Sounding
 			this.Wstar = getWstar(this.Qs, this.blDepth, this.levels[0].U);
 			this.Hcrit = surfaceGh + getZcrit(0.875, this.Wstar) * this.blDepth;
 		}
+		
+		// Buoyancy/Shear ratio
+		// we take wind half way between surface and blTop
+		const dVx: number = (Vx - this.levels[0].Vx) / 2;
+		const dVy: number = (Vy - this.levels[0].Vy) / 2;
+		this.Ri = this.Wstar * this.Wstar / ( dVx * dVx + dVy * dVy)
 		console.log("/Sounding.constructor:", this);
 	}
 }
@@ -89,8 +103,10 @@ export class SoundingLevel
 	U: number;						// mixing ratio
 	Tv: number;						// virtual (density) temperature (K)
 	Us: number;						// saturation mixing ratio at this temp / pressure
+	Vx: number;						// wind velocity x (ms-1)
+	Vy: number;						// wind velocity y (ms-1)
 
-	constructor(name: string, gh: number, p: number, T: number, rh: number, dewPoint: number)
+	constructor(name: string, gh: number, p: number, T: number, rh: number, dewPoint: number, Vx: number, Vy: number)
 	{
 	    this.name = name;
 	    this.gh = gh;					
@@ -102,6 +118,9 @@ export class SoundingLevel
 	    this.U = getMixingRatio(rh, T, p);
 	    this.Tv = getVirtualTemp(T, this.U);
 	    this.Us = getSaturationMixingRatio(T, p);
+	    
+	    this.Vx = Vx;
+	    this.Vy = Vy;
 	    //console.log(this);
 	}
 }
@@ -157,6 +176,10 @@ function getWstar(Qs: num, blDepth: num, mixingRatio: num): num
 	const Wstar = Math.pow(Qov * blDepth * g / temperatureBar, 1/3);			// characteristic updraft velocity
 	console.log("/getWstar:", Wstar);
 	return Wstar;
+}
+function getPotentialTemperature(T: number, P: number, P0: number): number
+{
+	return T * Math.pow(P0/P, Rd/Cp);
 }
 function getZcrit(wCrit: num, wStar: num): num
 {

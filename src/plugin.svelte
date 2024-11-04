@@ -11,6 +11,7 @@
     T: {format_temp(_sounding?.levels[0].T)}
     <br>Tdew: {format_temp(_sounding?.levels[0].dewPoint)}
     <br>Tv: {format_temp(_sounding?.levels[0].Tv)}
+    <br>B/S: {format_number(_sounding?.Ri, 2)}
 </td>
 <td style=";text-align:right;vertical-align:top">
     {#if _sounding?.blTop < _sounding?.levels[0].gh + 10}
@@ -31,8 +32,8 @@
     <br>Elev: {format_height(_sounding?.levels[0].gh)}
 </td>
 <td style=";text-align:right;vertical-align:top">
-    Cloud: {format_number(_clouds, 2)}
-    <br>Qs: {format_number(_Qs, 0)}
+    Cloud: {format_number(_sounding?.cloud, 2)}
+    <br>Qs: {format_number(_sounding?.Qs, 0)}
     <br>W*: {format_number(_sounding?.Wstar, 2)}
     {#if _sounding?.Hcrit < _sounding?.levels[0].gh + 10}
     	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
@@ -75,9 +76,7 @@
     let _level: string | null = null;
     let _path: string | null = null;
     let _hour: number | null = null;
-    let _clouds: number | null = null;
-    let _Qs: number | null = null;
-    
+   
     const { title, name } = config;
 
     const draggablePulsatingIcon = new L.DivIcon({
@@ -194,44 +193,44 @@
     {
  		console.log("updateSounding: ", _hour, _overlay, _loc, _meteogramForecast);
 
-   		calculateQs();
-   		
-    	if (_meteogramForecast == null) return;
     	if (_hour == null)
     		_hour = getHour();
 
-        _sounding = new Sounding(_meteogramForecast, _hour, _Qs);
-    }
-    function calculateQs()
-    {
-    	if (_interpolator == null || _loc == null)
+		var cloud: num | null = null;
+		var Qs: num | null = null;
+    	if (_interpolator != null && _loc != null && _hour != null)
     	{
-    		_clouds = null;
-    		_Qs = null;
-    	 	return;
+			const values = _interpolator(_loc);
+			console.log("calculateQs: ", _overlay, values);
+
+			if (Array.isArray(values))
+			{
+				if (_overlay == 'clouds')
+				{
+				   	cloud = values[0] / 100;
+				   	//rain = values[1];
+					Qs = (1-cloud) * getQs0(_hour, _loc);
+				}
+				else if (_overlay == 'solarpower')
+				{
+					Qs = values[0];
+					cloud = 1 - (Qs / getQs0(_hour, _loc));
+				}
+			}
     	}
-		const values = _interpolator(_loc);
-    	console.log("calculateQs: ", _overlay, values);
+   		
+    	if (_meteogramForecast == null) return;
 
-	    var sunAltitude = SunCalc.getPosition(_hour, _loc.lat, _loc.lon).altitude;
+        _sounding = new Sounding(_meteogramForecast, _hour, Qs, cloud);
+    }
+    function getQs0(hour: number, loc: LatLon): number
+    {
+    	// get insolation corrected only for sun altitude
+	    var sunAltitude: number = SunCalc.getPosition(hour, loc.lat, loc.lon).altitude;
 		if (sunAltitude <= 0) sunAltitude = 0;
-		const Qs0 = 1000 * Math.sin(sunAltitude);
-
-		if (Array.isArray(values))
-		{
-			if (_overlay == 'clouds')
-			{
-			   	_clouds = values[0] / 100;
-			   	//_rain = values[1];
-				_Qs = (1-_clouds) * Qs0;
-			}
-			else if (_overlay == 'solarpower')
-			{
-				_Qs = values[0];
-				_clouds = 1 - (_Qs / Qs0);
-			}
-	    }
-    	console.log("/calculateQs:", format_angle(sunAltitude), Qs0, _Qs, _clouds);
+		const Qs0: number = 1000 * Math.sin(sunAltitude);
+    	console.log("/getQs0:", format_angle(sunAltitude), Qs0);
+    	return Qs0;
     }
     function getHour(): number
     {
@@ -295,7 +294,7 @@
     function format_temp(x: number): string
     {
     	if (x == null) return '';
-    	return metrics.temp.convertNumber(x, 2).toFixed(2);
+    	return metrics.temp.convertNumber(x, 1).toFixed(1);
     }
     function format_press(x: number): string
     {
@@ -359,6 +358,7 @@
 		msg += "<br>T = surface temperature (" + metrics.temp.metric + ")"
 		msg += "<br>Tdew = surface dew point temperature (" + metrics.temp.metric + ")"
 		msg += "<br>Tv = surface virtual (density) temperature (" + metrics.temp.metric + ")"
+		msg += "<br>B/S = Bouyancy/Shear ratio"
 		msg += "<br>BL top = boundary layer top (dry thermal height) (" + metrics.altitude.metric + ")"
 		msg += "<br>Cu base = Cumulous cloud base (" + metrics.altitude.metric + ")"
 		msg += "<br>OD base = Overdeveloped / Spreadout cloud base (" + metrics.altitude.metric + ")"
@@ -366,6 +366,7 @@
 		msg += "</p>"
 		
 		msg += "<p>Clouds/Solar power layers only..."
+		msg += "<br>Cloud = total cloud cover"
 		msg += "<br>Qs = surface insolation (W/m2)"
 		msg += "<br>W* = thermal updraft velocity (" + metrics.wind.metric + ")"
 		msg += "<br>Hcrit = height at which updraft falls below 1.75kts (" + metrics.altitude.metric + ")"
