@@ -321,9 +321,9 @@
 	function getPopupMessage(): string
 	{
 		console.log("metric", metrics);
-		var msg: string = "<p>SoarCalc:</p>"
+		var msg: string = "<p>" + title + " v" + version + "</p>"
 
-		msg += "<p>Soaring Prediction parameters as per RASP but based on the current forecast model</p>"
+		msg += "<p>Soaring Prediction parameters as per RASP based on the current forecast model</p>"
 
 		msg += "<p>All layers..."
 		msg += "<br>T = surface temperature (" + metrics.temp.metric + ")"
