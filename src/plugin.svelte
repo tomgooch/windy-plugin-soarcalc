@@ -34,7 +34,7 @@
 <td style=";text-align:right;vertical-align:top">
     Cloud: {format_number(_sounding?.cloud, 2)}
     <br>Qs: {format_number(_sounding?.Qs, 0)}
-    <br>W*: {format_velocity(_sounding?.Wstar)}
+    <br>W*: {format_wind(_sounding?.Wstar)}
     {#if _sounding?.Hcrit < _sounding?.surfaceGh + 10}
     	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
     {:else}
@@ -272,7 +272,7 @@
     	if (x == null) return '';
 		return metrics.pressure.convertNumber(x, 2);
     }
-    function format_velocity(x: number): string
+    function format_wind(x: number): string
     {
     	if (x == null) return '';
 		return metrics.wind.convertNumber(x, 2);
