@@ -34,7 +34,7 @@ export class Sounding
         const md = meteogramForecast.data.data;
         this.surfaceGh = meteogramForecast.data.header.modelElevation;
         const t: number = md.hours.indexOf(hour);
-        
+        console.log ("t=", t);
         if (t < 0) return;		// user has requested a time beyond the limit of the forecast availability
 
 

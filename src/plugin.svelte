@@ -48,7 +48,7 @@
 
 <script lang="ts">
     import { getPointForecastData } from '@windy/fetch';
-    import { getMeteogramForecastData } from '@windy/fetch';
+    import { getMeteogramForecastData, LatLonStep } from '@windy/fetch';
     import store from '@windy/store'
     import bcast from '@windy/broadcast';
     import { map, markers} from '@windy/map';
@@ -187,7 +187,8 @@
  		console.log('updateForecast:', _model, _loc);
     	if (!isValidLatLonObj(_loc)) return;
 
- 	    getMeteogramForecastData(_model, _loc).then((meteogramForecast) => {
+		const latLonStep: LatLonStep = {lat:_loc.lat, lon:_loc.lon, step:1};
+ 	    getMeteogramForecastData(_model, latLonStep).then((meteogramForecast) => {
 	 	    _meteogramForecast = meteogramForecast;
         	updateSounding();
 		});
