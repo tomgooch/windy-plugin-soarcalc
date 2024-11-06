@@ -7,7 +7,7 @@ const config: ExternalPluginConfig = {
     icon: '🌤️',
     description: 'Displays Soaring parameters for any location on map.',
     author: '@tomA27',
-    repository: 'https://github.com/windycom/windy-plugin-soarcalc',
+    repository: 'https://github.com/tomgooch/windy-plugin-soarcalc',
     desktopUI: 'embedded',
     mobileUI: 'fullscreen',
     desktopWidth: 400,

@@ -47,12 +47,10 @@
 
 
 <script lang="ts">
-    import { getPointForecastData } from '@windy/fetch';
     import { getMeteogramForecastData, LatLonStep } from '@windy/fetch';
     import store from '@windy/store'
-    import bcast from '@windy/broadcast';
     import { map, markers} from '@windy/map';
-    import { isValidLatLonObj, qs, normalizeLatLon } from '@windy/utils';
+    import { isValidLatLonObj } from '@windy/utils';
     import { singleclick } from '@windy/singleclick';
     import metrics from '@windy/metrics';
     import { onDestroy, onMount } from 'svelte';
@@ -60,15 +58,14 @@
     import type { LatLon } from '@windy/interfaces.d';
     import SunCalc from 'suncalc';
     import { getLatLonInterpolator } from '@windy/interpolator';
-    import { Sounding, getSeaLevelPressure, getPressure } from './SoarCalc.ts';
 	import broadcast from '@windy/broadcast';
+	import { Sounding } from './SoarCalc.ts';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon | null = null;
     let _popupShown: bool = false;
 
     let _sounding = null;
-    let _pointForecast = null;
     let _meteogramForecast = null;
     let _interpolator = null;
     let _overlay: string | null = null;
@@ -85,7 +82,6 @@
         iconSize: [10, 10],
         iconAnchor: [5, 5],
     });
-
 
     const hideMarker = () => {
         if (marker) {
@@ -107,7 +103,6 @@
 			marker.bindPopup(getPopupMessage()).openPopup();
 			_popupShown = true;
 	    }
-
 
 	    marker.on('dragend', function (event) {
 	        const { lat, lng } = event.target.getLatLng();
@@ -150,6 +145,21 @@
 		_hour = new Date(dateString).getTime();
 		updateInterpolator(params.product, params.overlay);
 	}
+    function onSingleClick(location: LatLon)
+    {
+    	console.log("onSingleClick:", location);
+         _loc = location;
+        showMarker();
+        updateForecast();
+    }
+    function onSingleClickSounding(location: LatLon)
+    {
+    	console.log("onSingleClickSounding:", location);
+         _loc = location;
+        showMarker();
+        updateForecast();
+    }
+// **********************************************************
 	function updateInterpolator(model: string, overlay: string)
 	{
 		console.log('updateInterpolator', model, overlay);
@@ -167,25 +177,14 @@
 			}
 		});
 	}
-    function onSingleClick(location: LatLon)
-    {
-    	console.log("onSingleClick:", location);
-         _loc = location;
-        showMarker();
-        updateForecast();
-    }
-    function onSingleClickSounding(location: LatLon)
-    {
-    	console.log("onSingleClickSounding:", location);
-         _loc = location;
-        showMarker();
-        updateForecast();
-    }
-// **********************************************************
     function updateForecast()
     {
  		console.log('updateForecast:', _model, _loc);
-    	if (!isValidLatLonObj(_loc)) return;
+    	if (!isValidLatLonObj(_loc))
+    	{
+    		_sounding = null;
+    		return;
+    	}
 
 		const latLonStep: LatLonStep = {lat:_loc.lat, lon:_loc.lon, step:1};
  	    getMeteogramForecastData(_model, latLonStep).then((meteogramForecast) => {
@@ -222,8 +221,6 @@
 				}
 			}
     	}
-   		
-    	if (_meteogramForecast == null) return;
 
         _sounding = new Sounding(_meteogramForecast, _hour, Qs, cloud);
     }

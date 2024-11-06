@@ -30,18 +30,18 @@ export class Sounding
     	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
 		this.Qs = Qs;
 		this.cloud = cloud;
-		this.levels = Array<SoundingLevel>();
+		if (meteogramForecast == null) return;
+		
         const md = meteogramForecast.data.data;
         this.surfaceGh = meteogramForecast.data.header.modelElevation;
         const t: number = md.hours.indexOf(hour);
-        console.log ("t=", t);
         if (t < 0) return;		// user has requested a time beyond the limit of the forecast availability
-
 
         const P0: number = getSeaLevelPressure(95000, md['gh-950h'][t]);
         var Vx: number;		// wind velocity x at blTop
         var Vy: number;		// wind velocity y at blTop
        
+		this.levels = Array<SoundingLevel>();
 		this.levels[this.n++] = new SoundingLevel('surface', this.surfaceGh, getPressure(P0, this.surfaceGh), md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
 		this.surfaceDewPoint = this.levels[0].dewPoint;
 		this.surfaceT = this.levels[0].T;
