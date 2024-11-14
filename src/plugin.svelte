@@ -8,38 +8,44 @@
 <table style="width:100%">
 <tr>
 <td style=";text-align:right;vertical-align:top">
-    T: {format_temp(_sounding?.surfaceT)}
-    <br>Tdew: {format_temp(_sounding?.surfaceDewPoint)}
-    <br>Tv: {format_temp(_sounding?.surfaceTv)}
-    <br>B/S: {format_number(_sounding?.Ri, 2)}
+    T: {format_temp(_sounding?.surface.T)}
+    <br>Tdew: {format_temp(_sounding?.surface.dewPoint)}
+    <br>Elev: {format_height(_sounding?.surface.gh)}
+    <br>
+    <br>Tcon: {format_temp(_sounding?.Tcon)}
+    <br>Tcon2: {format_temp(_sounding2?.Tcon)}
 </td>
 <td style=";text-align:right;vertical-align:top">
-    {#if _sounding?.blTop < _sounding?.surfaceGh + 10}
-    	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop)}</span>
+    {#if _sounding?.blTop.gh == _sounding?.surface.gh}
+    	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop.gh)}</span>
     {:else}
-    	BL top: {format_height(_sounding?.blTop)}
+    	BL top: {format_height(_sounding?.blTop.gh)}
     {/if}
-    {#if _sounding?.cuBase > _sounding?.blTop}
-    	<br>Cu base: <span style="opacity:0.6">{format_height(_sounding?.cuBase)}</span>
+    {#if _sounding?.Hcrit == _sounding?.surface.gh}
+    	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
     {:else}
-    	<br>Cu base: {format_height(_sounding?.cuBase)}
+    	<br>Hcrit: {format_height(_sounding?.Hcrit)}
     {/if}
-    {#if _sounding?.odBase > _sounding?.blTop}
-    	<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase)}</span>
+    {#if _sounding?.cuBase.gh > _sounding?.blTop.gh}
+    	<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase.gh)}</span>
     {:else}
-    	<br>OD base: {format_height(_sounding?.odBase)}
+    	<br>CU base: {format_height(_sounding?.cuBase.gh)}
     {/if}
-    <br>Elev: {format_height(_sounding?.surfaceGh)}
+    {#if _sounding?.odBase.gh > _sounding?.blTop.gh}
+    	<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase.gh)}</span>
+    {:else}
+    	<br>OD base: {format_height(_sounding?.odBase.gh)}
+    {/if}
+    <br>CCL: {format_height(_sounding?.ccl.gh)}
+    <br>CCL2: {format_height(_sounding2?.ccl.gh)}
 </td>
 <td style=";text-align:right;vertical-align:top">
     Cloud: {format_number(_sounding?.cloud, 2)}
     <br>Qs: {format_number(_sounding?.Qs, 0)}
     <br>W*: {format_wind(_sounding?.Wstar)}
-    {#if _sounding?.Hcrit < _sounding?.surfaceGh + 10}
-    	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
-    {:else}
-    	<br>Hcrit: {format_height(_sounding?.Hcrit)}
-    {/if}
+    <br>B/S: {format_number(_sounding?.Ri, 2)}
+    <br>LCL: {format_height(_sounding?.lcl.gh)}
+    <br>LCL2: {format_height(_sounding2?.lcl.gh)}
 </td>
 </tr>
 </table>
@@ -59,13 +65,14 @@
     import SunCalc from 'suncalc';
     import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
-	import { Sounding } from './SoarCalc.ts';
+	import { Sounding, SoundingLevel } from './SoarCalc.ts';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon | null = null;
     let _popupShown: bool = false;
 
-    let _sounding = null;
+	let _sounding2: Sounding = null;
+    let _sounding: Sounding = null;
     let _meteogramForecast = null;
     let _interpolator = null;
     let _overlay: string | null = null;
@@ -124,13 +131,15 @@
 
     onMount(() => {
         singleclick.on(name, onSingleClick);
-        singleclick.on('sounding', onSingleClickSounding);
+        singleclick.on('sounding', onSingleClick);
+        singleclick.on('detail', onSingleClick);
         broadcast.on('redrawFinished', onRedrawFinished);
     });
 
     onDestroy(() => {
         singleclick.off(name, onSingleClick);
-        singleclick.off('sounding', onSingleClickSounding);
+        singleclick.off('sounding', onSingleClick);
+        singleclick.off('detail', onSingleClick);
         broadcast.off('redrawFinished', onRedrawFinished);
         hideMarker();
     });
@@ -148,13 +157,6 @@
     function onSingleClick(location: LatLon)
     {
     	console.log("onSingleClick:", location);
-         _loc = location;
-        showMarker();
-        updateForecast();
-    }
-    function onSingleClickSounding(location: LatLon)
-    {
-    	console.log("onSingleClickSounding:", location);
          _loc = location;
         showMarker();
         updateForecast();
@@ -185,6 +187,8 @@
     		_sounding = null;
     		return;
     	}
+    	if (_model == null)
+    		_model = store.get('product');
 
 		const latLonStep: LatLonStep = {lat:_loc.lat, lon:_loc.lon, step:1};
  	    getMeteogramForecastData(_model, latLonStep).then((meteogramForecast) => {
@@ -204,7 +208,7 @@
     	if (_interpolator != null && _loc != null && _hour != null)
     	{
 			const values = _interpolator(_loc);
-			console.log("calculateQs: ", _overlay, values);
+			//console.log("calculateQs: ", _overlay, values);
 
 			if (Array.isArray(values))
 			{
@@ -223,6 +227,11 @@
     	}
 
         _sounding = new Sounding(_meteogramForecast, _hour, Qs, cloud);
+        if (_sounding.surface == null)
+        	_sounding = null;
+        _sounding2 = new Sounding(_meteogramForecast, _hour, Qs, cloud, true);
+        if (_sounding2.surface == null)
+        	_sounding2 = null;
     }
     function getQs0(hour: number, loc: LatLon): number
     {
@@ -230,7 +239,7 @@
 	    var sunAltitude: number = SunCalc.getPosition(hour, loc.lat, loc.lon).altitude;
 		if (sunAltitude <= 0) sunAltitude = 0;
 		const Qs0: number = 1000 * Math.sin(sunAltitude);
-    	console.log("/getQs0:", format_angle(sunAltitude), Qs0);
+    	//console.log("/getQs0:", format_angle(sunAltitude), Qs0);
     	return Qs0;
     }
     function getHour(): number
