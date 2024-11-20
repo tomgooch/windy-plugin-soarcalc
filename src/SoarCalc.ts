@@ -1,10 +1,10 @@
-const Rd: num = 287;							// Gas constant for dry air (J kg-1 K-1)
-const Rv: num = 462;							// Gas constant for water vapour (J kg-1 K-1)
-const g: num = 9.81;							// acceleration due to gravity (m s-2)
-const Cp: num = 1004.67;						// Specific heat and constant pressure of dry air (J kg-1 K-1)
-const rho: num = 1.21;							// density of air at surface (kg m-3)
-const zeroC: num = 273.16;						// freezing point in Kelvin (K)
-const adiabaticLapseRate: num = -0.00975;		// adiabatic lapse rate g/Cp (K m-1) 
+const Rd: number = 287;							// Gas constant for dry air (J kg-1 K-1)
+const Rv: number = 462;							// Gas constant for water vapour (J kg-1 K-1)
+const g: number = 9.81;							// acceleration due to gravity (m s-2)
+const Cp: number = 1004.67;						// Specific heat and constant pressure of dry air (J kg-1 K-1)
+const rho: number = 1.21;							// density of air at surface (kg m-3)
+const zeroC: number = 273.16;						// freezing point in Kelvin (K)
+const adiabaticLapseRate: number = -0.00975;		// adiabatic lapse rate g/Cp (K m-1) 
 
 export class Sounding
 {
@@ -24,14 +24,17 @@ export class Sounding
 	Ri: number | null = null;				// B/S ratio (Richardson number)
 	blU: number | null = null;				// BL average mixing ratio
 
+	cuPossible: boolean = false;
+	odPossible: boolean = false;
+
 	// these quantities are only applicable to morning sounding above the well mixed zone
 	Tcon: number | null = null;				// Tcon convective trigger temperature
 	ccl: SoundingLevel | null = null;		// Convective Condensation Level (m)
 	lcl: SoundingLevel | null = null;		// Lifting Condensation Level (aka Cu cloudbase) (m)
 
-	constructor(meteogramForecast, hour: number, Qs: number, cloud: number, use100h: bool=false)
+	constructor(meteogramForecast: any, hour: number | null, Qs: number | null, cloud: number | null, use1000h: boolean=false)
 	{
-    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud, use100h);
+    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud, use1000h);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		if (meteogramForecast == null) return;
@@ -45,11 +48,14 @@ export class Sounding
         const surfaceTdew: number = md['dewpoint-surface'][t];
 
 		var x: string = 'surface';
-		var surfaceGh: number = meteogramForecast.data.header.modelElevation;
-        var surfaceP: number = getPressure(getSeaLevelPressure(95000, md['gh-950h'][t]), surfaceGh);
+		var surfaceGh: number = meteogramForecast.data.header.modelElevation;	// surface geopotential height is provided in the header rather than the data
+		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
+        var surfaceP: number = getPressure(seaLevelPressure, surfaceGh);
 
-		if (use100h && surfaceP > 100000)
+		if (use1000h && surfaceP > 100000)
 		{
+			// this reproduces the error in the Forecast Sounding screen.  Whenever the surface pressure is > 1000hPa it applies
+			// the surface temperature and dew point at the 1000hPa level as if this were the surface and thus calculates LCL, CCL and Tcon incorrectly
 			x = '1000h';
 			surfaceGh = md['gh-' + x][t];
 		    surfaceP = 100000;
@@ -63,22 +69,23 @@ export class Sounding
 		{
 			const gh = md['gh-' + x][t];
 			if (gh > this.levels[0].gh)
-				this.levels[this.levels.length] = new SoundingLevel(x, gh, Number(x.substring(0, x.length - 1)) * 100, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
+			{
+				const p = Number(x.substring(0, x.length - 1)) * 100;	// infer pressure from name of level
+				this.levels[this.levels.length] = new SoundingLevel(x, gh, p, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
+			}
 		}
-			
-		const Tv = Array.from(this.levels, (x) => x.Tv));
-		const h = Array.from(this.levels, (x) => x.gh));
 
 		for(var i=1; i<this.levels.length; i++)
 		{
-			const packetTv: num = Tv[0] + adiabaticLapseRate * (h[i] - h[0]);
-			const eLR = (Tv[i] - Tv[i-1]) / (h[i] - h[i-1]);
-			//console.log(i + ': ' + this.levels[i].name + ' h=' + h[i] + ', packetT=' + (packetTv-zeroC).toFixed(3) +', T=' + (Tv[i]-zeroC).toFixed(3) + ', elr=' + eLR.toFixed(6));
-			if (Tv[i] > packetTv)
+			const level1: SoundingLevel = this.levels[i];
+			const level0: SoundingLevel = this.levels[i-1];
+			const packetTv: number = this.surface.Tv + adiabaticLapseRate * (level1.gh - this.surface.gh);
+			const eLR = (level1.Tv - level0.Tv) / (level1.gh - level0.gh);
+			if (level1.Tv > packetTv)
 			{
-				const gh = (Tv[0] - Tv[i-1] + h[i-1] * eLR - h[0] * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
+				const gh = (this.surface.Tv - level0.Tv + level0.gh * eLR - this.surface.gh * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
 				if (gh - surfaceGh > 10)
-					this.blTop = getInterpolatedLevel(this.levels[i], this.levels[i-1], gh, 'blTop');
+					this.blTop = getInterpolatedLevel(level1, level0, gh, 'blTop');
 				else
 					this.blTop = this.surface;
 				break;
@@ -94,7 +101,7 @@ export class Sounding
 		this.blU = getBlAverageMixingRatio(this.levels, this.blTop);
 		this.odBase = getCondensationLevel(this.levels, this.blU, 'odbase');
 
-		this.blDepth = this.blTop.gh - h[0];
+		this.blDepth = this.blTop.gh - this.surface.gh;
 		if (this.blDepth <= 0) this.blDepth = 0;
 		
 		const cuBase: number = this.surface.gh + getCuBase(this.surface.T, this.surface.dewPoint);
@@ -120,6 +127,9 @@ export class Sounding
 			else if (dV2 > 0.000001)
 				this.Ri = this.Wstar * this.Wstar / (4 * dV2);
 		}
+
+		this.cuPossible = this.cuBase.gh < this.blTop.gh;
+		this.odPossible = this.odBase.gh < this.blTop.gh;
 		console.log("/Sounding.constructor:", this);
 	}
 }
@@ -128,7 +138,6 @@ export class SoundingLevel
 	name: string;
 	gh: number;						// geopotential height i.e. height above msl (m)
 	P: number;						// pressure (Pa)
-	pa:number;						// pressure altitude (1013 altitude / flight level) (m)
 	T: number;						// temperature (K)
 	rh: number;						// relative humidity
 	dewPoint: number				// dew point (K)
@@ -152,7 +161,6 @@ export class SoundingLevel
 	    this.U = getMixingRatio(rh, T, p);
 	    this.Tv = getVirtualTemp(T, this.U);
 	    this.Us = getSaturationMixingRatio(T, p);
-	    this.pa = getPressureAltitude(p);
 	    
 	    //console.log(this);
 	}
@@ -193,27 +201,27 @@ function getSeaLevelPressure(P: number, h: number): number
 	return P * Math.pow(1 - 0.0000225577 * h, -5.25588);
 }
 
-function getCuBase(surfaceTemp: num, surfaceDewPoint: num): num
+function getCuBase(surfaceTemp: number, surfaceDewPoint: number): number
 {
 	// extremely simple calculation of Cu cloudbase
 	return 125 * (surfaceTemp - surfaceDewPoint);
 }
-function getMixingRatio(relativeHumidity: num, temperature: num, pressure: num): num
+function getMixingRatio(relativeHumidity: number, temperature: number, pressure: number): number
 {
 	const vapourPressure = relativeHumidity * getSaturatedVapourPressure(temperature);
 	return (Rd/Rv) * vapourPressure / (pressure - vapourPressure);
 }
-function getSaturationMixingRatio(temperature: num, pressure: num): num
+function getSaturationMixingRatio(temperature: number, pressure: number): number
 {
 	const saturatedVapourPressure = getSaturatedVapourPressure(temperature);
 	return (Rd/Rv) * saturatedVapourPressure / (pressure - saturatedVapourPressure);
 }
-function getVirtualTemp(actualTemp: num, mixingRatio: num): num
+function getVirtualTemp(actualTemp: number, mixingRatio: number): number
 {
 	// returns the virtual temperature
 	return actualTemp * (1 + ((Rv - Rd) / Rd) * mixingRatio);
 }
-function getSaturatedVapourPressure(T: num): num
+function getSaturatedVapourPressure(T: number): number
 {
 	// the Tetens equation
 	// T = temperature (Centrigrade)
@@ -221,16 +229,16 @@ function getSaturatedVapourPressure(T: num): num
 	const Tc = T - zeroC;
 	return 610.78 * Math.exp(17.27 * Tc / (Tc + 237.3));
 }
-function getWstar(Qs: num, blDepth: num, mixingRatio: num): num
+function getWstar(Qs: number, blDepth: number, mixingRatio: number): number
 {
 	//console.log("getWstar:", Qs);
-	const temperatureBar: num = 288;											// average surface temperature
+	const temperatureBar: number = 288;											// average surface temperature
 	
-	const beta: num = 6;														// Bowen ratio sensible/latent heat flux
-	const Qg: num = 0.1 * Qs;													// heat flux into the ground
-	const QhTilde: num = beta * (Qs - Qg)/(1 + beta);							// sensible heat flux
-	const Qh: num = QhTilde / (rho * Cp);										// kinematic sensible heat flux
-	const Qov: num = Qh * ( 1 + ((Rv - Rd) / Rd) * mixingRatio);				// Qov kinematic virtual sensible heat flux
+	const beta: number = 6;														// Bowen ratio sensible/latent heat flux
+	const Qg: number = 0.1 * Qs;													// heat flux into the ground
+	const QhTilde: number = beta * (Qs - Qg)/(1 + beta);							// sensible heat flux
+	const Qh: number = QhTilde / (rho * Cp);										// kinematic sensible heat flux
+	const Qov: number = Qh * ( 1 + ((Rv - Rd) / Rd) * mixingRatio);				// Qov kinematic virtual sensible heat flux
 	const Wstar = Math.pow(Qov * blDepth * g / temperatureBar, 1/3);			// characteristic updraft velocity
 	//console.log("/getWstar:", Wstar);
 	return Wstar;
@@ -239,11 +247,11 @@ function getPotentialTemperature(T: number, P: number, P0: number): number
 {
 	return T * Math.pow(P0/P, Rd/Cp);
 }
-function getZcrit(wCrit: num, wStar: num): num
+function getZcrit(wCrit: number, wStar: number): number
 {
 	// employ Newton–Raphson method to find z (z/blDepth) for given value of w (Wcrit/Wstar)
 	//console.log("getZcrit:", wCrit, wStar);
-	var z: num;
+	var z: number;
 	if (wCrit > wStar)
 	{
 		z = 0;
@@ -257,10 +265,10 @@ function getZcrit(wCrit: num, wStar: num): num
 		}
 
 */
-		const w0: num = wCrit / wStar;
-		var w: num;
-		var dwdz: num;
-		var dz: num;
+		const w0: number = wCrit / wStar;
+		var w: number;
+		var dwdz: number;
+		var dz: number;
 		z = 0.9;
 		do
 		{
@@ -276,12 +284,12 @@ function getZcrit(wCrit: num, wStar: num): num
 }
 function getBlAverageMixingRatio(levels: SoundingLevel[], blTop: SoundingLevel): number
 {
-	const blDepth: num = blTop.gh - levels[0].gh;
+	const blDepth: number = blTop.gh - levels[0].gh;
 	if (blDepth < 10)
 		return levels[0].U;
 		
-	var sigma: num = 0;
-	for (var i:int = 1; i<levels.length; i++)
+	var sigma: number = 0;
+	for (var i: number = 1; i<levels.length; i++)
 	{
 		if (levels[i].gh > blTop.gh)
 		{
@@ -306,9 +314,9 @@ function getCondensationLevel(levels: SoundingLevel[], U: number, name: string):
 }
 function getCCLFromDewPoint(levels: SoundingLevel[], name: string): SoundingLevel
 {
-	const dpLR: num = -0.002;
-	const dps: num = levels[0].dewPoint;
-	const hs: num = levels[0].gh;
+	const dpLR: number = -0.002;
+	const dps: number = levels[0].dewPoint;
+	const hs: number = levels[0].gh;
 	for(var i=1; i<levels.length; i++)
 	{
 		if (levels[i].T < dps + dpLR * (levels[i].gh - hs))

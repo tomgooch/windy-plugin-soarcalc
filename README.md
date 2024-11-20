@@ -2,16 +2,18 @@
 
 Soaring Calculations. Presents important soaring parameters W*, Thermal height etc (as per RASP)
 
+[manual](/documents/xxx.md)
 
-# CHANGELOG
+[Dr Jack](/documents/BLIPMAP%20Parameter%20Information.md)
 
--   0.1.2
-    - improve initialization
-    - grey out Cu base etc when above BL top
-    - adjust calculation of Hcrit to fall inline with RASP
-    - respond to single click events from "sounding"
-    - show popup on first opening to explain parameters
+## CHANGELOG
 
--   0.1.1
-    -   Initial version of this repo
+- 0.1.2
+  - improve initialization
+  - grey out Cu base etc when above BL top
+  - adjust calculation of Hcrit to fall inline with RASP
+  - respond to single click events from "sounding"
+  - show popup on first opening to explain parameters
 
+- 0.1.1
+  - Initial version of this repo

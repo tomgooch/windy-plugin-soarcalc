@@ -8,44 +8,39 @@
 <table style="width:100%">
 <tr>
 <td style=";text-align:right;vertical-align:top">
-    T: {format_temp(_sounding?.surface.T)}
-    <br>Tdew: {format_temp(_sounding?.surface.dewPoint)}
-    <br>Elev: {format_height(_sounding?.surface.gh)}
+    T: {format_temp(_sounding?.surface?.T)}
+    <br>Tdew: {format_temp(_sounding?.surface?.dewPoint)}
+    <br>Elev: {format_height(_sounding?.surface?.gh)}
     <br>
-    <br>Tcon: {format_temp(_sounding?.Tcon)}
-    <br>Tcon2: {format_temp(_sounding2?.Tcon)}
 </td>
 <td style=";text-align:right;vertical-align:top">
-    {#if _sounding?.blTop.gh == _sounding?.surface.gh}
-    	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop.gh)}</span>
+    {#if _sounding?.blTop?.gh == _sounding?.surface?.gh}
+    	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop?.gh)}</span>
     {:else}
-    	BL top: {format_height(_sounding?.blTop.gh)}
+    	BL top: {format_height(_sounding?.blTop?.gh)}
     {/if}
-    {#if _sounding?.Hcrit == _sounding?.surface.gh}
+    {#if _sounding?.Hcrit == _sounding?.surface?.gh}
     	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
     {:else}
     	<br>Hcrit: {format_height(_sounding?.Hcrit)}
     {/if}
-    {#if _sounding?.cuBase.gh > _sounding?.blTop.gh}
-    	<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase.gh)}</span>
+    {#if _sounding?.cuPossible}
+		<br>CU base: {format_height(_sounding?.cuBase?.gh)}
+   {:else}
+   		<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase?.gh)}</span>
+   {/if}
+    {#if _sounding?.odPossible}
+		<br>OD base: {format_height(_sounding?.odBase?.gh)}
     {:else}
-    	<br>CU base: {format_height(_sounding?.cuBase.gh)}
+    	<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase?.gh)}</span>
     {/if}
-    {#if _sounding?.odBase.gh > _sounding?.blTop.gh}
-    	<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase.gh)}</span>
-    {:else}
-    	<br>OD base: {format_height(_sounding?.odBase.gh)}
-    {/if}
-    <br>CCL: {format_height(_sounding?.ccl.gh)}
-    <br>CCL2: {format_height(_sounding2?.ccl.gh)}
 </td>
 <td style=";text-align:right;vertical-align:top">
     Cloud: {format_number(_sounding?.cloud, 2)}
     <br>Qs: {format_number(_sounding?.Qs, 0)}
     <br>W*: {format_wind(_sounding?.Wstar)}
+    <br>Shear: {format_wind(_sounding?.blShear)}
     <br>B/S: {format_number(_sounding?.Ri, 2)}
-    <br>LCL: {format_height(_sounding?.lcl.gh)}
-    <br>LCL2: {format_height(_sounding2?.lcl.gh)}
 </td>
 </tr>
 </table>
@@ -53,7 +48,7 @@
 
 
 <script lang="ts">
-    import { getMeteogramForecastData, LatLonStep } from '@windy/fetch';
+    import { getMeteogramForecastData } from '@windy/fetch';
     import store from '@windy/store'
     import { map, markers} from '@windy/map';
     import { isValidLatLonObj } from '@windy/utils';
@@ -65,20 +60,19 @@
     import SunCalc from 'suncalc';
     import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
-	import { Sounding, SoundingLevel } from './SoarCalc.ts';
+	import { Sounding } from './SoarCalc';
 	
     let marker: L.Marker | null = null;
-    let _loc: LatLon | null = null;
-    let _popupShown: bool = false;
+    let _loc: LatLon;
+    let _popupShown: boolean = false;
 
-	let _sounding2: Sounding = null;
-    let _sounding: Sounding = null;
-    let _meteogramForecast = null;
-    let _interpolator = null;
+	let _sounding2: Sounding | null = null;
+    let _sounding: Sounding | null = null;
+    let _meteogramForecast: any = null;
+    let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
-    let _level: string | null = null;
-    let _path: string | null = null;
+    let _path: string;
     let _hour: number | null = null;
    
     const { title, name, version } = config;
@@ -100,7 +94,7 @@
     {
 		hideMarker();
 		
-	    marker = L.marker(_loc, {
+	    marker = L.marker({lat:_loc.lat, lng:_loc.lon}, {
 	        draggable: true,
 	        icon: draggablePulsatingIcon,
 	    }).addTo(map);
@@ -144,11 +138,11 @@
         hideMarker();
     });
     
-	function onRedrawFinished(params)
+	function onRedrawFinished(params: any)
 	{
 		console.log('onRedrawFinished', params);
 		_interpolator = null;
-		_level = params.level;
+		//_level = params.level;
 		_path = params.path;
 		const dateString: string = _path.substring(0,4) + '-' + _path.substring(4,6) + '-' + _path.substring(6,8) + 'T' + _path.substring(8,10) + ':00:00Z';
 		_hour = new Date(dateString).getTime();
@@ -190,8 +184,7 @@
     	if (_model == null)
     		_model = store.get('product');
 
-		const latLonStep: LatLonStep = {lat:_loc.lat, lon:_loc.lon, step:1};
- 	    getMeteogramForecastData(_model, latLonStep).then((meteogramForecast) => {
+ 	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast) => {
 	 	    _meteogramForecast = meteogramForecast;
         	updateSounding();
 		});
@@ -203,9 +196,9 @@
     	if (_hour == null)
     		_hour = getHour();
 
-		var cloud: num | null = null;
-		var Qs: num | null = null;
-    	if (_interpolator != null && _loc != null && _hour != null)
+		var cloud: number | null = null;
+		var Qs: number | null = null;
+    	if (_interpolator != null && isValidLatLonObj(_loc) && _hour != null)
     	{
 			const values = _interpolator(_loc);
 			//console.log("calculateQs: ", _overlay, values);
@@ -221,7 +214,7 @@
 				else if (_overlay == 'solarpower')
 				{
 					Qs = values[0];
-					cloud = 1 - (Qs / getQs0(_hour, _loc));
+					cloud = 1 - (values[0] / getQs0(_hour, _loc));
 				}
 			}
     	}
@@ -236,13 +229,13 @@
     function getQs0(hour: number, loc: LatLon): number
     {
     	// get insolation corrected only for sun altitude
-	    var sunAltitude: number = SunCalc.getPosition(hour, loc.lat, loc.lon).altitude;
+	    var sunAltitude: number = SunCalc.getPosition(new Date(hour), loc.lat, loc.lon).altitude;
 		if (sunAltitude <= 0) sunAltitude = 0;
 		const Qs0: number = 1000 * Math.sin(sunAltitude);
     	//console.log("/getQs0:", format_angle(sunAltitude), Qs0);
     	return Qs0;
     }
-    function getHour(): number
+    function getHour(): number | null
     {
     	// if we are invoked without triggering a re-draw we do not necessarily have the hour/timepoint on the forecast
     	// so we calculate it from the stored timestamp from the slider by finding the closest hour
@@ -262,24 +255,20 @@
        		h = hours[i];
        		dt = Math.abs(timestamp - h);
         }
+		return null;
     }
 // **********************************************************
-    function format_height(x: number): string
+    function format_height(x: number | null | undefined): string
     {
     	if (x == null) return '';
     	return metrics.altitude.convertNumber(x, 0);
     }
-    function format_temp(x: number): string
+    function format_temp(x: number | null | undefined): string
     {
     	if (x == null) return '';
     	return metrics.temp.convertNumber(x, 1).toFixed(1);
     }
-    function format_press(x: number): string
-    {
-    	if (x == null) return '';
-		return metrics.pressure.convertNumber(x, 2);
-    }
-    function format_wind(x: number): string
+    function format_wind(x: number | null | undefined): string
     {
     	if (x == null) return '';
 		return metrics.wind.convertNumber(x, 2);
@@ -308,24 +297,19 @@
 		const minutes: number = (x - degrees) * 60;
 		return degrees + ' ' + minutes.toFixed(3);
     }
-    function format_time(d: number): string
+    function format_time(d: number | null | undefined): string
     {
     	if (d == null) return '';
     	const days: string[] = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
     	const dt = new Date(d);
 		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ', ' + dt.getUTCHours() + ':00';
     }
-    function format_number(x: number, n: number): string
+    function format_number(x: number | null | undefined, n: number): string
     {
     	if (x == null) return '';
 		return x.toFixed(n);
     }
-    function format_angle(x: number): string
-    {
-    	if (x == null) return '';
-		return (x * 180 / Math.PI).toFixed(2);
-	}
-	function getPopupMessage(): string
+    function getPopupMessage(): string
 	{
 		console.log("metric", metrics);
 		var msg: string = "<p>" + title + " v" + version + "</p>"
@@ -335,18 +319,18 @@
 		msg += "<p>All layers..."
 		msg += "<br>T = surface temperature (" + metrics.temp.metric + ")"
 		msg += "<br>Tdew = surface dew point temperature (" + metrics.temp.metric + ")"
-		msg += "<br>Tv = surface virtual (density) temperature (" + metrics.temp.metric + ")"
-		msg += "<br>B/S = Bouyancy/Shear ratio"
+		msg += "<br>Elev = Model Elevation (" + metrics.altitude.metric + ")"
 		msg += "<br>BL top = boundary layer top (dry thermal height) (" + metrics.altitude.metric + ")"
 		msg += "<br>Cu base = Cumulous cloud base (" + metrics.altitude.metric + ")"
 		msg += "<br>OD base = Overdeveloped / Spreadout cloud base (" + metrics.altitude.metric + ")"
-		msg += "<br>Elev = Model Elevation (" + metrics.altitude.metric + ")"
+		msg += "<br>Shear = Boundary layer wind shear (" + metrics.wind.metric + ")"
 		msg += "</p>"
 		
 		msg += "<p>Clouds/Solar power layers only..."
 		msg += "<br>Cloud = total cloud cover"
 		msg += "<br>Qs = surface insolation (W/m2)"
 		msg += "<br>W* = thermal updraft velocity (" + metrics.wind.metric + ")"
+		msg += "<br>B/S = Bouyancy/Shear ratio"
 		msg += "<br>Hcrit = height at which updraft falls below 1.75kts (" + metrics.altitude.metric + ")"
 		msg += "</p>"
 		return msg;

@@ -27,5 +27,8 @@
     "dependencies": {
         "@windycom/plugin-devtools": "^2.0.0",
         "suncalc": "^1.9.0"
+    },
+    "devDependencies": {
+        "@types/suncalc": "^1.9.2"
     }
 }
