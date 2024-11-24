@@ -4,7 +4,8 @@ const g: number = 9.81;							// acceleration due to gravity (m s-2)
 const Cp: number = 1004.67;						// Specific heat at constant pressure of dry air (J kg-1 K-1)
 const rho: number = 1.21;							// density of air at surface (kg m-3)
 const zeroC: number = 273.16;						// freezing point in Kelvin (K)
-const adiabaticLapseRate: number = -0.00975;		// adiabatic lapse rate g/Cp (K m-1) 
+const adiabaticLapseRate: number = -0.00975;		// adiabatic lapse rate g/Cp (K m-1)
+const Wcrit: number = 0.9;							// sink rate of thermalling glider (ms-1)
 
 export class Sounding
 {
@@ -102,7 +103,7 @@ export class Sounding
 		if (this.Qs != null)
 		{
 			this.Wstar = getWstar(this.Qs, this.blDepth, this.surface.U);
-			this.Hcrit = this.surface.gh + getZcrit(0.9, this.Wstar) * this.blDepth;
+			this.Hcrit = this.surface.gh + getZcrit(Wcrit, this.Wstar) * this.blDepth;
 		}
 		
 		// Buoyancy/Shear ratio
