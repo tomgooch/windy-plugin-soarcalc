@@ -11,6 +11,7 @@
     T: {format_temp(_sounding?.surface?.T)}
     <br>Tdew: {format_temp(_sounding?.surface?.dewPoint)}
     <br>Elev: {format_height(_sounding?.surface?.gh)}
+    <br>ElevA: {format_height(_sounding?.actualElevation)}
     <br>
 </td>
 <td style=";text-align:right;vertical-align:top">
@@ -68,7 +69,7 @@
 
 	let _sounding2: Sounding | null = null;
     let _sounding: Sounding | null = null;
-    let _meteogramForecast: any = null;
+    let _meteogramForecast: any | null = null;
     let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
@@ -184,6 +185,9 @@
     	if (_model == null)
     		_model = store.get('product');
 
+		//getPointForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((pointForecastData) =>{
+		//	console.log("pointForecast", pointForecastData);
+		//});
  	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast) => {
 	 	    _meteogramForecast = meteogramForecast;
         	updateSounding();
@@ -314,12 +318,15 @@
 		console.log("metric", metrics);
 		var msg: string = "<p>" + title + " v" + version + "</p>"
 
-		msg += "<p>Soaring Prediction parameters as per RASP based on the current forecast model</p>"
+		msg += "<p>Thermal Soaring parameters as per RASP based on the current forecast model</p>"
+	
+		msg += "<p>Legend</p>"
 
 		msg += "<p>All layers..."
 		msg += "<br>T = surface temperature (" + metrics.temp.metric + ")"
 		msg += "<br>Tdew = surface dew point temperature (" + metrics.temp.metric + ")"
 		msg += "<br>Elev = Model Elevation (" + metrics.altitude.metric + ")"
+		msg += "<br>ElevA = Actual Elevation (" + metrics.altitude.metric + ")"
 		msg += "<br>BL top = boundary layer top (dry thermal height) (" + metrics.altitude.metric + ")"
 		msg += "<br>Cu base = Cumulous cloud base (" + metrics.altitude.metric + ")"
 		msg += "<br>OD base = Overdeveloped / Spreadout cloud base (" + metrics.altitude.metric + ")"
@@ -331,7 +338,7 @@
 		msg += "<br>Qs = surface insolation (W/m2)"
 		msg += "<br>W* = thermal updraft velocity (" + metrics.wind.metric + ")"
 		msg += "<br>B/S = Bouyancy/Shear ratio"
-		msg += "<br>Hcrit = height at which updraft falls below 1.75kts (" + metrics.altitude.metric + ")"
+		msg += "<br>Hcrit = height at which updraft falls below " + format_wind(0.9) + metrics.wind.metric + " (" + metrics.altitude.metric + ")"
 		msg += "</p>"
 		return msg;
 	}

@@ -2,9 +2,9 @@
 
 Soaring Calculations. Presents important soaring parameters W*, Thermal height etc (as per RASP)
 
-[manual](/docs/SoarCalc.md)
+[manual/discussion](/../docs/SoarCalc.md)
 
-[Dr Jack](/docs/BLIPMAP%20Parameter%20Information.md)
+[installation](/../docs/Installation.md)
 
 ## CHANGELOG
 

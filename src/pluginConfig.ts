@@ -2,10 +2,10 @@ import type { ExternalPluginConfig } from '@windy/interfaces';
 
 const config: ExternalPluginConfig = {
     name: 'windy-plugin-soarcalc',
-    version: '0.1.5',
+    version: '0.1.6',
     title: 'SoarCalc',
     icon: '🌤️',
-    description: 'Displays Soaring parameters for any location on map.',
+    description: 'Displays Thermal Soaring parameters as per RASP for any location on map.',
     author: '@tomA27',
     repository: 'https://github.com/tomgooch/windy-plugin-soarcalc',
     desktopUI: 'embedded',

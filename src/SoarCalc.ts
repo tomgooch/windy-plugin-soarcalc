@@ -1,13 +1,17 @@
 const Rd: number = 287;							// Gas constant for dry air (J kg-1 K-1)
 const Rv: number = 462;							// Gas constant for water vapour (J kg-1 K-1)
 const g: number = 9.81;							// acceleration due to gravity (m s-2)
-const Cp: number = 1004.67;						// Specific heat and constant pressure of dry air (J kg-1 K-1)
+const Cp: number = 1004.67;						// Specific heat at constant pressure of dry air (J kg-1 K-1)
 const rho: number = 1.21;							// density of air at surface (kg m-3)
 const zeroC: number = 273.16;						// freezing point in Kelvin (K)
 const adiabaticLapseRate: number = -0.00975;		// adiabatic lapse rate g/Cp (K m-1) 
 
 export class Sounding
 {
+	actualElevation: number;				// actual surface elevation
+	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
+	cloud: number | null;					// cloud cover ratio
+
 	levels: SoundingLevel[];					// data for each level from the forecast model
 	
 	surface: SoundingLevel | null = null;		// surface (levels[0])
@@ -17,8 +21,6 @@ export class Sounding
 
 	blShear: number | null = null;			// boundary layer wind shear (ms-1)
 	blDepth: number | null = null;			// boundary layer depth i.e. blTop - surface (m)
-	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
-	cloud: number | null;					// cloud cover ratio
 	Wstar: number | null = null;			// characteristic thermal updraft velocity (ms-2)
 	Hcrit: number | null = null;			// height of critical updraft strength
 	Ri: number | null = null;				// B/S ratio (Richardson number)
@@ -34,7 +36,7 @@ export class Sounding
 
 	constructor(meteogramForecast: any, hour: number | null, Qs: number | null, cloud: number | null, use1000h: boolean=false)
 	{
-    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud, use1000h);
+    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		if (meteogramForecast == null) return;
@@ -44,23 +46,12 @@ export class Sounding
         const t: number = md.hours.indexOf(hour);
         if (t < 0) return;		// user has requested a time beyond the limit of the forecast availability
 
-        const surfaceT: number = md['temp-surface'][t];
-        const surfaceTdew: number = md['dewpoint-surface'][t];
+		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
 
-		var x: string = 'surface';
-		var surfaceGh: number = meteogramForecast.data.header.modelElevation;	// surface geopotential height is provided in the header rather than the data
+ 		const gh: number = meteogramForecast.data.header.modelElevation;		// surface geopotential height is provided in the header rather than the data
 		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
-        var surfaceP: number = getPressure(seaLevelPressure, surfaceGh);
-
-		if (use1000h && surfaceP > 100000)
-		{
-			// this reproduces the error in the Forecast Sounding screen.  Whenever the surface pressure is > 1000hPa it applies
-			// the surface temperature and dew point at the 1000hPa level as if this were the surface and thus calculates LCL, CCL and Tcon incorrectly
-			x = '1000h';
-			surfaceGh = md['gh-' + x][t];
-		    surfaceP = 100000;
-		}
-        this.surface = new SoundingLevel('surface', surfaceGh, surfaceP, surfaceT, md['rh-' + x][t]/100, surfaceTdew, md['wind_u-' + x][t], md['wind_v-' + x][t]);
+        const p: number = getPressure(seaLevelPressure, gh);
+        this.surface = new SoundingLevel('surface', gh, p, md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
 
 		this.levels = Array<SoundingLevel>();
 		this.levels[0] = this.surface;
@@ -84,7 +75,7 @@ export class Sounding
 			if (level1.Tv > packetTv)
 			{
 				const gh = (this.surface.Tv - level0.Tv + level0.gh * eLR - this.surface.gh * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
-				if (gh - surfaceGh > 10)
+				if (gh - this.surface.gh > 10)
 					this.blTop = getInterpolatedLevel(level1, level0, gh, 'blTop');
 				else
 					this.blTop = this.surface;
@@ -111,7 +102,7 @@ export class Sounding
 		if (this.Qs != null)
 		{
 			this.Wstar = getWstar(this.Qs, this.blDepth, this.surface.U);
-			this.Hcrit = this.surface.gh + getZcrit(0.875, this.Wstar) * this.blDepth;
+			this.Hcrit = this.surface.gh + getZcrit(0.9, this.Wstar) * this.blDepth;
 		}
 		
 		// Buoyancy/Shear ratio
@@ -191,10 +182,10 @@ function getPressure(P0: number, h: number): number
 	// get pressure at known height
 	return P0 * Math.pow(1 - 0.0000225577 * h, 5.25588);
 }
-function getPressureAltitude(P: number): number
-{
-	return (1/0.0000225577) * (1 - Math.pow(P/101325, 1/5.25588))
-}
+//function getPressureAltitude(P: number): number
+//{
+//	return (1/0.0000225577) * (1 - Math.pow(P/101325, 1/5.25588))
+//}
 function getSeaLevelPressure(P: number, h: number): number
 {
 	// get sea level pressure from pressure at known height
@@ -233,14 +224,13 @@ function getWstar(Qs: number, blDepth: number, mixingRatio: number): number
 {
 	//console.log("getWstar:", Qs);
 	const temperatureBar: number = 288;											// average surface temperature
-	
 	const beta: number = 6;														// Bowen ratio sensible/latent heat flux
-	const Qg: number = 0.1 * Qs;													// heat flux into the ground
-	const QhTilde: number = beta * (Qs - Qg)/(1 + beta);							// sensible heat flux
-	const Qh: number = QhTilde / (rho * Cp);										// kinematic sensible heat flux
+	const Qg: number = 0.1 * Qs;												// heat flux into the ground
+	const QhTilde: number = beta * (Qs - Qg)/(1 + beta);						// sensible heat flux
+	const Qh: number = QhTilde / (rho * Cp);									// kinematic sensible heat flux
 	const Qov: number = Qh * ( 1 + ((Rv - Rd) / Rd) * mixingRatio);				// Qov kinematic virtual sensible heat flux
 	const Wstar = Math.pow(Qov * blDepth * g / temperatureBar, 1/3);			// characteristic updraft velocity
-	//console.log("/getWstar:", Wstar);
+	//console.log("/getWstar:", Qov, Qov/Qs, Wstar);
 	return Wstar;
 }
 function getPotentialTemperature(T: number, P: number, P0: number): number
