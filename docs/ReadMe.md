@@ -1,6 +1,19 @@
 # SoarCalc plugin for Windy.com
 
-## Abstract
+SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
+related parameters as per RASP.
+
+[**Installation**](#installation)
+
+[**Change Log**](#change-log)
+
+[**Discussion**](#discussion)
+
+---
+
+## Discussion
+
+### Abstract
 
 Windy.com is a very good general weather forecast site that makes
 available data from some of the best models available notably including
@@ -9,7 +22,7 @@ UKV from the UK Met Office and equivalent high resolution models worldwide.
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
 related parameters as per RASP.
 
-## Introduction
+### Introduction
 
 This document is written from the point of view of sailplane pilots in the UK but it will be equally applicable to all forms of soaring flight anywhere in the world where high resolution weather models are available.
 
@@ -25,13 +38,13 @@ However RASP does have some serious issues...
 2. It is updated infrequently. Usually even in the morning we see a forecast for the current day that is already 12 hours old.
 3. It does not deal with cloud amounts very well. There are a significant number of days in the year when it predicts virtually no cloud cover and hence good (5*) conditions over large areas at variance with all other models / forecasting sites.
 
-So the motivation to develop a plugin for Windy.com is simple. To make the RASP parameters available within Windy.com using the data from "UKV" and all of the other models that are available.
+So the motivation to develop a plugin for Windy.com is simple. To make the RASP parameters available within Windy.com using the data from "UKV" or any of the other models that are available.
 
 One thing that one learns very quickly is that there is nothing exact about boundary layer meteorology.  There are multiple reasonable interpretations and assumptions some being more reasonable and useful that others.  For this reason I have endeavoured to calculate the soaring parameters in, as far as possible, exactly the same way as RASP making the same assumptions and approximations following reference 1.  This way they should be just as reasonable and useful as RASP with which many of us are already familiar.
 
 Unfortunately however, it is not possible to compare the values output from SoarCalc directly with those output by RASP because they do not start with the same base data.
 
-## Methodology
+### Methodology
 
 Windy.com supports a "Plugin" mechanism allowing the development of
 JavaScript code to display additional information within their browser
@@ -53,7 +66,7 @@ I have not made any attempt to calculate or show parameters that are already ava
 
 Some of the parameters are available when viewing any map layer in Windy but the full functionality is available only when viewing the "Clouds" or "Solar power" layers. This is because we need an estimate of the incident solar radiation in order to calculate the thermal updraft velocity and derived quantities.
 
-## Parameters
+### Parameters
 
 A brief description of the parameters presented by SoarCalc is given in a "Legend" pop-up when SoarCalc is first opened.  A more detailed description is given here.
 
@@ -62,15 +75,15 @@ Values are given in the units selected in the Windy.com "Settings"
 I strongly recommend reading the notes published by Dr Jack Glendening
 describing the RASP parameters [BLIPMAP Prediction Parameters and Description](http://www.drjack.info/blip/INFO/parameters.html)
 
-### T / Tdew - Surface temperature / dew point
+#### T / Tdew - Surface temperature / dew point
 
 These are taken directly from the forecast model data and are self explanatory except to note "surface" refers to the model elevation not to the actual elevation.  If the model elevation differs significantly from the actual elevation then these values will differ correspondingly.
 
-### Elev / ElevA - Surface Elevation Model / Actual
+#### Elev / ElevA - Surface Elevation Model / Actual
 
 The model surface elevation "Elev" is used in all calculations.  The actual elevation "ElevA" is given only as a guide.  If it differs greatly from "Elev" that is a sign that significant geographic features may not be "seen" at the resolution of the current model.
 
-### BL top - Boundary Layer Top
+#### BL top - Boundary Layer Top
 
 Following RASP this is defined to be the level at which the buoyancy of a parcel of air
  originating at the surface would fall to zero with respect to the surrounding air in the absence of condensation.
@@ -90,7 +103,7 @@ Following RASP this is defined to be the level at which the buoyancy of a parcel
   Thus the value of BL top that we arrive at will usually be a little higher than would be obtained by the intersection of the
   dry adiabatic with the environmental temperature on the forecast sounding.
 
-### Cu base - Cumulous Cloud Base
+#### Cu base - Cumulous Cloud Base
 
 This parameter is also known as "LCL" the Lifting Condensation Level.  If below the boundary layer top then
 Cumulous clouds are likely to be present otherwise not but it is still a valid parameter useful for the prediction of orographic cloud for example.  If Cu base is above BL top then this parameter is greyed out.  Cumulous
@@ -101,12 +114,12 @@ It is defined as the level to which a parcel of air from the surface must be rai
 point and condensation takes place.  On a tephigram sounding it is the intersection of the line of constant mixing ratio
 from the surface dew point and the dry adiabatic from the surface temperature.
 
-### OD base - Overcast Development / Spreadout Cloud Base
+#### OD base - Overcast Development / Spreadout Cloud Base
 
 This is the condensation level of a parcel of air having the boundary layer average mixing ratio.  If below BL top
 then widespread convective cloud formation is likely.  If above BL top then this parameter is shown greyed out.
 
-### Cloud - Total Cloud Cover
+#### Cloud - Total Cloud Cover
 
 The fractional cloud cover (dimensionless ratio ranging from 0 to 1).  This is taken
 directly from the "Clouds" map layer in Windy. When viewing the UKV model this is probably the best estimate of cloud cover that we have
@@ -116,13 +129,13 @@ In the case of the "Solar Power" layer this value is "reverse engineered" from t
 
 In other map layers in Windy.com this parameter is not currently available.
 
-### Qs - Surface Insolation
+#### Qs - Surface Insolation
 
 The surface insolation / solar power arriving per unit area of the Earth's surface.  This is always shown in Watts per square meter as no suitable configurable setting is available.
 
 The value show is either that calculated from the cloud cover (see above) or taken directly from Windy.com if viewing the "Solar Power" layer.  Note that agreement between the values from these two sources is not perfect.
 
-### W* - Thermal updraft velocity
+#### W* - Thermal updraft velocity
 
 W* is known as the Deardorff velocity (reference 5).  It is the characteristic thermal updraft
 velocity which is definitely not to say that all parts of a thermal at all altitudes will be rising
@@ -154,11 +167,11 @@ note that the resulting value of $W^*$ is surprisingly insensitive to this value
 Note: to get to the expected climb rate of a glider you must, of course, subtract the descent rate of the
 glider whilst turning.  Typically about 0.9m/s or 1.75kts.
 
-### BL Shear - Boundary Layer Wind Shear
+#### BL Shear - Boundary Layer Wind Shear
 
 The modulus of vector wind difference between surface and BL top.
 
-### B/S - Buoyancy/Shear ratio
+#### B/S - Buoyancy/Shear ratio
 
 The Bulk Richardson number = ${W^*}^2/(BL shear)^2$ is a dimensionless quantity representing the ratio of "buoyant production of turbulent kinetic energy" to the "shear production of turbulent kinetic energy".  Larger values of the quantity indicate less broken thermals, smaller quantities indicate more broken thermals.
 
@@ -168,7 +181,7 @@ NOTE: if anyone can confirm or refute my assumption and that RASP is using some 
 
 NOTE 2: Even within this definition there is plenty of room for a factor of 4 difference simply by taking the shear value at half the BL height which is something like where the maximum updraft velocity will occur.
 
-### Hcrit - Height at which updraft falls below 0.9m/s (1.75kts)
+#### Hcrit - Height at which updraft falls below 0.9m/s (1.75kts)
 
 Empirically, as glider pilots, we know that thermal strength initially increases with altitude, remains roughly the same for
 a range of altitudes and then falls slowly back to zero as we approach the boundary layer top.  Therefore it is of interest
@@ -191,7 +204,7 @@ $W = 2.2z^{1/3}(1 - 1.1z)$
 We use this equation we find the altitude at which the updraft velocity falls to 0.9m/s or 1.75kts
 in order to follow RASP as closely as possible.
 
-## Further Comments
+### Further Comments
 
 It is useful to display the SoarCalc plugin in conjunction with the Windy.com "Sounding forecast" pane and I would recommend you to do this.  As all calculations
 are based on the same data it would indeed be natural for the SoarCalc parameters to be amalgamated with the
@@ -200,16 +213,16 @@ Currently LCL shown in the "Sounding forecast" pane is incorrect whenever the su
 
 So PLEASE do not look at the discrepancy and assume that it is SoarCalc that is incorrect.  That is not the case.
 
-It remains to use the plugin and gain practical experience of its usefulness.  Unfortunately, the winter is currently upon 
+It remains to use the plugin and gain practical experience of its usefulness.  Unfortunately, the winter is currently upon
 us in the northern hemisphere.  I can only try to draw experience from comparison with RASP in Australia, New Zealand and South Africa.
 The usefulness of this is limited by the facts that high resolution models are not available for these locations and
 I am unable to compare with the actual soaring conditions.  However, the numbers do seem to correspond reasonably well.
 
-## Further Development
+### Further Development
 
 It would be useful to estimate the Solar Insolation more thoroughly involving the cloud opacity/thickness as well as the cloud cover.  The estimate of Thermal Updraft velocity ($W^*$) would then be available in all layers.  However, it is far from clear how much improvement this might make to the forecast value of $W^*$ given the other assumptions and approximations involved.
 
-## Appendix 1 - Derivation of Virtual Potential Temperature Flux
+### Appendix 1 - Derivation of Virtual Potential Temperature Flux
 
 The virtual potential temperature flux $Q_{ov}$ can be calculated from the incident solar radiation
 $Q_s$ as follows.
@@ -248,7 +261,7 @@ Where $R_v$ is the gas constant for water vapour (461 J/kgK), $R_d$ is the gas c
 
  $Q_{ov} = 0.75 Q_s / (\rho C_p)$
 
-## References
+### References
 
 1. BLIPMAP Prediction Parameters and Description. Dr. John W. (Jack) Glendening.
 <http://www.drjack.info/blip/INFO/parameters.html>
@@ -267,3 +280,45 @@ California 93523-0273, USA
 5. Convective Velocity and Temperature Scales for the Unstable Planetary Boundary Layer and for Rayleigh Convection
 James W. Deardorff (1970)
 <https://journals.ametsoc.org/view/journals/atsc/27/8/1520-0469_1970_027_1211_cvatsf_2_0_co_2.xml>
+
+---
+
+## Installation
+
+The SoarCalc plugin is only available in the browser version of Windy.com.  Unfortunately it is not available in the Android/iPhone App.
+
+For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows...
+
+1. Open Windy.com https://www.windy.com
+2. Open the menu
+3. Select “Install Windy Plugin”
+4. Select “Load plugin directly from URL”
+5. Enter this url: https://windy-plugins.com/12216047/windy-plugin-soarcalc/0.1.6/plugin.min.js
+6. “SoarCalc” will now appear on the main menu.
+7. It can be opened either from the main menu or more normally from the context menu (right
+mouse on the map)
+8. The pop-up window appears when you first open SoarCalc; you can close it directly or it
+will be removed on the next mouse click on the map.
+9. Windy.com opens by default in the “Wind” layer. But as the pop-up says, it works better in the
+“clouds” layer so it is best to switch over to that.
+
+---
+
+## Change Log
+
+- 0.1.6
+  - Total rework of documentation
+  - Major cleanup of code
+  - Subscribe to singleClick events from both Sounding forecast and details/meteogram forecast so as to remain in sync at exactly the same location
+  - Request forecast data at 1 hour intervals so that premium Windy.com users benefit from this.  (non-premium users continue to receive 3 hour intervals)
+  - Add error message when problems occur - notably when model elevation is not available! (AROME/AROME-HD)
+
+- 0.1.2
+  - improve initialization
+  - grey out Cu base etc when above BL top
+  - adjust calculation of Hcrit to fall inline with RASP
+  - respond to single click events from "sounding"
+  - show popup on first opening to explain parameters
+
+- 0.1.1
+  - Initial version of this repo
