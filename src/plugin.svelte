@@ -5,48 +5,51 @@
 	<div style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}</div>
 	<span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
 	
-<table style="width:100%">
-<tr>
-<td style=";text-align:right;vertical-align:top">
-    T: {format_temp(_sounding?.surface?.T)}
-    <br>Tdew: {format_temp(_sounding?.surface?.dewPoint)}
-    <br>Elev: {format_height(_sounding?.surface?.gh)}
-    <br>ElevA: {format_height(_sounding?.actualElevation)}
-    <br>
-</td>
-<td style=";text-align:right;vertical-align:top">
-    {#if _sounding?.blTop?.gh == _sounding?.surface?.gh}
-    	BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop?.gh)}</span>
-    {:else}
-    	BL top: {format_height(_sounding?.blTop?.gh)}
-    {/if}
-    {#if _sounding?.Hcrit == _sounding?.surface?.gh}
-    	<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
-    {:else}
-    	<br>Hcrit: {format_height(_sounding?.Hcrit)}
-    {/if}
-    {#if _sounding?.cuPossible}
-		<br>CU base: {format_height(_sounding?.cuBase?.gh)}
-   {:else}
-   		<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase?.gh)}</span>
-   {/if}
-    {#if _sounding?.odPossible}
-		<br>OD base: {format_height(_sounding?.odBase?.gh)}
-    {:else}
-    	<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase?.gh)}</span>
-    {/if}
-</td>
-<td style=";text-align:right;vertical-align:top">
-    Cloud: {format_number(_sounding?.cloud, 2)}
-    <br>Qs: {format_number(_sounding?.Qs, 0)}
-    <br>W*: {format_wind(_sounding?.Wstar)}
-    <br>Shear: {format_wind(_sounding?.blShear)}
-    <br>B/S: {format_number(_sounding?.Ri, 2)}
-</td>
-</tr>
-</table>
-</div>
+	{#if _sounding != null && _sounding.status < 0}
+	<div style="color:red">{_sounding.message}</div>
+	{/if}
 
+	<table style="width:100%">
+	<tr>
+	<td style=";text-align:right;vertical-align:top">
+		T: {format_temp(_sounding?.surface?.T)}
+		<br>Tdew: {format_temp(_sounding?.surface?.dewPoint)}
+		<br>Elev: {format_height(_sounding?.surface?.gh)}
+		<br>ElevA: {format_height(_sounding?.actualElevation)}
+		<br>
+	</td>
+	<td style=";text-align:right;vertical-align:top">
+		{#if _sounding?.blTop?.gh == _sounding?.surface?.gh}
+			BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop?.gh)}</span>
+		{:else}
+			BL top: {format_height(_sounding?.blTop?.gh)}
+		{/if}
+		{#if _sounding?.Hcrit == _sounding?.surface?.gh}
+			<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
+		{:else}
+			<br>Hcrit: {format_height(_sounding?.Hcrit)}
+		{/if}
+		{#if _sounding?.cuPossible}
+			<br>CU base: {format_height(_sounding?.cuBase?.gh)}
+		{:else}
+			<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase?.gh)}</span>
+		{/if}
+		{#if _sounding?.odPossible}
+			<br>OD base: {format_height(_sounding?.odBase?.gh)}
+		{:else}
+			<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase?.gh)}</span>
+		{/if}
+	</td>
+	<td style=";text-align:right;vertical-align:top">
+		Cloud: {format_number(_sounding?.cloud, 2)}
+		<br>Qs: {format_number(_sounding?.Qs, 0)}
+		<br>W*: {format_wind(_sounding?.Wstar)}
+		<br>Shear: {format_wind(_sounding?.blShear)}
+		<br>B/S: {format_number(_sounding?.Ri, 2)}
+	</td>
+	</tr>
+	</table>
+</div>
 
 <script lang="ts">
     import { getMeteogramForecastData } from '@windy/fetch';
@@ -67,7 +70,6 @@
     let _loc: LatLon;
     let _popupShown: boolean = false;
 
-	let _sounding2: Sounding | null = null;
     let _sounding: Sounding | null = null;
     let _meteogramForecast: any | null = null;
     let _interpolator: any = null;
@@ -224,11 +226,6 @@
     	}
 
         _sounding = new Sounding(_meteogramForecast, _hour, Qs, cloud);
-        if (_sounding.surface == null)
-        	_sounding = null;
-        _sounding2 = new Sounding(_meteogramForecast, _hour, Qs, cloud, true);
-        if (_sounding2.surface == null)
-        	_sounding2 = null;
     }
     function getQs0(hour: number, loc: LatLon): number
     {

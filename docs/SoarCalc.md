@@ -4,8 +4,7 @@
 
 Windy.com is a very good general weather forecast site that makes
 available data from some of the best models available notably including
-ECMWF from the European Centre for Medium Range Weather Forecasting,
-UKV from the Met Office and equivalent high resolution models worldwide.
+UKV from the UK Met Office and equivalent high resolution models worldwide.
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
 related parameters as per RASP.
@@ -14,8 +13,7 @@ related parameters as per RASP.
 
 This document is written from the point of view of sailplane pilots in the UK but it will be equally applicable to all forms of soaring flight anywhere in the world where high resolution weather models are available.
 
-For the upcoming day or two days "UKV" is probably the best forecast model available to us in the UK. As such it is already an important resource for planning any cross-country task.  However, it is inconvenient that the soaring specific parameters are not immediately available as they are on the soaring forecast sites (RASP, SkySight, TopMeteo etc.). Personally, I always check the soaring forecasts against UKV and if they significantly disagree then this is a good indication that they are not to be trusted. If they do agree, then, of course they do provide a better user experience. But the soaring
-forecasts all have their problems. I shall take the case of RASP because...
+For the upcoming day or two days "UKV" is probably the best forecast model available to us in the UK. As such it is already an important resource for planning any cross-country task.  However, it is inconvenient that the soaring specific parameters are not immediately available as they are on the soaring forecast sites (RASP, SkySight, TopMeteo etc.). Personally, I always check the soaring forecasts against UKV and if they significantly disagree then this is a good indication that they are not to be trusted. If they do agree, then, of course they do provide a better user experience. But the soaring forecasts all have their problems. I shall take the case of RASP because...
 
 1. The forecast analysis and range of parameters it presents are sound and well documented.
 2. Its author, Dr. John W. (Jack) Glendening (reference 1), has been open about the origin of the parameters that are presented.

@@ -9,6 +9,9 @@ const Wcrit: number = 0.9;							// sink rate of thermalling glider (ms-1)
 
 export class Sounding
 {
+	status: number = 0;						// status
+	message: string = '';					// status message
+
 	actualElevation: number;				// actual surface elevation
 	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
 	cloud: number | null;					// cloud cover ratio
@@ -40,16 +43,31 @@ export class Sounding
     	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
 		this.Qs = Qs;
 		this.cloud = cloud;
-		if (meteogramForecast == null) return;
-		if (meteogramForecast.status != 200) return;
+		if (meteogramForecast == null || meteogramForecast.status != 200)
+		{
+			this.status = -1;
+			this.message = 'null or invalid meteogramForecast';
+			return;
+		}
 		
         const md = meteogramForecast.data.data;
         const t: number = md.hours.indexOf(hour);
-        if (t < 0) return;		// user has requested a time beyond the limit of the forecast availability
+        if (t < 0)
+		{
+			this.status = -1;
+			this.message = 'time point unavailable';		// user has requested a time beyond the limit of the forecast availability
+			return;
+		}
 
+        if (meteogramForecast.data.header.modelElevation == null)
+		{
+			this.status = -1;
+			this.message = 'model elevation unavailable';	// AROME does not give us the model elevation!
+			return;
+		}
+	
 		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
-
- 		const gh: number = meteogramForecast.data.header.modelElevation;		// surface geopotential height is provided in the header rather than the data
+		const gh: number = meteogramForecast.data.header.modelElevation;		// surface geopotential height is provided in the header rather than the data
 		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
         const p: number = getPressure(seaLevelPressure, gh);
         this.surface = new SoundingLevel('surface', gh, p, md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
