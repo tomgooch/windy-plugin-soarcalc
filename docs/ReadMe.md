@@ -1,13 +1,68 @@
 # SoarCalc plugin for Windy.com
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
-related parameters as per RASP.
+parameters as per RASP.
 
-[**Installation**](#installation)
+## Contents
 
-[**Change Log**](#change-log)
+- [Installation](#installation)
 
-[**Discussion**](#discussion)
+- [Change Log](#change-log)
+
+- [Discussion](#discussion)
+
+---
+
+## Installation
+
+For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows...
+
+1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC (unfortunately the plugin is not available on Android/iPhone neither App nor Browser)
+
+2. Open the menu
+
+3. Select “Install Windy Plugin”
+
+4. Select “Load plugin directly from URL”
+
+5. Paste this string after the url already present in the input box:
+
+          12216047/windy-plugin-soarcalc/0.1.6/plugin.min.js
+
+6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
+
+7. It can be opened either from the main menu or more normally from the context menu (right
+mouse on the map)
+
+8. A pop-up window containing a description of all the parameters appears when you first open SoarCalc; you can close it directly or it
+will be removed on the next mouse click on the map.
+
+9. Windy.com opens by default in the “Wind” layer. But as the pop-up says, SoarCalc works better in the
+“clouds” layer so it is best to switch over to that.
+
+---
+
+## Change Log
+
+### 0.1.6
+
+- Total rework of documentation
+- Major cleanup of code
+- Subscribe to singleClick events from both Sounding forecast and details/meteogram forecast so as to remain in sync at exactly the same location
+- Request forecast data at 1 hour intervals so that premium Windy.com users benefit from this.  (non-premium users continue to receive 3 hour intervals)
+- Add error message when problems occur - notably when model elevation is not available! (AROME/AROME-HD)
+
+### 0.1.2
+
+- improve initialization
+- grey out Cu base etc when above BL top
+- adjust calculation of Hcrit to fall inline with RASP
+- respond to single click events from "sounding"
+- show popup on first opening to explain parameters
+
+### 0.1.1
+
+- Initial version of this repo
 
 ---
 
@@ -26,7 +81,7 @@ related parameters as per RASP.
 
 This document is written from the point of view of sailplane pilots in the UK but it will be equally applicable to all forms of soaring flight anywhere in the world where high resolution weather models are available.
 
-For the upcoming day or two days "UKV" is probably the best forecast model available to us in the UK. As such it is already an important resource for planning any cross-country task.  However, it is inconvenient that the soaring specific parameters are not immediately available as they are on the soaring forecast sites (RASP, SkySight, TopMeteo etc.). Personally, I always check the soaring forecasts against UKV and if they significantly disagree then this is a good indication that they are not to be trusted. If they do agree, then, of course they do provide a better user experience. But the soaring forecasts all have their problems. I shall take the case of RASP because...
+For the upcoming day or two "UKV" is probably the best forecast model available to us in the UK. As such it is already an important resource for planning any cross-country task.  However, it is inconvenient that the soaring specific parameters are not immediately available as they are on the soaring forecast sites (RASP, SkySight, TopMeteo etc.). Personally, I always check the soaring forecasts against UKV and if they significantly disagree then this is a good indication that they are not to be trusted. If they do agree, then, of course they do provide a better user experience. But the soaring forecasts all have their problems. I shall take the case of RASP because...
 
 1. The forecast analysis and range of parameters it presents are sound and well documented.
 2. Its author, Dr. John W. (Jack) Glendening (reference 1), has been open about the origin of the parameters that are presented.
@@ -187,7 +242,7 @@ Empirically, as glider pilots, we know that thermal strength initially increases
 a range of altitudes and then falls slowly back to zero as we approach the boundary layer top.  Therefore it is of interest
 to estimate the critical altitude at which the thermal strength is expected to fall to the descent rate of the glider.
 
-Lechlow and Stephens (reference 3) propose the following equation for the thermal updraft strengh at a given altitude...
+Lechlow and Stephens (reference 3) propose the following equation for the thermal updraft strength at a given altitude...
 
 $W = z^{1/3}(1 - 1.1z)$
 
@@ -280,45 +335,3 @@ California 93523-0273, USA
 5. Convective Velocity and Temperature Scales for the Unstable Planetary Boundary Layer and for Rayleigh Convection
 James W. Deardorff (1970)
 <https://journals.ametsoc.org/view/journals/atsc/27/8/1520-0469_1970_027_1211_cvatsf_2_0_co_2.xml>
-
----
-
-## Installation
-
-The SoarCalc plugin is only available in the browser version of Windy.com.  Unfortunately it is not available in the Android/iPhone App.
-
-For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows...
-
-1. Open Windy.com https://www.windy.com
-2. Open the menu
-3. Select “Install Windy Plugin”
-4. Select “Load plugin directly from URL”
-5. Enter this url: https://windy-plugins.com/12216047/windy-plugin-soarcalc/0.1.6/plugin.min.js
-6. “SoarCalc” will now appear on the main menu.
-7. It can be opened either from the main menu or more normally from the context menu (right
-mouse on the map)
-8. The pop-up window appears when you first open SoarCalc; you can close it directly or it
-will be removed on the next mouse click on the map.
-9. Windy.com opens by default in the “Wind” layer. But as the pop-up says, it works better in the
-“clouds” layer so it is best to switch over to that.
-
----
-
-## Change Log
-
-- 0.1.6
-  - Total rework of documentation
-  - Major cleanup of code
-  - Subscribe to singleClick events from both Sounding forecast and details/meteogram forecast so as to remain in sync at exactly the same location
-  - Request forecast data at 1 hour intervals so that premium Windy.com users benefit from this.  (non-premium users continue to receive 3 hour intervals)
-  - Add error message when problems occur - notably when model elevation is not available! (AROME/AROME-HD)
-
-- 0.1.2
-  - improve initialization
-  - grey out Cu base etc when above BL top
-  - adjust calculation of Hcrit to fall inline with RASP
-  - respond to single click events from "sounding"
-  - show popup on first opening to explain parameters
-
-- 0.1.1
-  - Initial version of this repo
