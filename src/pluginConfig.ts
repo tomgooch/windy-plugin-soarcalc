@@ -9,7 +9,7 @@ const config: ExternalPluginConfig = {
     author: '@tomA27',
     repository: 'https://github.com/tomgooch/windy-plugin-soarcalc',
     desktopUI: 'embedded',
-    mobileUI: 'fullscreen',
+    mobileUI: 'small',
     desktopWidth: 400,
 
     // Link to this plugin will be additional add to RH button context menu

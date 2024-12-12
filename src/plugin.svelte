@@ -1,6 +1,3 @@
-<div class="plugin__mobile-header">
-    {title}
-</div>
 <div>
 	<div style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}</div>
 	<span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
@@ -123,7 +120,6 @@
         	showMarker();
             updateInterpolator(store.get('product'), store.get('overlay'));
         }
-        console.log('markers', markers);
     };
 
     onMount(() => {

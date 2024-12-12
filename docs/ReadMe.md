@@ -27,7 +27,7 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 5. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/0.1.6/plugin.min.js
+          12216047/windy-plugin-soarcalc/0.1.7/plugin.min.js
 
 6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -43,6 +43,10 @@ will be removed on the next mouse click on the map.
 ---
 
 ## Change Log
+
+### 0.1.7
+
+- Support for browser on mobile
 
 ### 0.1.6
 
