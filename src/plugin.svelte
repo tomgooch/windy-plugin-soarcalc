@@ -97,7 +97,6 @@
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
-    let _popupShown: boolean = false;
 
     let _sounding: Sounding = new Sounding(null, null, null, null, null);
     let _meteogramForecast: any | null = null;
@@ -131,13 +130,6 @@
 	        icon: draggablePulsatingIcon,
 	    }).addTo(map);
 	    
-	    if (!_popupShown)
-	    {
-			_popupShown = true;
-			if (!isMobileOrTablet)
-				marker.bindPopup(getPopupMessage()).openPopup();
-	    }
-
 	    marker.on('dragend', function (event) {
 	        const { lat, lng } = event.target.getLatLng();
 	        _loc = { lat, lon: lng };
@@ -351,35 +343,6 @@
     	if (x == null) return '';
 		return x.toFixed(n);
     }
-    function getPopupMessage(): string
-	{
-		console.log("metric", metrics);
-		var msg: string = "<p>" + title + " v" + version + "</p>"
-
-		msg += "<p>Thermal Soaring parameters as per RASP based on the current forecast model</p>"
-	
-		msg += "<p>Legend</p>"
-
-		msg += "<p>All layers..."
-		msg += "<br>T = surface temperature (" + metrics.temp.metric + ")"
-		msg += "<br>Tdew = surface dew point temperature (" + metrics.temp.metric + ")"
-		msg += "<br>Elev = Model Elevation (" + metrics.altitude.metric + ")"
-		msg += "<br>ElevA = Actual Elevation (" + metrics.altitude.metric + ")"
-		msg += "<br>BL top = boundary layer top (dry thermal height) (" + metrics.altitude.metric + ")"
-		msg += "<br>Cu base = Cumulous cloud base (" + metrics.altitude.metric + ")"
-		msg += "<br>OD base = Overdeveloped / Spreadout cloud base (" + metrics.altitude.metric + ")"
-		msg += "<br>Shear = Boundary layer wind shear (" + metrics.wind.metric + ")"
-		msg += "</p>"
-		
-		msg += "<p>Clouds/Solar power layers only..."
-		msg += "<br>Cloud = total cloud cover"
-		msg += "<br>Qs = surface insolation (W/m2)"
-		msg += "<br>W* = thermal updraft velocity (" + metrics.wind.metric + ")"
-		msg += "<br>B/S = Bouyancy/Shear ratio"
-		msg += "<br>Hcrit = height at which updraft falls below " + format_wind(0.9) + metrics.wind.metric + " (" + metrics.altitude.metric + ")"
-		msg += "</p>"
-		return msg;
-	}
 </script>
 
 <style lang="less">
