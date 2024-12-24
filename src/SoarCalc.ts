@@ -1,3 +1,5 @@
+import { LatLon } from "@windycom/plugin-devtools/types/interfaces";
+
 const Rd: number = 287;							// Gas constant for dry air (J kg-1 K-1)
 const Rv: number = 462;							// Gas constant for water vapour (J kg-1 K-1)
 const g: number = 9.81;							// acceleration due to gravity (m s-2)
@@ -12,6 +14,7 @@ export class Sounding
 	status: number = 0;						// status
 	message: string = '';					// status message
 
+	Loc: LatLon | null;
 	actualElevation: number;				// actual surface elevation
 	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
 	cloud: number | null;					// cloud cover ratio
@@ -38,18 +41,31 @@ export class Sounding
 	ccl: SoundingLevel | null = null;		// Convective Condensation Level (m)
 	lcl: SoundingLevel | null = null;		// Lifting Condensation Level (aka Cu cloudbase) (m)
 
-	constructor(meteogramForecast: any, hour: number | null, Qs: number | null, cloud: number | null, use1000h: boolean=false)
+	constructor(meteogramForecast: any, loc: LatLon | null, hour: number | null, Qs: number | null, cloud: number | null)
 	{
     	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
 		this.Qs = Qs;
 		this.cloud = cloud;
-		if (meteogramForecast == null || meteogramForecast.status != 200)
+		this.Loc = loc;
+		if (loc == null)
 		{
 			this.status = -1;
-			this.message = 'null or invalid meteogramForecast';
+			this.message = 'no current location';
 			return;
 		}
-		
+		if (meteogramForecast == null)
+		{
+			this.status = -1;
+			this.message = 'null meteogramForecast';
+			return;
+		}
+		if (meteogramForecast.status != 200)
+		{
+			this.status = -1;
+			this.message = 'invalid meteogramForecast, status=' + meteogramForecast.status;
+			return;
+		}
+					
         const md = meteogramForecast.data.data;
         const t: number = md.hours.indexOf(hour);
         if (t < 0)

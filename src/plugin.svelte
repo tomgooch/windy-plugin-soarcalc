@@ -1,57 +1,89 @@
 <div>
-	<div style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}</div>
-	<span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
+	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}
+		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
+	</div>
+	<br><span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
 	
-	{#if _sounding != null && _sounding.status < 0}
-	<div style="color:red">{_sounding.message}</div>
+	{#if _sounding.status < 0}
+	<div>{_sounding.message}</div>
 	{/if}
 
 	<table style="width:100%">
 	<tr>
 	<td style=";text-align:right;vertical-align:top">
-		T: {format_temp(_sounding?.surface?.T)}
-		<br>Tdew: {format_temp(_sounding?.surface?.dewPoint)}
-		<br>Elev: {format_height(_sounding?.surface?.gh)}
-		<br>ElevA: {format_height(_sounding?.actualElevation)}
-		<br>
+		<div class="tooltipR">T: {format_temp(_sounding.surface?.T)}
+			<span class="tooltiptext">Surface temperature ({metrics.temp.metric})</span>
+		</div>
+		<br><div class="tooltipR">Tdew: {format_temp(_sounding.surface?.dewPoint)}
+			<span class="tooltiptext">Surface dew point temperature ({metrics.temp.metric})</span>
+		</div>
+		<br><div class="tooltipR">Elev: {format_height(_sounding.surface?.gh)}
+			<span class="tooltiptext">Model elevation ({metrics.altitude.metric})</span>
+		</div>
+		<br><div class="tooltipR">ElevA: {format_height(_sounding.actualElevation)}
+			<span class="tooltiptext">Actual elevation ({metrics.altitude.metric})</span>
+		</div>
 	</td>
 	<td style=";text-align:right;vertical-align:top">
-		{#if _sounding?.blTop?.gh == _sounding?.surface?.gh}
-			BL top: <span style="opacity:0.6">{format_height(_sounding?.blTop?.gh)}</span>
-		{:else}
-			BL top: {format_height(_sounding?.blTop?.gh)}
-		{/if}
-		{#if _sounding?.Hcrit == _sounding?.surface?.gh}
-			<br>Hcrit: <span style="opacity:0.6">{format_height(_sounding?.Hcrit)}</span>
-		{:else}
-			<br>Hcrit: {format_height(_sounding?.Hcrit)}
-		{/if}
-		{#if _sounding?.cuPossible}
-			<br>CU base: {format_height(_sounding?.cuBase?.gh)}
-		{:else}
-			<br>CU base: <span style="opacity:0.6">{format_height(_sounding?.cuBase?.gh)}</span>
-		{/if}
-		{#if _sounding?.odPossible}
-			<br>OD base: {format_height(_sounding?.odBase?.gh)}
-		{:else}
-			<br>OD base: <span style="opacity:0.6">{format_height(_sounding?.odBase?.gh)}</span>
-		{/if}
+		<div class="tooltip">BL top: 
+			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
+				<span style="opacity:0.6">{format_height(_sounding.blTop?.gh)}</span>
+			{:else}
+				{format_height(_sounding.blTop?.gh)}
+			{/if}
+			<span class="tooltiptext">Boundary Layer top (dry thermal height) ({metrics.altitude.metric})</span>
+		</div>
+		<br><div class="tooltip">Hcrit: 
+			{#if _sounding.Hcrit == _sounding.surface?.gh}
+				<span style="opacity:0.6">{format_height(_sounding.Hcrit)}</span>
+			{:else}
+				<br>{format_height(_sounding.Hcrit)}
+			{/if}
+			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric}) (Clouds overlay only)</span>
+		</div>
+		<br><div class="tooltip">CU base: 
+			{#if _sounding.cuPossible}
+				{format_height(_sounding.cuBase?.gh)}
+			{:else}
+				<span style="opacity:0.6">{format_height(_sounding.cuBase?.gh)}</span>
+			{/if}
+			<span class="tooltiptext">Cumulous cloud base ({metrics.altitude.metric})</span>
+		</div>
+		<br><div class="tooltip">OD base: 
+			{#if _sounding.odPossible}
+				{format_height(_sounding.odBase?.gh)}
+			{:else}
+				<span style="opacity:0.6">{format_height(_sounding.odBase?.gh)}</span>
+			{/if}
+			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric})</span>
+		</div>
 	</td>
 	<td style=";text-align:right;vertical-align:top">
-		Cloud: {format_number(_sounding?.cloud, 2)}
-		<br>Qs: {format_number(_sounding?.Qs, 0)}
-		<br>W*: {format_wind(_sounding?.Wstar)}
-		<br>Shear: {format_wind(_sounding?.blShear)}
-		<br>B/S: {format_number(_sounding?.Ri, 2)}
+		<div class="tooltipL">Cloud: {format_number(_sounding.cloud, 2)}
+			<span class="tooltiptext">Total cloud cover (Clouds overlay only)</span>
+		</div>
+		<br><div class="tooltipL">Qs: {format_number(_sounding.Qs, 0)}
+			<span class="tooltiptext">Surface insolation (W/m2) (Clouds overlay only)</span>
+		</div>
+		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar)}
+			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) (Clouds overlay only)</span>
+		</div>
+		<br><div class="tooltipL">Shear: {format_wind(_sounding.blShear)}
+			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric}) (Clouds overlay only)</span>
+		</div>
+		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
+			<span class="tooltiptext">Bouyancy/Shear ratio (Clouds overlay only)</span>
+		</div>
 	</td>
 	</tr>
 	</table>
 </div>
 
 <script lang="ts">
+    import { isMobileOrTablet } from '@windy/rootScope';
     import { getMeteogramForecastData } from '@windy/fetch';
     import store from '@windy/store'
-    import { map, markers} from '@windy/map';
+    import { map } from '@windy/map';
     import { isValidLatLonObj } from '@windy/utils';
     import { singleclick } from '@windy/singleclick';
     import metrics from '@windy/metrics';
@@ -67,7 +99,7 @@
     let _loc: LatLon;
     let _popupShown: boolean = false;
 
-    let _sounding: Sounding | null = null;
+    let _sounding: Sounding = new Sounding(null, null, null, null, null);
     let _meteogramForecast: any | null = null;
     let _interpolator: any = null;
     let _overlay: string | null = null;
@@ -101,8 +133,9 @@
 	    
 	    if (!_popupShown)
 	    {
-			marker.bindPopup(getPopupMessage()).openPopup();
 			_popupShown = true;
+			if (!isMobileOrTablet)
+				marker.bindPopup(getPopupMessage()).openPopup();
 	    }
 
 	    marker.on('dragend', function (event) {
@@ -118,25 +151,38 @@
         if (isValidLatLonObj(location)) {
        		_loc = location;
         	showMarker();
-            updateInterpolator(store.get('product'), store.get('overlay'));
+            updateInterpolatorIfNeeded(store.get('product'), store.get('overlay'));
         }
     };
 
     onMount(() => {
-        singleclick.on(name, onSingleClick);
-        singleclick.on('sounding', onSingleClick);
-        singleclick.on('detail', onSingleClick);
         broadcast.on('redrawFinished', onRedrawFinished);
-    });
+        singleclick.on(name, onSingleClick);
+		if (!isMobileOrTablet)
+		{
+			singleclick.on('sounding', onSingleClick);
+			singleclick.on('detail', onSingleClick);
+		}
+	});
 
     onDestroy(() => {
-        singleclick.off(name, onSingleClick);
-        singleclick.off('sounding', onSingleClick);
-        singleclick.off('detail', onSingleClick);
-        broadcast.off('redrawFinished', onRedrawFinished);
         hideMarker();
+        broadcast.off('redrawFinished', onRedrawFinished);
+        singleclick.off(name, onSingleClick);
+		if (!isMobileOrTablet)
+		{
+			singleclick.off('sounding', onSingleClick);
+			singleclick.off('detail', onSingleClick);
+		}
     });
-    
+	function onSingleClick(location: LatLon)
+    {
+    	console.log("onSingleClick:", location);
+         _loc = location;
+        showMarker();
+        updateForecast();
+    }
+   
 	function onRedrawFinished(params: any)
 	{
 		console.log('onRedrawFinished', params);
@@ -145,39 +191,36 @@
 		_path = params.path;
 		const dateString: string = _path.substring(0,4) + '-' + _path.substring(4,6) + '-' + _path.substring(6,8) + 'T' + _path.substring(8,10) + ':00:00Z';
 		_hour = new Date(dateString).getTime();
-		updateInterpolator(params.product, params.overlay);
+		updateInterpolatorIfNeeded(params.product, params.overlay);
 	}
-    function onSingleClick(location: LatLon)
-    {
-    	console.log("onSingleClick:", location);
-         _loc = location;
-        showMarker();
-        updateForecast();
-    }
-// **********************************************************
-	function updateInterpolator(model: string, overlay: string)
+	function updateInterpolatorIfNeeded(model: string, overlay: string)
 	{
-		console.log('updateInterpolator', model, overlay);
-	    getLatLonInterpolator().then((interpolator) => {
-			_interpolator = interpolator;
-			_overlay = overlay;
-			if (model != _model)
-			{
-				_model = model;
-				updateForecast();
-			}
-			else
-			{
-		    	updateSounding();
-			}
-		});
+		if (overlay == 'clouds' || overlay == 'solarpower')
+			getLatLonInterpolator().then((interpolator) => { updateInterpolator(interpolator, model, overlay) });
+		else
+			updateInterpolator(null, model, overlay)
 	}
-    function updateForecast()
+	function updateInterpolator(interpolator: any, model: string, overlay: string)
+	{
+		console.log('updateInterpolator', model, overlay, interpolator);
+		_interpolator = interpolator;
+		_overlay = overlay;
+		if (_meteogramForecast == null || model != _model)
+		{
+			_model = model;
+			updateForecast();
+		}
+		else
+		{
+			updateSounding(_meteogramForecast);
+		}
+	}
+  	function updateForecast()
     {
  		console.log('updateForecast:', _model, _loc);
     	if (!isValidLatLonObj(_loc))
     	{
-    		_sounding = null;
+    		updateSounding(null);
     		return;
     	}
     	if (_model == null)
@@ -187,13 +230,15 @@
 		//	console.log("pointForecast", pointForecastData);
 		//});
  	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast) => {
-	 	    _meteogramForecast = meteogramForecast;
-        	updateSounding();
+        	updateSounding(meteogramForecast);
+		}).catch((e) => {
+			updateSounding(null);
 		});
     }
-    function updateSounding()
+    function updateSounding(meteogramForecast: any)
     {
- 		console.log("updateSounding: ", _hour, _overlay, _loc, _meteogramForecast);
+		_meteogramForecast = meteogramForecast;
+		console.log("updateSounding: ", _hour, _overlay, _loc, _meteogramForecast, _interpolator);
 
     	if (_hour == null)
     		_hour = getHour();
@@ -221,7 +266,7 @@
 			}
     	}
 
-        _sounding = new Sounding(_meteogramForecast, _hour, Qs, cloud);
+        _sounding = new Sounding(_meteogramForecast, _loc, _hour, Qs, cloud);
     }
     function getQs0(hour: number, loc: LatLon): number
     {
@@ -348,4 +393,84 @@
         z-index: 1000;
         cursor: move;
     }
+	.tooltip {
+	position: relative;
+	display: inline-block;
+	}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -100px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.tooltipL {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipL .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 100%;
+  margin-left: -200px;
+}
+
+.tooltipL:hover .tooltiptext {
+  visibility: visible;
+}
+
+
+.tooltipR {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipR .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  right: 100%;
+  margin-right: -200px;
+}
+
+.tooltipR:hover .tooltiptext {
+  visibility: visible;
+}
+
+
 </style>

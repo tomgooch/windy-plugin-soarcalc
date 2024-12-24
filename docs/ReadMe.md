@@ -7,6 +7,8 @@ parameters as per RASP.
 
 - [Installation](#installation)
 
+- [Getting Started](#getting-started)
+
 - [Change Log](#change-log)
 
 - [Discussion](#discussion)
@@ -15,9 +17,11 @@ parameters as per RASP.
 
 ## Installation
 
-For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows...
+For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows (note that this differs for desktop vs mobile devices)...
 
-1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC (unfortunately the plugin is not available on Android/iPhone neither App nor Browser)
+### Desktop
+
+1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC (Note: this will not work on a mobile device as it will redirect you to the Windy App which does not support plugins)
 
 2. Open the menu
 
@@ -34,11 +38,38 @@ For the moment this Plug-in is marked as “private” which means that it does 
 7. It can be opened either from the main menu or more normally from the context menu (right
 mouse on the map)
 
-8. A pop-up window containing a description of all the parameters appears when you first open SoarCalc; you can close it directly or it
+### Mobile
+
+Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile App but function well within Chrome etc on mobile devices.
+
+1. Open Chrome or other browser on your mobile device.
+
+2. Navigate to "windy.com/plugins"  (do not go to windy.com as that will redirect you to the App which you do not want)
+
+3. Select “Load plugin directly from URL”
+
+4. Paste the same string as above after the url already present in the input box.
+
+5. Press "install untrusted plugin" and you will see a message telling you that
+SoarCalc will be available on the main menu.  However, the add-in is not yet be available in this window.
+
+6. Close this browser window.
+
+7. Navigate to "windy.com/plugin/soarcalc" in a new window and SoarCalc will appear at the bottom of the screen.
+
+8. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
+
+## Getting Started
+
+When you open SoarCalc a pop-up window containing a description of all the parameters will appear.  You can close it directly or it
 will be removed on the next mouse click on the map.
 
-9. Windy.com opens by default in the “Wind” layer. But as the pop-up says, SoarCalc works better in the
+Windy.com opens by default in the “Wind” layer. But as the pop-up says, SoarCalc works better in the
 “clouds” layer so it is best to switch over to that.
+
+If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a better experience that the default 3 hour steps seen by non-premium users.
+
+To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document
 
 ---
 
@@ -46,7 +77,7 @@ will be removed on the next mouse click on the map.
 
 ### 0.1.7
 
-- Support for browser on mobile
+- Support for mobile devices
 
 ### 0.1.6
 
