@@ -31,7 +31,7 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 5. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/0.1.7/plugin.min.js
+          12216047/windy-plugin-soarcalc/0.1.8/plugin.min.js
 
 6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -59,13 +59,13 @@ SoarCalc will be available on the main menu.  However, the add-in is not yet be 
 
 8. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
 
+9. Ignore the button inviting you to "Download App".
+
 ## Getting Started
 
-When you open SoarCalc a pop-up window containing a description of all the parameters will appear.  You can close it directly or it
-will be removed on the next mouse click on the map.
+Tooltips give a description of all the parameters displayed by SoarCalc.  Some of the parameters are only available in the "Clouds" or "SolarPower" overlays.
 
-Windy.com opens by default in the “Wind” layer. But as the pop-up says, SoarCalc works better in the
-“clouds” layer so it is best to switch over to that.
+Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer so it is best to switch over to that.
 
 If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a better experience that the default 3 hour steps seen by non-premium users.
 
@@ -74,6 +74,11 @@ To gain a better understanding of the parameters that are being presented please
 ---
 
 ## Change Log
+
+### 0.1.8
+
+- Give more meaningful / helpful error messages in particular when there is no location selected on the map.
+- Provide Tooltips and remove the PopUp.
 
 ### 0.1.7
 
@@ -118,15 +123,15 @@ This document is written from the point of view of sailplane pilots in the UK bu
 
 For the upcoming day or two "UKV" is probably the best forecast model available to us in the UK. As such it is already an important resource for planning any cross-country task.  However, it is inconvenient that the soaring specific parameters are not immediately available as they are on the soaring forecast sites (RASP, SkySight, TopMeteo etc.). Personally, I always check the soaring forecasts against UKV and if they significantly disagree then this is a good indication that they are not to be trusted. If they do agree, then, of course they do provide a better user experience. But the soaring forecasts all have their problems. I shall take the case of RASP because...
 
-1. The forecast analysis and range of parameters it presents are sound and well documented.
+1. The forecast analysis and range of parameters that it presents are sound and well documented.
 2. Its author, Dr. John W. (Jack) Glendening (reference 1), has been open about the origin of the parameters that are presented.
-3. Experience suggests that, on days where the models (including GFS) are largely in agreement and there is not much spreadout, it is still probably as good as anything we have.
+3. Experience suggests that, on days where the models (including GFS) are largely in agreement and there is not much spreadout / over-development, it is still probably as good as anything we have.
 
 However RASP does have some serious issues...
 
 1. It still uses GFS and only GFS which is no longer the best forecast available for the UK
 2. It is updated infrequently. Usually even in the morning we see a forecast for the current day that is already 12 hours old.
-3. It does not deal with cloud amounts very well. There are a significant number of days in the year when it predicts virtually no cloud cover and hence good (5*) conditions over large areas at variance with all other models / forecasting sites.
+3. It does not deal with cloud amounts very well. There are a significant number of days in the year when it predicts virtually no cloud cover and hence good (5*) conditions over large areas at variance with all other models / forecasting sites and with reality.
 
 So the motivation to develop a plugin for Windy.com is simple. To make the RASP parameters available within Windy.com using the data from "UKV" or any of the other models that are available.
 
@@ -158,7 +163,7 @@ Some of the parameters are available when viewing any map layer in Windy but the
 
 ### Parameters
 
-A brief description of the parameters presented by SoarCalc is given in a "Legend" pop-up when SoarCalc is first opened.  A more detailed description is given here.
+A brief description of the parameters presented by SoarCalc is given by means of "Tool Tips".  A more detailed description is given here.
 
 Values are given in the units selected in the Windy.com "Settings"
 
@@ -167,7 +172,7 @@ describing the RASP parameters [BLIPMAP Prediction Parameters and Description](h
 
 #### T / Tdew - Surface temperature / dew point
 
-These are taken directly from the forecast model data and are self explanatory except to note "surface" refers to the model elevation not to the actual elevation.  If the model elevation differs significantly from the actual elevation then these values will differ correspondingly.
+These are taken directly from the forecast model data and are self explanatory except to note that "surface" refers to the model elevation not to the actual elevation.  If the model elevation differs significantly from the actual elevation then these values will differ correspondingly.
 
 #### Elev / ElevA - Surface Elevation Model / Actual
 
