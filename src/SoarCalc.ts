@@ -56,7 +56,7 @@ export class Sounding
 		if (meteogramForecast == null)
 		{
 			this.status = -1;
-			this.message = 'null meteogramForecast';
+			this.message = 'no meteogramForecast';
 			return;
 		}
 		if (meteogramForecast.status != 200)
@@ -75,15 +75,20 @@ export class Sounding
 			return;
 		}
 
+		var gh: number;
         if (meteogramForecast.data.header.modelElevation == null)
 		{
 			this.status = -1;
-			this.message = 'model elevation unavailable';	// AROME does not give us the model elevation!
-			return;
+			this.message = 'model elevation unavailable';						// AROME does not give us the model elevation!
+			gh = meteogramForecast.data.header.elevation;						// take the actual elevation (supplied by Windy - same for all models)???
+		}
+		else
+		{
+			gh = meteogramForecast.data.header.modelElevation;					// surface geopotential height is provided in the header rather than the data
 		}
 	
 		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
-		const gh: number = meteogramForecast.data.header.modelElevation;		// surface geopotential height is provided in the header rather than the data
+
 		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
         const p: number = getPressure(seaLevelPressure, gh);
         this.surface = new SoundingLevel('surface', gh, p, md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
@@ -99,6 +104,12 @@ export class Sounding
 				const p = Number(x.substring(0, x.length - 1)) * 100;	// infer pressure from name of level
 				this.levels[this.levels.length] = new SoundingLevel(x, gh, p, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
 			}
+		}
+		if (this.levels.length == 1)
+		{
+			this.status = -1;
+			this.message = 'surface data only';						// AROME-HD only gives us surface data
+			return;
 		}
 
 		for(var i=1; i<this.levels.length; i++)
