@@ -1,8 +1,8 @@
 <div>
-	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}: {format_time(_hour)}
+	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
-	<br><span style="font-size:10px;vertical-align:top">{format_latlon(_loc)}</span>
+	<br><span style="font-size:10px;vertical-align:top">{format_time(_hour)} , {format_latlon(_sounding.Loc)}</span>
 	
 	{#if _sounding.status < 0}
 	<div>{_sounding.message}</div>
@@ -37,7 +37,7 @@
 			{#if _sounding.Hcrit == _sounding.surface?.gh}
 				<span style="opacity:0.6">{format_height(_sounding.Hcrit)}</span>
 			{:else}
-				<br>{format_height(_sounding.Hcrit)}
+				{format_height(_sounding.Hcrit)}
 			{/if}
 			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric}) (Clouds overlay only)</span>
 		</div>
@@ -89,11 +89,12 @@
     import metrics from '@windy/metrics';
     import { onDestroy, onMount } from 'svelte';
     import config from './pluginConfig';
-    import type { LatLon } from '@windy/interfaces.d';
+    import type { LatLon, MeteogramDataPayload } from '@windy/interfaces.d';
     import SunCalc from 'suncalc';
     import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
+    import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
@@ -221,7 +222,7 @@
 		//getPointForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((pointForecastData) =>{
 		//	console.log("pointForecast", pointForecastData);
 		//});
- 	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast) => {
+ 	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast: HttpPayload<MeteogramDataPayload>) => {
         	updateSounding(meteogramForecast);
 		}).catch((e) => {
 			updateSounding(null);
@@ -307,11 +308,11 @@
     	if (x == null) return '';
 		return metrics.wind.convertNumber(x, 2);
     }
-    function format_latlon(x: LatLon): string
+    function format_latlon(x: LatLon | null): string
     {
-    	if (!isValidLatLonObj(x)) return '';
+    	if (x == null) return '';
 
-    	var latitude: string;
+		var latitude: string;
     	var longitude: string;
     	if (x.lat >= 0)
     		latitude = toDegreesAndDecimalMinutes(x.lat) + 'N'
@@ -323,7 +324,7 @@
     	else
     		longitude = toDegreesAndDecimalMinutes(Math.abs(x.lon)) + 'W'
 
-		return latitude + '  ' + longitude;
+		return latitude + ' / ' + longitude;
     }
     function toDegreesAndDecimalMinutes(x: number): string
     {
@@ -336,7 +337,7 @@
     	if (d == null) return '';
     	const days: string[] = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
     	const dt = new Date(d);
-		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ', ' + dt.getUTCHours() + ':00';
+		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' - ' + dt.getUTCHours() + ':00';
     }
     function format_number(x: number | null | undefined, n: number): string
     {
