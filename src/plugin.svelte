@@ -18,10 +18,10 @@
 			<span class="tooltiptext">Surface dew point temperature ({metrics.temp.metric})</span>
 		</div>
 		<br><div class="tooltipR">Elev: {format_height(_sounding.surface?.gh)}
-			<span class="tooltiptext">Model elevation ({metrics.altitude.metric})</span>
+			<span class="tooltiptext">Model elevation ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltipR">ElevA: {format_height(_sounding.actualElevation)}
-			<span class="tooltiptext">Actual elevation ({metrics.altitude.metric})</span>
+			<span class="tooltiptext">Actual elevation ({metrics.altitude.metric} amsl)</span>
 		</div>
 	</td>
 	<td style=";text-align:right;vertical-align:top">
@@ -31,15 +31,7 @@
 			{:else}
 				{format_height(_sounding.blTop?.gh)}
 			{/if}
-			<span class="tooltiptext">Boundary Layer top (dry thermal height) ({metrics.altitude.metric})</span>
-		</div>
-		<br><div class="tooltip">Hcrit: 
-			{#if _sounding.Hcrit == _sounding.surface?.gh}
-				<span style="opacity:0.6">{format_height(_sounding.Hcrit)}</span>
-			{:else}
-				{format_height(_sounding.Hcrit)}
-			{/if}
-			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric}) (Clouds overlay only)</span>
+			<span class="tooltiptext">Boundary Layer top (dry thermal height) ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltip">CU base: 
 			{#if _sounding.cuPossible}
@@ -47,7 +39,7 @@
 			{:else}
 				<span style="opacity:0.6">{format_height(_sounding.cuBase?.gh)}</span>
 			{/if}
-			<span class="tooltiptext">Cumulous cloud base ({metrics.altitude.metric})</span>
+			<span class="tooltiptext">Cumulous cloud base ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltip">OD base: 
 			{#if _sounding.odPossible}
@@ -55,8 +47,17 @@
 			{:else}
 				<span style="opacity:0.6">{format_height(_sounding.odBase?.gh)}</span>
 			{/if}
-			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric})</span>
+			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric} amsl)</span>
 		</div>
+		<br><div class="tooltip">Shear: 
+			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
+				<span style="opacity:0.6">{format_wind(_sounding.blShear)}</span>
+			{:else}
+				{format_wind(_sounding.blShear)}
+			{/if}
+			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric})</span>
+		</div>
+
 	</td>
 	<td style=";text-align:right;vertical-align:top">
 		<div class="tooltipL">Cloud: {format_number(_sounding.cloud, 2)}
@@ -68,8 +69,13 @@
 		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar)}
 			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) (Clouds overlay only)</span>
 		</div>
-		<br><div class="tooltipL">Shear: {format_wind(_sounding.blShear)}
-			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric}) (Clouds overlay only)</span>
+		<br><div class="tooltipL">Hcrit: 
+			{#if _sounding.Hcrit == _sounding.surface?.gh}
+				<span style="opacity:0.6">{format_height(_sounding.Hcrit)}</span>
+			{:else}
+				{format_height(_sounding.Hcrit)}
+			{/if}
+			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) (Clouds overlay only)</span>
 		</div>
 		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
 			<span class="tooltiptext">Bouyancy/Shear ratio (Clouds overlay only)</span>
