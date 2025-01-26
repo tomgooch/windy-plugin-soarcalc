@@ -21,7 +21,7 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 ### Desktop
 
-1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC (Note: this will not work on a mobile device as it will redirect you to the Windy App which does not support plugins)
+1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC
 
 2. Open the menu
 
@@ -31,7 +31,7 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 5. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/0.1.8/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.0.1/plugin.min.js
 
 6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -40,7 +40,7 @@ mouse on the map)
 
 ### Mobile
 
-Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile App but function well within Chrome etc on mobile devices.
+Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile App but SoarCalc functions well within Chrome etc on mobile devices.
 
 1. Open Chrome or other browser on your mobile device.
 
@@ -51,11 +51,11 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 4. Paste the same string as above after the url already present in the input box.
 
 5. Press "install untrusted plugin" and you will see a message telling you that
-SoarCalc will be available on the main menu.  However, the add-in is not yet be available in this window.
+SoarCalc will be available on the main menu.  However, the add-in is not yet available in this tab.
 
-6. Close this browser window.
+6. Close this browser tab.
 
-7. Navigate to "windy.com/plugin/soarcalc" in a new window and SoarCalc will appear at the bottom of the screen.
+7. Navigate to "windy.com/plugin/soarcalc" in a new window/tab and SoarCalc will appear at the bottom of the screen.
 
 8. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
 
@@ -67,7 +67,7 @@ Tooltips give a description of all the parameters displayed by SoarCalc.  Some o
 
 Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer so it is best to switch over to that.
 
-If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a better experience that the default 3 hour steps seen by non-premium users.
+If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience that the default 3 hour steps seen by non-premium users.
 
 To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document
 
@@ -75,34 +75,14 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 0.1.8
+### 1.0.1
 
-- Give more meaningful / helpful error messages in particular when there is no location selected on the map.
-- Provide Tooltips and remove the PopUp.
-
-### 0.1.7
+This version remains a private release but can be seen as the first candidate for public release.
+Important improvements from earlier private releases include...
 
 - Support for mobile devices
-
-### 0.1.6
-
-- Total rework of documentation
-- Major cleanup of code
-- Subscribe to singleClick events from both Sounding forecast and details/meteogram forecast so as to remain in sync at exactly the same location
-- Request forecast data at 1 hour intervals so that premium Windy.com users benefit from this.  (non-premium users continue to receive 3 hour intervals)
-- Add error message when problems occur - notably when model elevation is not available! (AROME/AROME-HD)
-
-### 0.1.2
-
-- improve initialization
-- grey out Cu base etc when above BL top
-- adjust calculation of Hcrit to fall inline with RASP
-- respond to single click events from "sounding"
-- show popup on first opening to explain parameters
-
-### 0.1.1
-
-- Initial version of this repo
+- Descriptions of all parameters available as tooltips
+- Meaningful error messages in particular when there is no location selected on the map or the selected model does not provide the required data.
 
 ---
 
@@ -110,12 +90,11 @@ To gain a better understanding of the parameters that are being presented please
 
 ### Abstract
 
-Windy.com is a very good general weather forecast site that makes
-available data from some of the best models available notably including
+Windy.com is a very good general weather forecast site that shows data from some of the best weather models available notably including
 UKV from the UK Met Office and equivalent high resolution models worldwide.
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
-related parameters as per RASP.
+related parameters calculated in the same way as RASP.
 
 ### Introduction
 
@@ -143,11 +122,7 @@ Unfortunately however, it is not possible to compare the values output from Soar
 
 Windy.com supports a "Plugin" mechanism allowing the development of
 JavaScript code to display additional information within their browser
-based user interface. Unfortunately, no such plugin mechanism is
-available within their mobile "App" on Android / Iphone. I do appreciate
-that this reduces the audience for this work but I think there are still
-many people who, like me, much prefer the experience of searching
-weather and planning tasks on a larger screen.
+based user interface.
 
 Within the plugin code one can get hold of the forecast information, do
 some calculations and display information on the screen. It is
@@ -163,7 +138,7 @@ Some of the parameters are available when viewing any map layer in Windy but the
 
 ### Parameters
 
-A brief description of the parameters presented by SoarCalc is given by means of "Tool Tips".  A more detailed description is given here.
+A brief description of the parameters presented by SoarCalc is given by means of "Tool Tips".  A more detailed description of each parameter is given here.
 
 Values are given in the units selected in the Windy.com "Settings"
 
@@ -183,8 +158,8 @@ The model surface elevation "Elev" is used in all calculations.  The actual elev
 Following RASP this is defined to be the level at which the buoyancy of a parcel of air
  originating at the surface would fall to zero with respect to the surrounding air in the absence of condensation.
  Clearly, this is only "correct" in the case of dry thermals / blue conditions but this
- is not unreasonable because we are interested primarily in what is going either below
- Cu cloud base or up to the top of blue thermals.  A treatment of what is going on within
+ is not unreasonable because we are interested primarily in what is going on either below
+ the cumulous cloud base or up to the top of blue thermals.  A treatment of what is going on within
  convective cloud is complex and of little practical use in this context except to note that
  "cloud suck" is a real effect and thermal updraft strength is increased in the presence of
  substantial convective cloud.
@@ -211,7 +186,7 @@ from the surface dew point and the dry adiabatic from the surface temperature.
 
 #### OD base - Overcast Development / Spreadout Cloud Base
 
-This is the condensation level of a parcel of air having the boundary layer average mixing ratio.  If below BL top
+Following RASP, this is the condensation level of a parcel of air having the boundary layer average mixing ratio.  If below BL top
 then widespread convective cloud formation is likely.  If above BL top then this parameter is shown greyed out.
 
 #### Cloud - Total Cloud Cover
@@ -226,7 +201,7 @@ In other map layers in Windy.com this parameter is not currently available.
 
 #### Qs - Surface Insolation
 
-The surface insolation / solar power arriving per unit area of the Earth's surface.  This is always shown in Watts per square meter as no suitable configurable setting is available.
+The surface insolation / solar power arriving per unit area of the Earth's surface.  (Note: This is always shown in Watts per square meter as no suitable configurable setting is available.)
 
 The value show is either that calculated from the cloud cover (see above) or taken directly from Windy.com if viewing the "Solar Power" layer.  Note that agreement between the values from these two sources is not perfect.
 
@@ -235,7 +210,7 @@ The value show is either that calculated from the cloud cover (see above) or tak
 W* is known as the Deardorff velocity (reference 5).  It is the characteristic thermal updraft
 velocity which is definitely not to say that all parts of a thermal at all altitudes will be rising
 at this velocity.  Even in an idealized thermal the actual updraft velocity will vary with both altitude
-and distance from the centre of the thermal.  However, as explained in (reference 1) and by practical experience
+and distance from the centre of the thermal.  However, as explained in reference 1 and by practical experience
 this is known to be a useful measure.
 
 $W^* = (g z Q_{ov}/\bar{T})^{1/3}$
@@ -301,17 +276,17 @@ in order to follow RASP as closely as possible.
 
 ### Further Comments
 
-It is useful to display the SoarCalc plugin in conjunction with the Windy.com "Sounding forecast" pane and I would recommend you to do this.  As all calculations
+It is useful to display the SoarCalc plugin in conjunction with the Windy.com "Sounding forecast" pane and I would recommend that you to do this.  As all calculations
 are based on the same data it would indeed be natural for the SoarCalc parameters to be amalgamated with the
 "Sounding forecast" pane.  Indeed LCL/Cu base is already shown on the "Sounding forecast" pane BUT there is a problem:
 Currently LCL shown in the "Sounding forecast" pane is incorrect whenever the surface pressure is higher than 1000hPa.
 
-So PLEASE do not look at the discrepancy and assume that it is SoarCalc that is incorrect.  That is not the case.
+So PLEASE do not look at the discrepancy and assume that SoarCalc is incorrect.  This is not the case.
 
 It remains to use the plugin and gain practical experience of its usefulness.  Unfortunately, the winter is currently upon
 us in the northern hemisphere.  I can only try to draw experience from comparison with RASP in Australia, New Zealand and South Africa.
 The usefulness of this is limited by the facts that high resolution models are not available for these locations and
-I am unable to compare with the actual soaring conditions.  However, the numbers do seem to correspond reasonably well.
+I am unable to compare with the actual soaring conditions.  However, the numbers do seem to correspond reasonably well. (Note: since writing the above the 1.5km resolution "ACCESS" models have become available in Australia)
 
 ### Further Development
 
