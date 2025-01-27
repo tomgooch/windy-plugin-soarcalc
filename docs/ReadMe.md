@@ -31,7 +31,7 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 5. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.0.1/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.0.2/plugin.min.js
 
 6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -74,6 +74,11 @@ To gain a better understanding of the parameters that are being presented please
 ---
 
 ## Change Log
+
+### 1.0.2
+
+- 'detail' and 'sounding' plugins are closed on opening soarcalc (so that soarcalc will be able to see their onSingleClick events if they are reopened).
+- on opening 'detail' or 'sounding' plugins the current location for soarcalc is updated.
 
 ### 1.0.1
 

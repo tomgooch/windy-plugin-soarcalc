@@ -101,6 +101,7 @@
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
+    //import bcast from '@windy/broadcast';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
@@ -147,6 +148,9 @@
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
     export const onopen = (location?: LatLon) => {
+		console.log('onopen', location);
+		broadcast.emit('rqstClose', 'sounding');
+		broadcast.emit('rqstClose', 'detail');
         if (isValidLatLonObj(location)) {
        		_loc = location;
         	showMarker();
@@ -156,23 +160,25 @@
 
     onMount(() => {
         broadcast.on('redrawFinished', onRedrawFinished);
+		broadcast.on('rqstOpen', onRqstOpen);
         singleclick.on(name, onSingleClick);
-		if (!isMobileOrTablet)
-		{
+		//if (!isMobileOrTablet)
+		//{
 			singleclick.on('sounding', onSingleClick);
 			singleclick.on('detail', onSingleClick);
-		}
+		//}
 	});
 
     onDestroy(() => {
         hideMarker();
         broadcast.off('redrawFinished', onRedrawFinished);
+		broadcast.off('rqstOpen', onRqstOpen);
         singleclick.off(name, onSingleClick);
-		if (!isMobileOrTablet)
-		{
+		//if (!isMobileOrTablet)
+		//{
 			singleclick.off('sounding', onSingleClick);
 			singleclick.off('detail', onSingleClick);
-		}
+		//}
     });
 	function onSingleClick(location: LatLon)
     {
@@ -181,7 +187,14 @@
         showMarker();
         updateForecast();
     }
-   
+	function onRqstOpen(plugin: any, location: LatLon)
+    {
+    	console.log("onRqstOpen:", plugin, location);
+        if ((plugin == 'detail' || plugin == 'sounding') && isValidLatLonObj(location)) {
+			onSingleClick(location);
+		}
+    }
+  
 	function onRedrawFinished(params: any)
 	{
 		console.log('onRedrawFinished', params);
