@@ -86,7 +86,7 @@
 </div>
 
 <script lang="ts">
-    import { isMobileOrTablet } from '@windy/rootScope';
+    //import { isMobileOrTablet } from '@windy/rootScope';
     import { getMeteogramForecastData } from '@windy/fetch';
     import store from '@windy/store'
     import { map } from '@windy/map';
@@ -162,11 +162,8 @@
         broadcast.on('redrawFinished', onRedrawFinished);
 		broadcast.on('rqstOpen', onRqstOpen);
         singleclick.on(name, onSingleClick);
-		//if (!isMobileOrTablet)
-		//{
-			singleclick.on('sounding', onSingleClick);
-			singleclick.on('detail', onSingleClick);
-		//}
+		singleclick.on('sounding', onSingleClick);
+		singleclick.on('detail', onSingleClick);
 	});
 
     onDestroy(() => {
@@ -174,11 +171,8 @@
         broadcast.off('redrawFinished', onRedrawFinished);
 		broadcast.off('rqstOpen', onRqstOpen);
         singleclick.off(name, onSingleClick);
-		//if (!isMobileOrTablet)
-		//{
-			singleclick.off('sounding', onSingleClick);
-			singleclick.off('detail', onSingleClick);
-		//}
+		singleclick.off('sounding', onSingleClick);
+		singleclick.off('detail', onSingleClick);
     });
 	function onSingleClick(location: LatLon)
     {
