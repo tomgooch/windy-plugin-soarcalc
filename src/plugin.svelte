@@ -184,7 +184,7 @@
 	function onRqstOpen(plugin: any, location: LatLon)
     {
     	console.log("onRqstOpen:", plugin, location);
-        if ((plugin == 'detail' || plugin == 'sounding') && isValidLatLonObj(location)) {
+        if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport' || plugin == 'picker') && isValidLatLonObj(location)) {
 			onSingleClick(location);
 		}
     }
@@ -268,6 +268,8 @@
 				{
 					Qs = values[0];
 					cloud = 1 - (values[0] / getQs0(_hour, _loc));
+					if (cloud < 0)
+						cloud = 0;
 				}
 			}
     	}
