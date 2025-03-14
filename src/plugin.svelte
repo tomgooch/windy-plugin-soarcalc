@@ -2,7 +2,10 @@
 	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
-	<br><span style="font-size:10px;vertical-align:top">{format_time(_hour)} , {format_latlon(_sounding.Loc)}</span>
+	<div class="tooltipR">
+		<span style="font-size:10px;vertical-align:top">{format_time(_hour)}, {format_latlon(_sounding.Loc)}</span>
+		<span class="tooltiptext">Timestamp [note: aligns with currently mapped data not with the slider which shows the nearest hour rather than the nearest available forecast time]</span>
+	</div>
 	
 	{#if _sounding.status < 0}
 	<div>{_sounding.message}</div>
@@ -39,7 +42,7 @@
 			{:else}
 				<span style="opacity:0.6">{format_height(_sounding.cuBase?.gh)}</span>
 			{/if}
-			<span class="tooltiptext">Cumulous cloud base ({metrics.altitude.metric} amsl)</span>
+			<span class="tooltiptext">Cumulous cloud base ({metrics.altitude.metric} amsl) [note: Windy shows this incorrectly in the Sounding Forecast whenever surface pressure > 1000hPa]</span>
 		</div>
 		<br><div class="tooltip">OD base: 
 			{#if _sounding.odPossible}
@@ -244,7 +247,7 @@
     function updateSounding(meteogramForecast: any)
     {
 		_meteogramForecast = meteogramForecast;
-		console.log("updateSounding: ", _hour, _overlay, _loc, _meteogramForecast, _interpolator);
+		console.log("updateSounding: ", format_time(_hour), _overlay, _loc, _meteogramForecast, _interpolator);
 
     	if (_hour == null)
     		_hour = getHour();
@@ -330,16 +333,16 @@
 		var latitude: string;
     	var longitude: string;
     	if (x.lat >= 0)
-    		latitude = toDegreesAndDecimalMinutes(x.lat) + 'N'
+    		latitude = 'N' + toDegreesAndDecimalMinutes(x.lat)
     	else
-    		latitude = toDegreesAndDecimalMinutes(Math.abs(x.lat)) + 'S'
+    		latitude =  'S' + toDegreesAndDecimalMinutes(Math.abs(x.lat))
 
     	if (x.lon >= 0)
-    		longitude = toDegreesAndDecimalMinutes(x.lon) + 'E'
+    		longitude = 'E' + toDegreesAndDecimalMinutes(x.lon)
     	else
-    		longitude = toDegreesAndDecimalMinutes(Math.abs(x.lon)) + 'W'
+    		longitude = 'W' + toDegreesAndDecimalMinutes(Math.abs(x.lon))
 
-		return latitude + ' / ' + longitude;
+		return latitude + ', ' + longitude;
     }
     function toDegreesAndDecimalMinutes(x: number): string
     {
