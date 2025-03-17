@@ -2,7 +2,7 @@
 	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
-	<div class="tooltipR">
+	<br><div class="tooltipR">
 		<span style="font-size:10px;vertical-align:top">{format_time(_hour)}, {format_latlon(_sounding.Loc)}</span>
 		<span class="tooltiptext">Timestamp [note: aligns with currently mapped data not with the slider which shows the nearest hour rather than the nearest available forecast time]</span>
 	</div>
