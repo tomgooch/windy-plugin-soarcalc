@@ -1,7 +1,7 @@
 # SoarCalc plugin for Windy.com
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
-parameters as per RASP.
+parameters in, as far as possible, exactly the same way as RASP.
 
 ## Contents
 
@@ -17,7 +17,7 @@ parameters as per RASP.
 
 ## Installation
 
-For the moment this Plug-in is marked as “private” which means that it does not appear in the "Plugin Gallery".  The installation process is as follows (note that this differs for desktop vs mobile devices)...
+The installation process is as follows (note that this differs for desktop vs mobile devices)...
 
 ### Desktop
 
@@ -27,16 +27,9 @@ For the moment this Plug-in is marked as “private” which means that it does 
 
 3. Select “Install Windy Plugin”
 
-4. Select “Load plugin directly from URL”
+4. SoarCalc should appear in the list of available plug-ins.  If so simply select it, otherwise please follow [Load plugin directly from URL](#load-plugin-directly-from-url).
 
-5. Paste this string after the url already present in the input box:
-
-          12216047/windy-plugin-soarcalc/1.0.2/plugin.min.js
-
-6. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
-
-7. It can be opened either from the main menu or more normally from the context menu (right
-mouse on the map)
+5. SoarCalc is now installed and can be opened either from the main menu or more normally from the context menu (right mouse on the map)
 
 ### Mobile
 
@@ -46,20 +39,27 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 
 2. Navigate to "windy.com/plugins"  (do not go to windy.com as that will redirect you to the App which you do not want)
 
-3. Select “Load plugin directly from URL”
+3. SoarCalc should appear in the list of available plug-ins.  If so simply select it, otherwise please follow [Load plugin directly from URL](#load-plugin-directly-from-url).
 
-4. Paste the same string as above after the url already present in the input box.
+4. The plug-in is now installed.  However, it is not yet available in this browser tab so close this tab.
 
-5. Press "install untrusted plugin" and you will see a message telling you that
-SoarCalc will be available on the main menu.  However, the add-in is not yet available in this tab.
+5. Navigate to "windy.com/plugin/soarcalc" in a new window/tab and SoarCalc will appear at the bottom of the screen.
 
-6. Close this browser tab.
+6. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
 
-7. Navigate to "windy.com/plugin/soarcalc" in a new window/tab and SoarCalc will appear at the bottom of the screen.
+7. Ignore the button inviting you to "Download App".
 
-8. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
+### Load plugin directly from URL
 
-9. Ignore the button inviting you to "Download App".
+If "SoarCalc" is not found in the list of plug-ins then it is still possible to install directly from the URL...
+
+1. Select “Load plugin directly from URL”
+
+2. Paste this string after the url already present in the input box:
+
+          12216047/windy-plugin-soarcalc/1.0.4/plugin.min.js
+
+3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
 ## Getting Started
 
@@ -67,13 +67,20 @@ Tooltips give a description of all the parameters displayed by SoarCalc.  Some o
 
 Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer so it is best to switch over to that.
 
-If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience that the default 3 hour steps seen by non-premium users.
+If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
 
 To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document
 
 ---
 
 ## Change Log
+
+### 1.0.4
+
+This is the first publicly available version of this plugin.  Changes are mainly limited to documentation / tooltip texts etc.
+
+- bug causing "cloud ratio" to go negative has been fixed.
+- current location now also follows selection of airports and the weather picker.
 
 ### 1.0.2
 
