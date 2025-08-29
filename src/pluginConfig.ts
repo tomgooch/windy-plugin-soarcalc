@@ -25,7 +25,7 @@ const config: ExternalPluginConfig = {
     // singleclick events is emitted with name of this plugin
     listenToSingleclick: true,
     
-    private: true,
+    private: false,
 };
 
 export default config;
