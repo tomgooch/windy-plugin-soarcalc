@@ -75,6 +75,15 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
+### 1.0.8
+
+The main purpose of this release is to make the plug-in work with the most recent update of Windy.com (August 2025).  Also...
+
+- Boundary Layer Average Wind parameter has been added.
+- Issues with time shown in plug-in being out of step with that shown on the slider are resolved.
+- Timeouts from getLatLongInterpolator() are handled gracefully.  The parameters are now all updated properly except that the values in the rightmost "cloud" column show as ## in this circumstance rather than continuing to show old data.
+
+
 ### 1.0.6
 
 This is the first publicly available version of this plugin.  Changes are mainly limited to documentation / tooltip texts etc.
