@@ -3,15 +3,16 @@
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
 	<br><div class="tooltipR">
-		<span style="font-size:10px;vertical-align:top">{format_time(_hour)}, {format_latlon(_sounding.Loc)}</span>
-		<span class="tooltiptext">Timestamp [note: aligns with currently mapped data not with the slider which shows the nearest hour rather than the nearest available forecast time]</span>
+		<span style="font-size:10px;vertical-align:top">{format_time(_sounding.hour)}, {format_latlon(_sounding.Loc)}</span>
+		<span class="tooltiptext">Time and Location</span>
 	</div>
 	
 	{#if _sounding.status < 0}
 	<div>{_sounding.message}</div>
 	{/if}
 
-	<table style="width:100%">
+	
+	<table style={isMobile ? "width:95%" : "width:100%" }>
 	<tr>
 	<td style=";text-align:right;vertical-align:top">
 		<div class="tooltipR">T: {format_temp(_sounding.surface?.T)}
@@ -60,17 +61,16 @@
 			{/if}
 			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric})</span>
 		</div>
-
 	</td>
 	<td style=";text-align:right;vertical-align:top">
 		<div class="tooltipL">Cloud: {format_number(_sounding.cloud, 2)}
-			<span class="tooltiptext">Total cloud cover (Clouds overlay only)</span>
+			<span class="tooltiptext">Total cloud cover [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">Qs: {format_number(_sounding.Qs, 0)}
-			<span class="tooltiptext">Surface insolation (W/m2) (Clouds overlay only)</span>
+			<span class="tooltiptext">Surface insolation (W/m2) [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar)}
-			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) (Clouds overlay only)</span>
+			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">Hcrit: 
 			{#if _sounding.Hcrit == _sounding.surface?.gh}
@@ -78,19 +78,23 @@
 			{:else}
 				{format_height(_sounding.Hcrit)}
 			{/if}
-			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) (Clouds overlay only)</span>
+			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
-			<span class="tooltiptext">Bouyancy/Shear ratio (Clouds overlay only)</span>
+			<span class="tooltiptext">Bouyancy/Shear ratio [Clouds layer only]</span>
 		</div>
 	</td>
 	</tr>
 	</table>
+	<div class="tooltipR">
+		<span style="color:yellow;font-size:10px;vertical-align:top">{isMobile ? 'Tap' : 'Hover'} for descriptions</span>
+		<span class="tooltiptext">{isMobile ? 'Tap' : 'Hover'} individual parameters to see their descriptions</span>
+	</div>
 </div>
 
 <script lang="ts">
-    //import { isMobileOrTablet } from '@windy/rootScope';
-    import { getMeteogramForecastData } from '@windy/fetch';
+	import { isMobile } from '@windy/rootScope';
+	import { getMeteogramForecastData } from '@windy/fetch';
     import store from '@windy/store'
     import { map } from '@windy/map';
     import { isValidLatLonObj } from '@windy/utils';
@@ -99,7 +103,6 @@
     import { onDestroy, onMount } from 'svelte';
     import config from './pluginConfig';
     import type { LatLon, MeteogramDataPayload } from '@windy/interfaces.d';
-    import SunCalc from 'suncalc';
     import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
@@ -114,8 +117,6 @@
     let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
-    let _path: string;
-    let _hour: number | null = null;
    
     const { title, name, version } = config;
 
@@ -157,8 +158,8 @@
         if (isValidLatLonObj(location)) {
        		_loc = location;
         	showMarker();
-            updateInterpolatorIfNeeded(store.get('product'), store.get('overlay'));
         }
+        updateInterpolator();
     };
 
     onMount(() => {
@@ -179,7 +180,7 @@
     });
 	function onSingleClick(location: LatLon)
     {
-    	console.log("onSingleClick:", location);
+    	console.log("onSingleClick:", location, store.get('product'), store.get('overlay'));
          _loc = location;
         showMarker();
         updateForecast();
@@ -194,24 +195,32 @@
   
 	function onRedrawFinished(params: any)
 	{
-		console.log('onRedrawFinished', params);
+		console.log('onRedrawFinished', params, 'store.timestamp=', store.get('timestamp'));
 		_interpolator = null;
-		//_level = params.level;
-		_path = params.path;
-		const dateString: string = _path.substring(0,4) + '-' + _path.substring(4,6) + '-' + _path.substring(6,8) + 'T' + _path.substring(8,10) + ':00:00Z';
-		_hour = new Date(dateString).getTime();
-		updateInterpolatorIfNeeded(params.product, params.overlay);
+		updateInterpolator();
 	}
-	function updateInterpolatorIfNeeded(model: string, overlay: string)
+	function timeout(p: Promise<any>, ms: number): Promise<any>
 	{
+		// return a race between the passed in promise and one that resolves with null after specified number of milliseconds
+		return Promise.race([p, new Promise((resolve) => {setTimeout(() => resolve(null), ms)})]);
+	}
+	function updateInterpolator()
+	{
+		var overlay = store.get('overlay');
+		console.log('updateInterpolator', overlay);
 		if (overlay == 'clouds' || overlay == 'solarpower')
-			getLatLonInterpolator().then((interpolator) => { updateInterpolator(interpolator, model, overlay) });
+		{
+			timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
+				setInterpolator(interpolator, overlay);
+			});
+		}
 		else
-			updateInterpolator(null, model, overlay)
+			setInterpolator(null, overlay)
 	}
-	function updateInterpolator(interpolator: any, model: string, overlay: string)
+	function setInterpolator(interpolator: any, overlay: string)
 	{
-		console.log('updateInterpolator', model, overlay, interpolator);
+		var model = store.get('product');
+		console.log('setInterpolator', interpolator != null, model, overlay);
 		_interpolator = interpolator;
 		_overlay = overlay;
 		if (_meteogramForecast == null || model != _model)
@@ -235,9 +244,6 @@
     	if (_model == null)
     		_model = store.get('product');
 
-		//getPointForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((pointForecastData) =>{
-		//	console.log("pointForecast", pointForecastData);
-		//});
  	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast: HttpPayload<MeteogramDataPayload>) => {
         	updateSounding(meteogramForecast);
 		}).catch((e) => {
@@ -247,88 +253,48 @@
     function updateSounding(meteogramForecast: any)
     {
 		_meteogramForecast = meteogramForecast;
-		console.log("updateSounding: ", format_time(_hour), _overlay, _loc, _meteogramForecast, _interpolator);
+		console.log("updateSounding: ", _overlay, _loc, _meteogramForecast, _interpolator);
 
-    	if (_hour == null)
-    		_hour = getHour();
-
+    	var timestamp: number | null = store.get('timestamp');
 		var cloud: number | null = null;
 		var Qs: number | null = null;
-    	if (_interpolator != null && isValidLatLonObj(_loc) && _hour != null)
+    	if (_interpolator != null && isValidLatLonObj(_loc))
     	{
 			const values = _interpolator(_loc);
-			//console.log("calculateQs: ", _overlay, values);
-
 			if (Array.isArray(values))
 			{
 				if (_overlay == 'clouds')
 				{
 				   	cloud = values[0] / 100;
 				   	//rain = values[1];
-					Qs = (1-cloud) * getQs0(_hour, _loc);
 				}
 				else if (_overlay == 'solarpower')
 				{
 					Qs = values[0];
-					cloud = 1 - (values[0] / getQs0(_hour, _loc));
-					if (cloud < 0)
-						cloud = 0;
 				}
 			}
     	}
-
-        _sounding = new Sounding(_meteogramForecast, _loc, _hour, Qs, cloud);
-    }
-    function getQs0(hour: number, loc: LatLon): number
-    {
-    	// get insolation corrected only for sun altitude
-	    var sunAltitude: number = SunCalc.getPosition(new Date(hour), loc.lat, loc.lon).altitude;
-		if (sunAltitude <= 0) sunAltitude = 0;
-		const Qs0: number = 1000 * Math.sin(sunAltitude);
-    	//console.log("/getQs0:", format_angle(sunAltitude), Qs0);
-    	return Qs0;
-    }
-    function getHour(): number | null
-    {
-    	// if we are invoked without triggering a re-draw we do not necessarily have the hour/timepoint on the forecast
-    	// so we calculate it from the stored timestamp from the slider by finding the closest hour
-    	
-    	if (_meteogramForecast == null) return null;
-    	
-    	console.log('getHour()');
-    	
-    	const timestamp = store.get('timestamp');
-        const hours = _meteogramForecast.data.data.hours;
-        var h = hours[0];
-        var dt = Math.abs(timestamp - h);
-        for (var i: number = 1; i < hours.length; i++)
-        {
-        	if (Math.abs(timestamp - hours[i]) > dt) return h;
-
-       		h = hours[i];
-       		dt = Math.abs(timestamp - h);
-        }
-		return null;
+        _sounding = new Sounding(_meteogramForecast, _loc, timestamp, Qs, cloud);
     }
 // **********************************************************
     function format_height(x: number | null | undefined): string
     {
-    	if (x == null) return '';
+    	if (x == null) return '##';
     	return metrics.altitude.convertNumber(x, 0);
     }
     function format_temp(x: number | null | undefined): string
     {
-    	if (x == null) return '';
+    	if (x == null) return '##';
     	return metrics.temp.convertNumber(x, 1).toFixed(1);
     }
     function format_wind(x: number | null | undefined): string
     {
-    	if (x == null) return '';
+    	if (x == null) return '##';
 		return metrics.wind.convertNumber(x, 2);
     }
     function format_latlon(x: LatLon | null): string
     {
-    	if (x == null) return '';
+    	if (x == null) return '##, ##';
 
 		var latitude: string;
     	var longitude: string;
@@ -352,14 +318,15 @@
     }
     function format_time(d: number | null | undefined): string
     {
-    	if (d == null) return '';
+    	if (d == null) return '##';
     	const days: string[] = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
     	const dt = new Date(d);
-		return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' - ' + dt.getUTCHours() + ':00';
+		//return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' - ' + dt.getUTCHours() + ':00';
+		return days[dt.getDay()] + ' ' + dt.getDate() + ' - ' + dt.getHours() + ':00';
     }
     function format_number(x: number | null | undefined, n: number): string
     {
-    	if (x == null) return '';
+    	if (x == null) return '##';
 		return x.toFixed(n);
     }
 </script>

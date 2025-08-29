@@ -1,4 +1,5 @@
 import { LatLon } from "@windycom/plugin-devtools/types/interfaces";
+import SunCalc from 'suncalc';
 
 const Rd: number = 287;							// Gas constant for dry air (J kg-1 K-1)
 const Rv: number = 462;							// Gas constant for water vapour (J kg-1 K-1)
@@ -13,9 +14,11 @@ export class Sounding
 {
 	status: number = 0;						// status
 	message: string = '';					// status message
+	hour: number | null = null;
 
 	Loc: LatLon | null;
 	actualElevation: number;				// actual surface elevation
+	Qs0: number | null;						// heat flux in the absence of cloud
 	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
 	cloud: number | null;					// cloud cover ratio
 
@@ -44,6 +47,7 @@ export class Sounding
 	constructor(meteogramForecast: any, loc: LatLon | null, hour: number | null, Qs: number | null, cloud: number | null)
 	{
     	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
+		this.hour = hour;
 		this.Qs = Qs;
 		this.cloud = cloud;
 		this.Loc = loc;
@@ -67,11 +71,11 @@ export class Sounding
 		}
 					
         const md = meteogramForecast.data.data;
-        const t: number = md.hours.indexOf(hour);
+        const t: number = getHourIndex(hour, md.hours);
         if (t < 0)
 		{
 			this.status = -1;
-			this.message = 'time point unavailable';		// user has requested a time beyond the limit of the forecast availability
+			this.message = 'time point unavailable';							// user has requested a time beyond the limit of the forecast availability
 			return;
 		}
 
@@ -86,7 +90,27 @@ export class Sounding
 		{
 			gh = meteogramForecast.data.header.modelElevation;					// surface geopotential height is provided in the header rather than the data
 		}
-	
+
+		this.Qs0 = getQs0(this.hour!, this.Loc!);
+		if (cloud != null)
+		{
+			this.cloud = cloud;
+			this.Qs = (1-cloud) * this.Qs0;
+		}
+		else if (Qs != null)
+		{
+			this.Qs = Qs;
+			this.cloud = 1 - (this.Qs / this.Qs0);
+			if (this.cloud < 0)
+				this.cloud = 0;
+		}
+		else
+		{
+			this.cloud = null;
+			this.Qs = null;
+		}
+
+
 		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
 
 		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
@@ -169,6 +193,7 @@ export class Sounding
 		this.odPossible = this.odBase.gh < this.blTop.gh;
 		console.log("/Sounding.constructor:", this);
 	}
+	
 }
 export class SoundingLevel
 {
@@ -202,6 +227,33 @@ export class SoundingLevel
 	    //console.log(this);
 	}
 }
+function getHourIndex(timestamp: number | null, hours: any): number
+{
+	// find the index of the forecast point (hour) closest to timestamp
+	
+	if (timestamp == null || hours == null) return -1;
+	
+	var dt = Math.abs(timestamp - hours[0]);
+	for (var i: number = 1; i < hours.length; i++)
+	{
+		if (Math.abs(timestamp - hours[i]) > dt) return i-1;
+
+		dt = Math.abs(timestamp - hours[i]);
+	}
+	if (dt < hours[hours.length-1] - hours[hours.length-2])	return hours.length-1;
+
+	return -1;
+}
+function getQs0(hour: number, loc: LatLon): number
+{
+	// get insolation corrected only for sun altitude
+	var sunAltitude: number = SunCalc.getPosition(new Date(hour), loc.lat, loc.lon).altitude;
+	if (sunAltitude <= 0) sunAltitude = 0;
+	const Qs0: number = 1000 * Math.sin(sunAltitude);
+	//console.log("/getQs0:", format_angle(sunAltitude), Qs0);
+	return Qs0;
+}
+
 function getInterpolatedLevel2(levels: SoundingLevel[], gh: number, name: string): SoundingLevel
 {
 		for(var i=1; i<levels.length; i++)
@@ -319,6 +371,24 @@ function getZcrit(wCrit: number, wStar: number): number
 	return z;
 }
 function getBlAverageMixingRatio(levels: SoundingLevel[], blTop: SoundingLevel): number
+{
+	const blDepth: number = blTop.gh - levels[0].gh;
+	if (blDepth < 10)
+		return levels[0].U;
+		
+	var sigma: number = 0;
+	for (var i: number = 1; i<levels.length; i++)
+	{
+		if (levels[i].gh > blTop.gh)
+		{
+			sigma += (blTop.gh - levels[i-1].gh) * (blTop.U + levels[i-1].U) / 2;
+			break;
+		}
+		sigma += (levels[i].gh - levels[i-1].gh) * (levels[i].U + levels[i-1].U) / 2;
+	}
+	return sigma / blDepth;
+}
+function getBlAverageWind(levels: SoundingLevel[], blTop: SoundingLevel): number
 {
 	const blDepth: number = blTop.gh - levels[0].gh;
 	if (blDepth < 10)
