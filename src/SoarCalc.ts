@@ -35,6 +35,8 @@ export class Sounding
 	Hcrit: number | null = null;			// height of critical updraft strength
 	Ri: number | null = null;				// B/S ratio (Richardson number)
 	blU: number | null = null;				// BL average mixing ratio
+	blVx: number | null = null;			// BL average wind x
+	blVy: number | null = null;			// BL average wind y
 
 	cuPossible: boolean = false;
 	odPossible: boolean = false;
@@ -155,12 +157,14 @@ export class Sounding
 		if (this.blTop == null)
 			this.blTop = this.levels[this.levels.length-1];
 
+		this.getBlAverageWindAndMixingRatio();
+
 		//this.ccl = getCondensationLevel(this.levels, this.surface.U, 'ccl');
 		this.ccl = getCCLFromDewPoint(this.levels, 'ccl');
 		this.Tcon = getPotentialTemperature(this.ccl.T, this.ccl.P, this.surface.P);
 		
-		this.blU = getBlAverageMixingRatio(this.levels, this.blTop);
-		this.odBase = getCondensationLevel(this.levels, this.blU, 'odbase');
+		if (this.blU != null)
+			this.odBase = getCondensationLevel(this.levels, this.blU, 'odbase');
 
 		this.blDepth = this.blTop.gh - this.surface.gh;
 		if (this.blDepth <= 0) this.blDepth = 0;
@@ -190,10 +194,46 @@ export class Sounding
 		}
 
 		this.cuPossible = this.cuBase.gh < this.blTop.gh;
-		this.odPossible = this.odBase.gh < this.blTop.gh;
+		if (this.odBase != null)
+			this.odPossible = this.odBase.gh < this.blTop.gh;
+
 		console.log("/Sounding.constructor:", this);
 	}
-	
+	getBlAverageWindAndMixingRatio(): void
+	{
+		if (this.blTop == null) return;
+
+		const blDepth: number = this.blTop.gh - this.levels[0].gh;
+		if (blDepth < 10)
+		{
+			this.blVx = this.levels[0].Vx;
+			this.blVy = this.levels[0].Vy;
+			return;
+		}
+			
+		var sigmaVx: number = 0;
+		var sigmaVy: number = 0;
+		var sigmaU: number = 0;
+		var levelDepth: number;
+		for (var i: number = 1; i<this.levels.length; i++)
+		{
+			if (this.levels[i].gh > this.blTop.gh)
+			{
+				levelDepth = this.blTop.gh - this.levels[i-1].gh;
+				sigmaVx += levelDepth * (this.blTop.Vx + this.levels[i-1].Vx) / 2;
+				sigmaVy += levelDepth * (this.blTop.Vy + this.levels[i-1].Vy) / 2;
+				sigmaU += levelDepth * (this.blTop.U + this.levels[i-1].U) / 2;
+				break;
+			}
+			levelDepth = this.levels[i].gh - this.levels[i-1].gh;
+			sigmaVx += levelDepth * (this.levels[i].Vx + this.levels[i-1].Vx) / 2;
+			sigmaVy += levelDepth * (this.levels[i].Vy + this.levels[i-1].Vy) / 2;
+			sigmaU += levelDepth * (this.levels[i].U + this.levels[i-1].U) / 2;
+		}
+		this.blVx = sigmaVx / blDepth;
+		this.blVy = sigmaVy / blDepth;
+		this.blU = sigmaU / blDepth;
+	}
 }
 export class SoundingLevel
 {
@@ -369,42 +409,6 @@ function getZcrit(wCrit: number, wStar: number): number
 	}
 	//console.log("/getZcrit:", z);
 	return z;
-}
-function getBlAverageMixingRatio(levels: SoundingLevel[], blTop: SoundingLevel): number
-{
-	const blDepth: number = blTop.gh - levels[0].gh;
-	if (blDepth < 10)
-		return levels[0].U;
-		
-	var sigma: number = 0;
-	for (var i: number = 1; i<levels.length; i++)
-	{
-		if (levels[i].gh > blTop.gh)
-		{
-			sigma += (blTop.gh - levels[i-1].gh) * (blTop.U + levels[i-1].U) / 2;
-			break;
-		}
-		sigma += (levels[i].gh - levels[i-1].gh) * (levels[i].U + levels[i-1].U) / 2;
-	}
-	return sigma / blDepth;
-}
-function getBlAverageWind(levels: SoundingLevel[], blTop: SoundingLevel): number
-{
-	const blDepth: number = blTop.gh - levels[0].gh;
-	if (blDepth < 10)
-		return levels[0].U;
-		
-	var sigma: number = 0;
-	for (var i: number = 1; i<levels.length; i++)
-	{
-		if (levels[i].gh > blTop.gh)
-		{
-			sigma += (blTop.gh - levels[i-1].gh) * (blTop.U + levels[i-1].U) / 2;
-			break;
-		}
-		sigma += (levels[i].gh - levels[i-1].gh) * (levels[i].U + levels[i-1].U) / 2;
-	}
-	return sigma / blDepth;
 }
 function getCondensationLevel(levels: SoundingLevel[], U: number, name: string): SoundingLevel
 {

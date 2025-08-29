@@ -53,6 +53,14 @@
 			{/if}
 			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric} amsl)</span>
 		</div>
+		<br><div class="tooltip">BL avg: 
+			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
+				<span style="opacity:0.6">{format_vector_wind(_sounding.blVx, _sounding.blVy)}</span>
+			{:else}
+				{format_vector_wind(_sounding.blVx, _sounding.blVy)}
+			{/if}
+			<span class="tooltiptext">BL average Wind (degrees/{metrics.wind.metric})</span>
+		</div>
 		<br><div class="tooltip">Shear: 
 			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
 				<span style="opacity:0.6">{format_wind(_sounding.blShear)}</span>
@@ -291,6 +299,15 @@
     {
     	if (x == null) return '##';
 		return metrics.wind.convertNumber(x, 2);
+    }
+    function format_vector_wind(x: number | null | undefined, y: number | null | undefined): string
+    {
+    	if (x == null || y == null) return '##/##';
+		const w: number = Math.sqrt(x*x + y*y);
+		var a: number = 270 - (Math.atan2(y, x) * 180 / Math.PI);
+		if (a < 0) a += 360;
+
+		return Math.round(a) + "/" + metrics.wind.convertNumber(w, 0);
     }
     function format_latlon(x: LatLon | null): string
     {
