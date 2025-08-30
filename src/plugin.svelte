@@ -54,19 +54,11 @@
 			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltip">BL avg: 
-			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
-				<span style="opacity:0.6">{format_vector_wind(_sounding.blVx, _sounding.blVy)}</span>
-			{:else}
-				{format_vector_wind(_sounding.blVx, _sounding.blVy)}
-			{/if}
+			{format_vector_wind(_sounding.blVx, _sounding.blVy)}
 			<span class="tooltiptext">BL average Wind (degrees/{metrics.wind.metric})</span>
 		</div>
 		<br><div class="tooltip">Shear: 
-			{#if _sounding.blTop?.gh == _sounding.surface?.gh}
-				<span style="opacity:0.6">{format_wind(_sounding.blShear)}</span>
-			{:else}
-				{format_wind(_sounding.blShear)}
-			{/if}
+			{format_wind(_sounding.blShear, 0)}
 			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric})</span>
 		</div>
 	</td>
@@ -77,7 +69,7 @@
 		<br><div class="tooltipL">Qs: {format_number(_sounding.Qs, 0)}
 			<span class="tooltiptext">Surface insolation (W/m2) [Clouds layer only]</span>
 		</div>
-		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar)}
+		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar, 2)}
 			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">Hcrit: 
@@ -86,7 +78,7 @@
 			{:else}
 				{format_height(_sounding.Hcrit)}
 			{/if}
-			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) [Clouds layer only]</span>
+			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9, 2)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) [Clouds layer only]</span>
 		</div>
 		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
 			<span class="tooltiptext">Bouyancy/Shear ratio [Clouds layer only]</span>
@@ -295,10 +287,10 @@
     	if (x == null) return '##';
     	return metrics.temp.convertNumber(x, 1).toFixed(1);
     }
-    function format_wind(x: number | null | undefined): string
+    function format_wind(x: number | null | undefined, n: number): string
     {
     	if (x == null) return '##';
-		return metrics.wind.convertNumber(x, 2);
+		return metrics.wind.convertNumber(x, n);
     }
     function format_vector_wind(x: number | null | undefined, y: number | null | undefined): string
     {

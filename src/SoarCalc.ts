@@ -201,15 +201,14 @@ export class Sounding
 	}
 	getBlAverageWindAndMixingRatio(): void
 	{
+		this.blVx = this.levels[0].Vx;
+		this.blVy = this.levels[0].Vy;
+		this.blU = this.levels[0].U;
+	
 		if (this.blTop == null) return;
 
 		const blDepth: number = this.blTop.gh - this.levels[0].gh;
-		if (blDepth < 10)
-		{
-			this.blVx = this.levels[0].Vx;
-			this.blVy = this.levels[0].Vy;
-			return;
-		}
+		if (blDepth < 10) return;
 			
 		var sigmaVx: number = 0;
 		var sigmaVy: number = 0;
