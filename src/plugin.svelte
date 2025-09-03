@@ -107,6 +107,8 @@
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
+	import plugins from '@windy/plugins';
+
     //import bcast from '@windy/broadcast';
 	
     let marker: L.Marker | null = null;
@@ -168,6 +170,11 @@
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClick);
 		singleclick.on('detail', onSingleClick);
+		if(isMobile)
+		{
+			const thisPlugin = plugins['windy-plugins-soarcalc'];
+			thisPlugin.window.node.style.pointerEvents = "initial"; 
+		} 
 	});
 
     onDestroy(() => {
