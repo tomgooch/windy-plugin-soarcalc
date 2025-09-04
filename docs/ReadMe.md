@@ -57,7 +57,7 @@ If "SoarCalc" is not found in the list of plug-ins then it is still possible to 
 
 2. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.0.11/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.0.12/plugin.min.js
 
 3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -74,6 +74,11 @@ To gain a better understanding of the parameters that are being presented please
 ---
 
 ## Change Log
+
+### 1.0.12
+
+- Fix tooltips on mobile
+
 
 ### 1.0.11
 
@@ -257,6 +262,10 @@ note that the resulting value of $W^*$ is surprisingly insensitive to this value
 
 Note: to get to the expected climb rate of a glider you must, of course, subtract the descent rate of the
 glider whilst turning.  Typically about 0.9m/s or 1.75kts.
+
+#### BL avg - Boundary Layer Average Wind
+
+The vector average wind between surface and BL top.
 
 #### BL Shear - Boundary Layer Wind Shear
 
