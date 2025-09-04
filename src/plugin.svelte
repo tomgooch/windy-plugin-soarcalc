@@ -155,6 +155,13 @@
     // if not, the location param is undefined
     export const onopen = (location?: LatLon) => {
 		console.log('onopen', location);
+		if(isMobile)
+		{
+			// without this the small window on mobile UI inherits pointerEvents = none;
+			const thisPlugin = plugins['windy-plugin-soarcalc'];
+			thisPlugin.window.node.style.pointerEvents = "initial";
+		}
+
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'detail');
         if (isValidLatLonObj(location)) {
@@ -162,19 +169,16 @@
         	showMarker();
         }
         updateInterpolator();
-    };
+	};
 
     onMount(() => {
+		console.log("onMount")
         broadcast.on('redrawFinished', onRedrawFinished);
 		broadcast.on('rqstOpen', onRqstOpen);
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClick);
 		singleclick.on('detail', onSingleClick);
-		if(isMobile)
-		{
-			const thisPlugin = plugins['windy-plugins-soarcalc'];
-			thisPlugin.window.node.style.pointerEvents = "initial"; 
-		} 
+
 	});
 
     onDestroy(() => {
