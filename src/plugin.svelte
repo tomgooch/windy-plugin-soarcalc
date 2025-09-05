@@ -119,8 +119,7 @@
     let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
-	let _previousModel: string | null = null;
-    let _timestamp: number | null = null;
+	let _forecastModel: string | null = null;
 	let _hour: number | null = null;
    
     const { title, name, version } = config;
@@ -210,17 +209,26 @@
 	{
 		_model = store.get('product');
 		_overlay = store.get('overlay');
-		_timestamp = store.get('timestamp');
+		const timestamp: number | null = store.get('timestamp');
 
-		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated value that corresponds to the map / forecast point
-		_hour = 3600000 * Math.trunc(_timestamp/3600000);
+		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated (not rounded) value that corresponds to the map / forecast point
+		_hour = 3600000 * Math.trunc(timestamp/3600000);
 
 
-		console.log('onRedrawFinished', 'model: ', _model, 'overlay: ', _overlay, 'timestamp: ', hoursAndMinutes(_timestamp), 'params: ', params);
+		console.log('onRedrawFinished', 'model: ', _model, 'overlay: ', _overlay, 'timestamp: ', hoursAndMinutes(timestamp), 'params: ', params);
 		if (_overlay == 'clouds' || _overlay == 'solarpower')
 		{
 			timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
-				setInterpolator(interpolator);
+				if (interpolator != null)
+					setInterpolator(interpolator);
+				else
+				{
+					// retry once after first timeout.  It seems to work????
+					console.log('retrying getLatLonInterpolator()')
+					timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
+						setInterpolator(interpolator);
+					});
+				}
 			});
 		}
 		else
@@ -236,7 +244,7 @@
 	{
 		console.log('setInterpolator', interpolator != null);
 		_interpolator = interpolator;
-		if (_meteogramForecast == null || _previousModel != _model)
+		if (_meteogramForecast == null || _model != _forecastModel)
 		{
 			updateForecast();
 		}
@@ -261,12 +269,12 @@
 		}).catch((e) => {
 			updateSounding(null);
 		});
-		_previousModel = _model;
+		_forecastModel = _model;
     }
     function updateSounding(meteogramForecast: any)
     {
 		_meteogramForecast = meteogramForecast;
-		console.log("updateSounding: ", _overlay, _timestamp, _loc, _meteogramForecast, _interpolator);
+		console.log("updateSounding: ", _overlay, _hour, _loc, _meteogramForecast, _interpolator);
 
 		var cloud: number | null = null;
 		var Qs: number | null = null;

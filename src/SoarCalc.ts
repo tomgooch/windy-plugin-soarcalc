@@ -272,7 +272,7 @@ function getHourIndex(timestamp: number | null, hours: any): number
 	
 	if (timestamp == null || hours == null) return -1;
 	
-	console.log('getHourIndex:', hoursAndMinutes(timestamp), hours.length);
+	//console.log('getHourIndex:', hoursAndMinutes(timestamp), hours.length);
 	var dt0 = Math.abs(timestamp - hours[0]);
 	for (var i: number = 1; i < hours.length; i++)
 	{
@@ -280,7 +280,7 @@ function getHourIndex(timestamp: number | null, hours: any): number
 		//console.log(i, hours[i], hoursAndMinutes(hours[i]), dt)
 		if (dt > dt0)
 		{
-			console.log('/getHourIndex:', i-1, hours[i-1], hoursAndMinutes(hours[i-1]), dt0)
+			//console.log('/getHourIndex:', i-1, hours[i-1], hoursAndMinutes(hours[i-1]), dt0)
 			return i-1;
 		}
 
@@ -288,18 +288,18 @@ function getHourIndex(timestamp: number | null, hours: any): number
 	}
 	if (dt0 < hours[hours.length-1] - hours[hours.length-2])
 	{
-		console.log('/getHourIndex:', hours.length-1, hours[hours.length-1], hoursAndMinutes(hours[hours.length-1]), dt0)
+		//console.log('/getHourIndex:', hours.length-1, hours[hours.length-1], hoursAndMinutes(hours[hours.length-1]), dt0)
 		return hours.length-1;
 	}
 
-	console.log('/getHourIndex:', -1);
+	//console.log('/getHourIndex:', -1);
 	return -1;
 }
-function hoursAndMinutes(t: number): string
-{
-		const d = new Date(t);
-		return d.getHours() + ":" + d.getMinutes();
-}
+// function hoursAndMinutes(t: number): string
+// {
+// 		const d = new Date(t);
+// 		return d.getHours() + ":" + d.getMinutes();
+// }
 function getQs0(hour: number, loc: LatLon): number
 {
 	// get insolation corrected only for sun altitude
