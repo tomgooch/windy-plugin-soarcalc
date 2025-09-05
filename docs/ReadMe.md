@@ -49,6 +49,8 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 
 7. Ignore the button inviting you to "Download App".
 
+NOTE: If navigating to "windy.com/plugin/soarcalc" does not work then please try navigating again to "windy.com/plugins" and selecting "SoarCalc" (which should now be marked as "installed" and select "Open plugin").
+
 ### Load plugin directly from URL
 
 If "SoarCalc" is not found in the list of plug-ins then it is still possible to install directly from the URL...
@@ -57,7 +59,7 @@ If "SoarCalc" is not found in the list of plug-ins then it is still possible to 
 
 2. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.0.12/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.0.13/plugin.min.js
 
 3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -75,10 +77,13 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 1.0.12
+### 1.0.13
 
-- Fix tooltips on mobile
+This release fixes a number of important issues.
 
+- Fix problem with cloud cover data sometimes being missing when stepping though the hours of the day.
+- Fix problem with synchronization with the time shown on the slider.
+- Tooltips now work properly on mobile
 
 ### 1.0.11
 
@@ -87,7 +92,6 @@ The main purpose of this release is to make the plug-in work with the most recen
 - Boundary Layer Average Wind parameter has been added.
 - Issues with time shown in plug-in being out of step with that shown on the slider are resolved.
 - Timeouts from getLatLongInterpolator() are handled gracefully.  The parameters are now all updated properly except that the values in the rightmost "cloud" column show as ## in this circumstance rather than continuing to show old data.
-
 
 ### 1.0.6
 
