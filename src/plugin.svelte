@@ -108,14 +108,12 @@
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
 	import plugins from '@windy/plugins';
-
-    //import bcast from '@windy/broadcast';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
 
     let _sounding: Sounding = new Sounding(null, null, null, null, null);
-    let _meteogramForecast: any | null = null;
+    let _meteogramForecast: any = null;
     let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
