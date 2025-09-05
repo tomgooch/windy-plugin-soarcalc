@@ -119,6 +119,9 @@
     let _interpolator: any = null;
     let _overlay: string | null = null;
     let _model: string | null = null;
+	let _previousModel: string | null = null;
+    let _timestamp: number | null = null;
+	let _hour: number | null = null;
    
     const { title, name, version } = config;
 
@@ -168,7 +171,7 @@
        		_loc = location;
         	showMarker();
         }
-        updateInterpolator();
+        onRedrawFinished(null);
 	};
 
     onMount(() => {
@@ -178,7 +181,6 @@
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClick);
 		singleclick.on('detail', onSingleClick);
-
 	});
 
     onDestroy(() => {
@@ -206,37 +208,36 @@
   
 	function onRedrawFinished(params: any)
 	{
-		console.log('onRedrawFinished', params, 'store.timestamp=', store.get('timestamp'));
-		_interpolator = null;
-		updateInterpolator();
+		_model = store.get('product');
+		_overlay = store.get('overlay');
+		_timestamp = store.get('timestamp');
+
+		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated value that corresponds to the map / forecast point
+		_hour = 3600000 * Math.trunc(_timestamp/3600000);
+
+
+		console.log('onRedrawFinished', 'model: ', _model, 'overlay: ', _overlay, 'timestamp: ', hoursAndMinutes(_timestamp), 'params: ', params);
+		if (_overlay == 'clouds' || _overlay == 'solarpower')
+		{
+			timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
+				setInterpolator(interpolator);
+			});
+		}
+		else
+			setInterpolator(null)
 	}
 	function timeout(p: Promise<any>, ms: number): Promise<any>
 	{
 		// return a race between the passed in promise and one that resolves with null after specified number of milliseconds
 		return Promise.race([p, new Promise((resolve) => {setTimeout(() => resolve(null), ms)})]);
 	}
-	function updateInterpolator()
+
+	function setInterpolator(interpolator: any)
 	{
-		var overlay = store.get('overlay');
-		console.log('updateInterpolator', overlay);
-		if (overlay == 'clouds' || overlay == 'solarpower')
-		{
-			timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
-				setInterpolator(interpolator, overlay);
-			});
-		}
-		else
-			setInterpolator(null, overlay)
-	}
-	function setInterpolator(interpolator: any, overlay: string)
-	{
-		var model = store.get('product');
-		console.log('setInterpolator', interpolator != null, model, overlay);
+		console.log('setInterpolator', interpolator != null);
 		_interpolator = interpolator;
-		_overlay = overlay;
-		if (_meteogramForecast == null || model != _model)
+		if (_meteogramForecast == null || _previousModel != _model)
 		{
-			_model = model;
 			updateForecast();
 		}
 		else
@@ -260,13 +261,13 @@
 		}).catch((e) => {
 			updateSounding(null);
 		});
+		_previousModel = _model;
     }
     function updateSounding(meteogramForecast: any)
     {
 		_meteogramForecast = meteogramForecast;
-		console.log("updateSounding: ", _overlay, _loc, _meteogramForecast, _interpolator);
+		console.log("updateSounding: ", _overlay, _timestamp, _loc, _meteogramForecast, _interpolator);
 
-    	var timestamp: number | null = store.get('timestamp');
 		var cloud: number | null = null;
 		var Qs: number | null = null;
     	if (_interpolator != null && isValidLatLonObj(_loc))
@@ -285,7 +286,7 @@
 				}
 			}
     	}
-        _sounding = new Sounding(_meteogramForecast, _loc, timestamp, Qs, cloud);
+        _sounding = new Sounding(_meteogramForecast, _loc, _hour, Qs, cloud);
     }
 // **********************************************************
     function format_height(x: number | null | undefined): string
@@ -349,6 +350,12 @@
     	if (x == null) return '##';
 		return x.toFixed(n);
     }
+	function hoursAndMinutes(t: number): string
+	{
+			const d = new Date(t);
+			return d.getHours() + ":" + d.getMinutes();
+	}
+
 </script>
 
 <style lang="less">

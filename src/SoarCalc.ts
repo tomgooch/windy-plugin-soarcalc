@@ -46,10 +46,9 @@ export class Sounding
 	ccl: SoundingLevel | null = null;		// Convective Condensation Level (m)
 	lcl: SoundingLevel | null = null;		// Lifting Condensation Level (aka Cu cloudbase) (m)
 
-	constructor(meteogramForecast: any, loc: LatLon | null, hour: number | null, Qs: number | null, cloud: number | null)
+	constructor(meteogramForecast: any, loc: LatLon | null, timestamp: number | null, Qs: number | null, cloud: number | null)
 	{
-    	console.log("Sounding.constructor:", meteogramForecast, hour, Qs, cloud);
-		this.hour = hour;
+    	console.log("Sounding.constructor:", meteogramForecast, timestamp, Qs, cloud);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		this.Loc = loc;
@@ -73,13 +72,14 @@ export class Sounding
 		}
 					
         const md = meteogramForecast.data.data;
-        const t: number = getHourIndex(hour, md.hours);
+        const t: number = getHourIndex(timestamp, md.hours);
         if (t < 0)
 		{
 			this.status = -1;
 			this.message = 'time point unavailable';							// user has requested a time beyond the limit of the forecast availability
 			return;
 		}
+		this.hour = md.hours[t];
 
 		var gh: number;
         if (meteogramForecast.data.header.modelElevation == null)
@@ -272,16 +272,33 @@ function getHourIndex(timestamp: number | null, hours: any): number
 	
 	if (timestamp == null || hours == null) return -1;
 	
-	var dt = Math.abs(timestamp - hours[0]);
+	console.log('getHourIndex:', hoursAndMinutes(timestamp), hours.length);
+	var dt0 = Math.abs(timestamp - hours[0]);
 	for (var i: number = 1; i < hours.length; i++)
 	{
-		if (Math.abs(timestamp - hours[i]) > dt) return i-1;
+		var dt = Math.abs(timestamp - hours[i]);
+		//console.log(i, hours[i], hoursAndMinutes(hours[i]), dt)
+		if (dt > dt0)
+		{
+			console.log('/getHourIndex:', i-1, hours[i-1], hoursAndMinutes(hours[i-1]), dt0)
+			return i-1;
+		}
 
-		dt = Math.abs(timestamp - hours[i]);
+		dt0 = dt;
 	}
-	if (dt < hours[hours.length-1] - hours[hours.length-2])	return hours.length-1;
+	if (dt0 < hours[hours.length-1] - hours[hours.length-2])
+	{
+		console.log('/getHourIndex:', hours.length-1, hours[hours.length-1], hoursAndMinutes(hours[hours.length-1]), dt0)
+		return hours.length-1;
+	}
 
+	console.log('/getHourIndex:', -1);
 	return -1;
+}
+function hoursAndMinutes(t: number): string
+{
+		const d = new Date(t);
+		return d.getHours() + ":" + d.getMinutes();
 }
 function getQs0(hour: number, loc: LatLon): number
 {
