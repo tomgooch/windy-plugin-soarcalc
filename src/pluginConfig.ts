@@ -2,7 +2,7 @@ import type { ExternalPluginConfig } from '@windy/interfaces';
 
 const config: ExternalPluginConfig = {
     name: 'windy-plugin-soarcalc',
-    version: '1.0.14',
+    version: '1.2.15',
     title: 'SoarCalc',
     icon: '🌤️',
     description: 'Displays Thermal Soaring parameters as per RASP for any location on map.',
@@ -21,7 +21,7 @@ const config: ExternalPluginConfig = {
     // https://www.windy.com/plugin/route-path/:lat/:lon
     routerPath: '/soarcalc/:lat?/:lon?',
 
-    // Whenever user clicks on map and plugin i opened,
+    // Whenever user clicks on map and plugin is opened,
     // singleclick events is emitted with name of this plugin
     listenToSingleclick: true,
     

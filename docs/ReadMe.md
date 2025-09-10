@@ -37,29 +37,28 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 
 1. Open Chrome or other browser on your mobile device.
 
-2. Navigate to "windy.com/plugins"  (do not go to windy.com as that will redirect you to the App which you do not want)
+2. Navigate to <https://windy.com/plugin/soarcalc>  (do not go to windy.com as that will redirect you to the App which you do not want)
 
-3. SoarCalc should appear in the list of available plug-ins.  If so simply select it, otherwise please follow [Load plugin directly from URL](#load-plugin-directly-from-url).
+3. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" setup page.  Select "SoarCalc" from the list of available plugins, then select "Open plugin".
 
-4. The plug-in is now installed.  However, it is not yet available in this browser tab so close this tab.
+4. If SoarCalc is already installed Windy.com will open directly with the SoarCalc plugin already active.
 
-5. Navigate to "windy.com/plugin/soarcalc" in a new window/tab and SoarCalc will appear at the bottom of the screen.
+5. It will always be necessary to use <https://windy.com/plugin/soarcalc> so you may want to create a shortcut to that.
 
-6. It will always be necessary to use "windy.com/plugin/soarcalc" so you may want to create a shortcut to that.
+6. If you want to get back to the setup page once SoarCalc is already installed you can do so by navigating to <https://windy.com/plugins>.  This would allow you to un-install or re-install a test version via [Load plugin directly from URL](#load-plugin-directly-from-url).
 
-7. Ignore the button inviting you to "Download App".
+NOTE: Ignore the button inviting you to "Download App".
 
-NOTE: If navigating to "windy.com/plugin/soarcalc" does not work then please try navigating again to "windy.com/plugins" and selecting "SoarCalc" (which should now be marked as "installed" and select "Open plugin").
 
 ### Load plugin directly from URL
 
-If "SoarCalc" is not found in the list of plug-ins then it is still possible to install directly from the URL...
+If "SoarCalc" is not found in the list of plug-ins or if you wish to install a trial version and have been given the url then it is possible to install directly from the URL...
 
 1. Select “Load plugin directly from URL”
 
 2. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.0.14/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.2.15/plugin.min.js
 
 3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -77,13 +76,15 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 1.0.14
+### 1.2.15
 
-This release fixes a number of important issues.
+This release wraps up a number of important issues.
 
-- Fix problem with cloud cover data sometimes being missing when stepping though the hours of the day.
-- Fix problem with synchronization with the time shown on the slider.
-- Tooltips now work properly on mobile
+- Fixed problem with cloud cover data sometimes being missing when stepping though the hours of the day.
+- Fixed problem with synchronization with the time shown on the slider.
+- Updating of soaring parameters has been optimized. 
+- Tooltips now work properly on mobile.
+- The "clouds" layer is automatically selected when the SoarCalc is opened.
 
 ### 1.0.11
 

@@ -169,10 +169,14 @@
 
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'detail');
+
+		store.set('overlay', 'clouds');
+
         if (isValidLatLonObj(location))
         	update('onOpen', location);
        	else
         	update('onOpen', null);
+
 	};
 
     onMount(() => {
