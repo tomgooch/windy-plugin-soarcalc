@@ -1,5 +1,5 @@
 <div>
-	<div class="tooltipR" style="color:yellow">{title} v{version}: {_model}
+	<div class="tooltipR" style="color:yellow">{title} v{version}: {_sounding.model}
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
 	<br><div class="tooltipR">
@@ -112,14 +112,20 @@
     let marker: L.Marker | null = null;
     let _loc: LatLon;
 
-    let _sounding: Sounding = new Sounding(null, null, null, null, null);
+    let _sounding: Sounding = new Sounding(null, null, null, null, null, null, null);
     let _meteogramForecast: any = null;
     let _interpolator: any = null;
-    let _overlay: string | null = null;
-    let _model: string | null = null;
-	let _forecastModel: string | null = null;
-	let _hour: number | null = null;
-   
+
+	let _timestamp: number = 0;
+	let	_model: string | null = null;
+	let	_overlay: string | null = null;
+	let	_hour: number = 0;
+	let _latitude: number = 0;
+	let _longitude: number = 0;
+	let _mapLatitude: number = 0;
+	let _mapLongitude: number = 0;
+	let _mapZoom: number = 0;
+
     const { title, name, version } = config;
 
     const draggablePulsatingIcon = new L.DivIcon({
@@ -135,26 +141,25 @@
             marker = null;
         }
     };
-    function showMarker()
+    function showMarker(location: LatLon)
     {
 		hideMarker();
 		
-	    marker = L.marker({lat:_loc.lat, lng:_loc.lon}, {
+	    marker = L.marker({lat:location.lat, lng:location.lon}, {
 	        draggable: true,
 	        icon: draggablePulsatingIcon,
 	    }).addTo(map);
 	    
 	    marker.on('dragend', function (event) {
 	        const { lat, lng } = event.target.getLatLng();
-	        _loc = { lat, lon: lng };
-	        updateForecast();
+	        update('dragend', { lat, lon: lng });
 	    });
     }
 
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
     export const onopen = (location?: LatLon) => {
-		console.log('onopen', location);
+		console.log('onOpen', location);
 		if(isMobile)
 		{
 			// without this the small window on mobile UI inherits pointerEvents = none;
@@ -164,11 +169,10 @@
 
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'detail');
-        if (isValidLatLonObj(location)) {
-       		_loc = location;
-        	showMarker();
-        }
-        onRedrawFinished(null);
+        if (isValidLatLonObj(location))
+        	update('onOpen', location);
+       	else
+        	update('onOpen', null);
 	};
 
     onMount(() => {
@@ -190,110 +194,139 @@
     });
 	function onSingleClick(location: LatLon)
     {
-    	console.log("onSingleClick:", location, store.get('product'), store.get('overlay'));
-         _loc = location;
-        showMarker();
-        updateForecast();
+		update('onSingleClick', location);
     }
 	function onRqstOpen(plugin: any, location: LatLon)
     {
-    	console.log("onRqstOpen:", plugin, location);
         if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport' || plugin == 'picker') && isValidLatLonObj(location)) {
-			onSingleClick(location);
+			update('onRqstOpen', location);
 		}
     }
   
 	function onRedrawFinished(params: any)
 	{
-		_model = store.get('product');
-		_overlay = store.get('overlay');
+		// still need this to avoid conflict with internal use of getLatLonInterpretor()
+		pause(200).then(() => {update('onRedrawFinished', null)});
+	}
+
+	function update(tag: string, location: LatLon | null)
+	{
+		const model = store.get('product');
+		const overlay = store.get('overlay');
 		const timestamp: number | null = store.get('timestamp');
+		const mapCoords = store.get('mapCoords');
 
 		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated (not rounded) value that corresponds to the map / forecast point
-		_hour = 3600000 * Math.trunc(timestamp/3600000);
+		const hour = 3600000 * Math.trunc(timestamp/3600000);
 
+		const ts: number = new Date().getTime();
 
-		console.log('onRedrawFinished', 'model: ', _model, 'overlay: ', _overlay, 'timestamp: ', hoursAndMinutes(timestamp), 'params: ', params);
-		if (_overlay == 'clouds' || _overlay == 'solarpower')
+		if (location != null)
 		{
-			timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
-				if (interpolator != null)
-					setInterpolator(interpolator);
-				else
+			_loc = location;
+			showMarker(_loc);
+		}
+
+		console.log('update:', tag, ts, model, overlay, hoursAndMinutes(hour), _loc?.lat, _loc?.lon);
+		//console.log(_pendingTimestamp, _pendingModel, _pendingOverlay, _pendingHour, _pendingLatitude, _pendingLongitude);
+
+		// interpolator is also invalidated by zooming or panning map
+		var valid: boolean = mapCoords?.lat == _mapLatitude && mapCoords?.lon == _mapLongitude && mapCoords?.zoom == _mapZoom;
+
+		// onRedrawFinished gets fired twice when stepping though hours in day so add this code to avoid wasting resource
+		// if we were brave enough we could remove the timeout
+		if (ts < _timestamp + 60000 && valid && model == _model && overlay == _overlay && hour == _hour && _loc?.lat == _latitude && _loc?.lon == _longitude)
+		{
+			console.log('duplicate');
+			return;
+		}
+
+		_timestamp = ts;
+		_model = model;
+		_overlay = overlay;
+		_hour = hour;
+		_latitude = _loc?.lat;
+		_longitude = _loc?.lon;
+		_mapLatitude = mapCoords?.lat!;
+		_mapLongitude = mapCoords?.lon!;
+		_mapZoom = mapCoords?.zoom!;
+
+		updateMeteogramForecast(model, _loc).then((meteogramForecast) => {
+			console.log('updateMeteogramForecast.then', new Date().getTime(), meteogramForecast != null);
+			_meteogramForecast = meteogramForecast;
+
+			updateInterpolator(model, overlay, hour, valid).then((interpolator) => {
+				console.log('updateInterpolator.then', new Date().getTime(), interpolator != null);
+				_interpolator = interpolator;
+
+				var cloud: number | null = null;
+				var Qs: number | null = null;
+				if ((overlay == 'clouds' || overlay == 'solarpower') && _interpolator != null && isValidLatLonObj(_loc))
 				{
-					// retry once after first timeout.  It seems to work????
-					console.log('retrying getLatLonInterpolator()')
-					timeout(getLatLonInterpolator(), 1000).then((interpolator) => {
-						setInterpolator(interpolator);
-					});
+					const values = _interpolator(_loc);
+					if (Array.isArray(values))
+					{
+						if (overlay == 'clouds')
+						{
+							cloud = values[0] / 100;
+							//rain = values[1];
+						}
+						else if (overlay == 'solarpower')
+						{
+							Qs = values[0];
+						}
+					}
 				}
+				_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 			});
-		}
-		else
-			setInterpolator(null)
-	}
-	function timeout(p: Promise<any>, ms: number): Promise<any>
-	{
-		// return a race between the passed in promise and one that resolves with null after specified number of milliseconds
-		return Promise.race([p, new Promise((resolve) => {setTimeout(() => resolve(null), ms)})]);
-	}
-
-	function setInterpolator(interpolator: any)
-	{
-		console.log('setInterpolator', interpolator != null);
-		_interpolator = interpolator;
-		if (_meteogramForecast == null || _model != _forecastModel)
-		{
-			updateForecast();
-		}
-		else
-		{
-			updateSounding(_meteogramForecast);
-		}
-	}
-  	function updateForecast()
-    {
- 		console.log('updateForecast:', _model, _loc);
-    	if (!isValidLatLonObj(_loc))
-    	{
-    		updateSounding(null);
-    		return;
-    	}
-    	if (_model == null)
-    		_model = store.get('product');
-
- 	    getMeteogramForecastData(_model, {lat:_loc.lat, lon:_loc.lon, step:1}).then((meteogramForecast: HttpPayload<MeteogramDataPayload>) => {
-        	updateSounding(meteogramForecast);
-		}).catch((e) => {
-			updateSounding(null);
 		});
-		_forecastModel = _model;
-    }
-    function updateSounding(meteogramForecast: any)
-    {
-		_meteogramForecast = meteogramForecast;
-		console.log("updateSounding: ", _overlay, _hour, _loc, _meteogramForecast, _interpolator);
+	}
 
-		var cloud: number | null = null;
-		var Qs: number | null = null;
-    	if (_interpolator != null && isValidLatLonObj(_loc))
-    	{
-			const values = _interpolator(_loc);
-			if (Array.isArray(values))
-			{
-				if (_overlay == 'clouds')
-				{
-				   	cloud = values[0] / 100;
-				   	//rain = values[1];
-				}
-				else if (_overlay == 'solarpower')
-				{
-					Qs = values[0];
-				}
-			}
-    	}
-        _sounding = new Sounding(_meteogramForecast, _loc, _hour, Qs, cloud);
-    }
+	function updateMeteogramForecast(model: string | null, loc: LatLon | null): Promise<HttpPayload<MeteogramDataPayload> | null>
+	{
+		if (model == null || loc == null)
+			return new Promise((resolve) => {resolve(null)});
+
+		if (model == _sounding.model && loc.lat == _sounding.Loc?.lat && loc.lon == _sounding.Loc?.lon)
+			return new Promise((resolve) => {resolve(_meteogramForecast)});
+ 	    	
+		console.log('getMeteogramForecastData()');
+		return getMeteogramForecastData(model, {lat:loc.lat, lon:loc.lon, step:1});
+	}
+
+	function updateInterpolator(model: string | null, overlay: string | null, hour: number, valid: boolean): Promise<any>
+	{
+		//console.log('updateInterpolator:', model, _sounding.model, overlay, _sounding.overlay, hour, _sounding.hour);
+		if (model == null || (overlay != 'clouds' && overlay != 'solarpower'))
+			return new Promise((resolve) => {resolve(null)});
+
+		if (valid && model == _sounding.model && overlay == _sounding.overlay && hour == _sounding.hour)
+			return new Promise((resolve) => {resolve(_interpolator)});
+
+		console.log('getLatLonInterpolator()');
+		return Promise.race([getLatLonInterpolator(), pause(1000)]);
+
+		// pause(120).then(() => {
+		// 	Promise.race([getLatLonInterpolator(), pause(1000)]).then((interpolator) => {
+		// 		if (interpolator != null)
+		// 			setInterpolator(interpolator);
+		// 		else
+		// 		{
+		// 			// retry once after first timeout.
+		// 			console.log('retrying getLatLonInterpolator()');
+		// 			Promise.race([getLatLonInterpolator(), pause(1000)]).then((interpolator) => {
+		// 				setInterpolator(interpolator);
+		// 			});
+		// 		}
+		// 	});
+		// });
+
+	}
+	function pause(ms: number): Promise<any>
+	{
+		// return a promise that resolves with null after specified number of milliseconds
+		return new Promise((resolve) => {setTimeout(() => resolve(null), ms)});
+	}
 // **********************************************************
     function format_height(x: number | null | undefined): string
     {

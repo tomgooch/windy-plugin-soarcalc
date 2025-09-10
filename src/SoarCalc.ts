@@ -14,9 +14,13 @@ export class Sounding
 {
 	status: number = 0;						// status
 	message: string = '';					// status message
-	hour: number | null = null;
+	hour: number | null = null;				// forecast time point
+	model: string | null = null;			// forecast model
+	overlay: string | null = null;			// current overlay
 
 	Loc: LatLon | null;
+	latitude: number;
+	longitude: number;
 	actualElevation: number;				// actual surface elevation
 	Qs0: number | null;						// heat flux in the absence of cloud
 	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
@@ -46,12 +50,14 @@ export class Sounding
 	ccl: SoundingLevel | null = null;		// Convective Condensation Level (m)
 	lcl: SoundingLevel | null = null;		// Lifting Condensation Level (aka Cu cloudbase) (m)
 
-	constructor(meteogramForecast: any, loc: LatLon | null, timestamp: number | null, Qs: number | null, cloud: number | null)
+	constructor(meteogramForecast: any, model: string | null, loc: LatLon | null, timestamp: number | null, overlay: string | null, Qs: number | null, cloud: number | null)
 	{
-    	console.log("Sounding.constructor:", meteogramForecast, timestamp, Qs, cloud);
+    	console.log("Sounding.constructor:", model, overlay, timestamp, loc?.lat, loc?.lon, Qs, cloud, meteogramForecast);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		this.Loc = loc;
+		this.model = model;
+		this.overlay = overlay;
 		if (loc == null)
 		{
 			this.status = -1;

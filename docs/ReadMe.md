@@ -59,7 +59,7 @@ If "SoarCalc" is not found in the list of plug-ins then it is still possible to 
 
 2. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.0.13/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.0.14/plugin.min.js
 
 3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -77,7 +77,7 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 1.0.13
+### 1.0.14
 
 This release fixes a number of important issues.
 
