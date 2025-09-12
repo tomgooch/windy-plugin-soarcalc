@@ -25,11 +25,9 @@ The installation process is as follows (note that this differs for desktop vs mo
 
 2. Open the menu
 
-3. Select “Install Windy Plugin”
+3. Select “Install Windy Plugin”, then select "SoarCalc" from the list of available plugins, then "Install plugin", then "Open plugin".
 
-4. SoarCalc should appear in the list of available plug-ins.  If so simply select it, otherwise please follow [Load plugin directly from URL](#load-plugin-directly-from-url).
-
-5. SoarCalc is now installed and can be opened either from the main menu or more normally from the context menu (right mouse on the map)
+4. SoarCalc is now installed and can be opened either from the main menu or more normally from the context menu (right mouse on the map).  Alternately, it may be opened directly by navigating to <https://windy.com/plugin/soarcalc>.
 
 ### Mobile
 
@@ -39,34 +37,38 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 
 2. Navigate to <https://windy.com/plugin/soarcalc>  (do not go to windy.com as that will redirect you to the App which you do not want)
 
-3. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" setup page.  Select "SoarCalc" from the list of available plugins, then select "Open plugin".
+3. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" menu page. Select "SoarCalc" from the list of available plugins, then select "Install plugin", then "Open plugin".
 
-4. If SoarCalc is already installed Windy.com will open directly with the SoarCalc plugin already active.
+4. If SoarCalc is already installed then navigating to <https://windy.com/plugin/soarcalc> will cause Windy to open with the SoarCalc plugin already active.
 
 5. It will always be necessary to use <https://windy.com/plugin/soarcalc> so you may want to create a shortcut to that.
-
-6. If you want to get back to the setup page once SoarCalc is already installed you can do so by navigating to <https://windy.com/plugins>.  This would allow you to un-install or re-install a test version via [Load plugin directly from URL](#load-plugin-directly-from-url).
 
 NOTE: Ignore the button inviting you to "Download App".
 
 
-### Load plugin directly from URL
+### Windy Plugins Menu
 
 If "SoarCalc" is not found in the list of plug-ins or if you wish to install a trial version and have been given the url then it is possible to install directly from the URL...
 
-1. Select “Load plugin directly from URL”
+1. Go to the Windy Plugins menu page either by selecting "Install Windy Plugin" within the Windy.com desktop main menu or by navigating to <https://windy.com/plugins>
 
-2. Paste this string after the url already present in the input box:
+2. Select “Load plugin directly from URL”
 
-          12216047/windy-plugin-soarcalc/1.2.15/plugin.min.js
+3. Paste this string after the url already present in the input box:
 
-3. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
+          12216047/windy-plugin-soarcalc/1.2.16/plugin.min.js
+
+4. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
+
+NOTE: selecting SoarCalc within the "Windy Plugins" menu also gives you access to a link to the github repository for this plugin including this document (ReadMe.md).
 
 ## Getting Started
 
 Tooltips give a description of all the parameters displayed by SoarCalc.  Some of the parameters are only available in the "Clouds" or "SolarPower" overlays.
 
-Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer so it is best to switch over to that.
+Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer and so it switches over to that automatically when opened.
+
+One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy 5defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are better high resolution models available.  In the UK we have the "UKV" model from the Met Office.  You will find that these give you a much better view of the soaring weather so please consider using these.
 
 If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
 
@@ -75,6 +77,10 @@ To gain a better understanding of the parameters that are being presented please
 ---
 
 ## Change Log
+
+### 1.2.16
+
+- On opening, if location is given in url map is moved so that location marker is central, if not then location is set to centre of map.
 
 ### 1.2.15
 
