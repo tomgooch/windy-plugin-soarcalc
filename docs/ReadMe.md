@@ -68,6 +68,8 @@ Tooltips give a description of all the parameters displayed by SoarCalc.  Some o
 
 Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer and so it switches over to that automatically when opened.
 
+On opening the location is always set either to the given coordinates from the url or to the centre of the map area and if available at that location the 'ukv' model is selected.
+
 One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy 5defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are better high resolution models available.  In the UK we have the "UKV" model from the Met Office.  You will find that these give you a much better view of the soaring weather so please consider using these.
 
 If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
@@ -78,9 +80,10 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 1.2.16
+### 1.2.17
 
 - On opening, if location is given in url map is moved so that location marker is central, if not then location is set to centre of map.
+- Select the ukv model on opening if it is available
 
 ### 1.2.15
 
