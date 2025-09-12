@@ -108,6 +108,7 @@
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
 	import plugins from '@windy/plugins';
+    import { MapCoordinates } from '@windy/client/d.ts.files/dataSpecifications';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
@@ -143,6 +144,7 @@
     };
     function showMarker(location: LatLon)
     {
+		_loc = location;
 		hideMarker();
 		
 	    marker = L.marker({lat:location.lat, lng:location.lon}, {
@@ -172,11 +174,18 @@
 
 		store.set('overlay', 'clouds');
 
-        if (isValidLatLonObj(location))
-        	update('onOpen', location);
-       	else
-        	update('onOpen', null);
+		// if location is given we use it and centre the map on that location
+		// otherwise we set the location to the centre of the map
 
+		const mapCoords: MapCoordinates | null = store.get('mapCoords');
+        if (location != null && isValidLatLonObj(location) && (mapCoords?.lat != location.lat || mapCoords?.lon != location.lon))
+		{
+			// map.setView will eventually trigger an onRedrawFinished() so no need to update here
+			showMarker(location);
+			map.setView({lat: location.lat, lng: location.lon}, 8);
+		}
+		else
+			update('onOpen', mapCoords);
 	};
 
     onMount(() => {
@@ -209,7 +218,7 @@
   
 	function onRedrawFinished(params: any)
 	{
-		// still need this to avoid conflict with internal use of getLatLonInterpretor()
+		// still need this to avoid conflict with internal use of getLatLonInterpolator()
 		pause(200).then(() => {update('onRedrawFinished', null)});
 	}
 
@@ -226,13 +235,9 @@
 		const ts: number = new Date().getTime();
 
 		if (location != null)
-		{
-			_loc = location;
-			showMarker(_loc);
-		}
+			showMarker(location);
 
 		console.log('update:', tag, ts, model, overlay, hoursAndMinutes(hour), _loc?.lat, _loc?.lon);
-		//console.log(_pendingTimestamp, _pendingModel, _pendingOverlay, _pendingHour, _pendingLatitude, _pendingLongitude);
 
 		// interpolator is also invalidated by zooming or panning map
 		var valid: boolean = mapCoords?.lat == _mapLatitude && mapCoords?.lon == _mapLongitude && mapCoords?.zoom == _mapZoom;
