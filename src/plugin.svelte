@@ -169,11 +169,39 @@
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
 
+		// first discover if ukv is available at the desired location and if so select it
+		console.log(store.get('product'));
+		var loc: LatLon | null = null;
+        if (location != null && isValidLatLonObj(location))
+			loc = location;
+		else
+			loc = store.get('mapCoords');
+
+		if (loc == null)
+			onOpen2(location);
+		else
+		{
+			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
+				console.log('ukv available');
+				store.set('product', 'ukv');
+				onOpen2(location);
+			}).catch((e) => {
+				console.log('ukv not available');
+				onOpen2(location);
+			});
+		}
+	}
+	function onOpen2(location: LatLon | undefined)
+	{
+		console.log('onOpen2', location);
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'detail');
 
 		store.set('overlay', 'clouds');
 
+		console.log('mapCoords:', store.get('mapCoords'));
+		console.log('availableProducts:', store.get('availProducts'));
+		
 		// if location is given we use it and centre the map on that location
 		// otherwise we set the location to the centre of the map
 
