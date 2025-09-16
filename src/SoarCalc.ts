@@ -16,6 +16,7 @@ export class Sounding
 	message: string = '';					// status message
 	hour: number | null = null;				// forecast time point
 	model: string | null = null;			// forecast model
+	refTime: number | null = null;			// forecast reference time
 	overlay: string | null = null;			// current overlay
 
 	Loc: LatLon | null;
@@ -86,6 +87,7 @@ export class Sounding
 			return;
 		}
 		this.hour = md.hours[t];
+		this.refTime = new Date(meteogramForecast.data.header.refTime).getTime();
 
 		var gh: number;
         if (meteogramForecast.data.header.modelElevation == null)

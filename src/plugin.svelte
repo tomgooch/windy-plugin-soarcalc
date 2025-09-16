@@ -1,5 +1,5 @@
 <div>
-	<div class="tooltipR" style="color:yellow">{title} v{version}: {_sounding.model}
+	<div class="tooltipR" style="color:yellow">{title} v{version}: {_sounding.model} {format_refTime(_sounding.refTime)}
 		<span class="tooltiptext">Thermal Soaring parameters as per RASP based on the current forecast model</span>
 	</div>
 	<br><div class="tooltipR">
@@ -420,6 +420,15 @@
     	const dt = new Date(d);
 		//return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' - ' + dt.getUTCHours() + ':00';
 		return days[dt.getDay()] + ' ' + dt.getDate() + ' - ' + dt.getHours() + ':00';
+    }
+    function format_refTime(t: number | null | undefined): string
+    {
+    	if (t == null) return '(##)';
+    	const hour = new Date(t).getUTCHours();
+		if (hour < 10)
+			return '(0' + hour + 'Z)';
+		else
+			return '(' + hour + 'Z)';
     }
     function format_number(x: number | null | undefined, n: number): string
     {
