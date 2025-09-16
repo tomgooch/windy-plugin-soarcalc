@@ -315,7 +315,15 @@
 					}
 				}
 				_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
+			}).catch((e) => {
+				console.log('updateInterpolator.catch', e.message);
+				_interpolator = null;
+				_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
 			});
+		}).catch((e) => {
+			console.log('updateMeteogramForecast.catch', e.message);
+			_meteogramForecast = null;
+			_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
 		});
 	}
 
