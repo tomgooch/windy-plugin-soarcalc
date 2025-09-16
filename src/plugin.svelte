@@ -95,6 +95,9 @@
 <script lang="ts">
 	import { isMobile } from '@windy/rootScope';
 	import { getMeteogramForecastData } from '@windy/fetch';
+   	import type { LatLon, MeteogramDataPayload } from '@windy/interfaces.d';
+	// import { getPointForecastData } from '@windy/fetch';
+   	// import type { WeatherDataPayload } from '@windy/interfaces.d';
     import store from '@windy/store'
     import { map } from '@windy/map';
     import { isValidLatLonObj } from '@windy/utils';
@@ -102,8 +105,7 @@
     import metrics from '@windy/metrics';
     import { onDestroy, onMount } from 'svelte';
     import config from './pluginConfig';
-    import type { LatLon, MeteogramDataPayload } from '@windy/interfaces.d';
-    import { getLatLonInterpolator } from '@windy/interpolator';
+     import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
@@ -338,6 +340,15 @@
 		console.log('getMeteogramForecastData()');
 		return getMeteogramForecastData(model, {lat:loc.lat, lon:loc.lon, step:1});
 	}
+	// function updatePointForecast(model: string | null, loc: LatLon | null): Promise<HttpPayload<WeatherDataPayload> | null>
+	// {
+	//	// PointForecast contains nothing useful that is not already included in MeteogramForecast
+	// 	if (model == null || loc == null)
+	// 		return new Promise((resolve) => {resolve(null)});
+
+	// 	console.log('getPointForecastData()');
+	// 	return getPointForecastData(model, {lat:loc.lat, lon:loc.lon, step:1});
+	// }
 
 	function updateInterpolator(model: string | null, overlay: string | null, hour: number, valid: boolean): Promise<any>
 	{

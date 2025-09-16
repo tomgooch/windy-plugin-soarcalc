@@ -56,7 +56,7 @@ If "SoarCalc" is not found in the list of plug-ins or if you wish to install a t
 
 3. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.2.16/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.2.18/plugin.min.js
 
 4. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -80,10 +80,12 @@ To gain a better understanding of the parameters that are being presented please
 
 ## Change Log
 
-### 1.2.17
+### 1.2.18
 
 - On opening, if location is given in url map is moved so that location marker is central, if not then location is set to centre of map.
-- Select the ukv model on opening if it is available
+- Select the ukv model on opening if it is available.
+- Include forecast reference time in title.
+- Improve exception handling round getMeteogramForecastData().
 
 ### 1.2.15
 
