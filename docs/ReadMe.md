@@ -27,7 +27,7 @@ The installation process is as follows (note that this differs for desktop vs mo
 
 3. Select “Install Windy Plugin”, then select "SoarCalc" from the list of available plugins, then "Install plugin", then "Open plugin".
 
-4. SoarCalc is now installed and can be opened either from the main menu or more normally from the context menu (right mouse on the map).  Alternately, it may be opened directly by navigating to <https://windy.com/plugin/soarcalc>.
+4. SoarCalc is now installed and can be opened either from the main menu or the context menu (right mouse on the map).  Alternately, it may be opened directly by navigating to <https://windy.com/plugin/soarcalc>.
 
 ### Mobile
 
@@ -45,10 +45,9 @@ Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile
 
 NOTE: Ignore the button inviting you to "Download App".
 
+### Pre-Release Versions
 
-### Windy Plugins Menu
-
-If "SoarCalc" is not found in the list of plug-ins or if you wish to install a trial version and have been given the url then it is possible to install directly from the URL...
+Pre-release versions are sometimes made available for test / user feedback purposes.  To install a pre-release version and have been given the url then it is possible to install directly from the URL...
 
 1. Go to the Windy Plugins menu page either by selecting "Install Windy Plugin" within the Windy.com desktop main menu or by navigating to <https://windy.com/plugins>
 
@@ -56,7 +55,7 @@ If "SoarCalc" is not found in the list of plug-ins or if you wish to install a t
 
 3. Paste this string after the url already present in the input box:
 
-          12216047/windy-plugin-soarcalc/1.2.18/plugin.min.js
+          12216047/windy-plugin-soarcalc/1.2.19/plugin.min.js
 
 4. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
 
@@ -70,11 +69,11 @@ Windy.com opens by default in the “Wind” layer. SoarCalc works better in the
 
 On opening the location is always set either to the given coordinates from the url or to the centre of the map area and if available at that location the 'ukv' model is selected.
 
-One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy 5defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are better high resolution models available.  In the UK we have the "UKV" model from the Met Office.  You will find that these give you a much better view of the soaring weather so please consider using these.
+One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are better high resolution models available.  In the UK we have the "UKV" model from the Met Office.  You will find that these give you a much better view of the soaring weather so please consider using these.
 
 If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
 
-To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document
+To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document.
 
 ---
 
@@ -133,7 +132,7 @@ Important improvements from earlier private releases include...
 ### Abstract
 
 Windy.com is a very good general weather forecast site that shows data from some of the best weather models available notably including
-UKV from the UK Met Office and equivalent high resolution models worldwide.
+UKV from the UK Met Office and similar high resolution models worldwide.
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
 related parameters calculated in the same way as RASP.
