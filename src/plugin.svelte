@@ -334,7 +334,7 @@
 		if (model == null || loc == null)
 			return new Promise((resolve) => {resolve(null)});
 
-		if (model == _sounding.model && loc.lat == _sounding.Loc?.lat && loc.lon == _sounding.Loc?.lon)
+		if (_meteogramForecast != null && model == _sounding.model && loc.lat == _sounding.Loc?.lat && loc.lon == _sounding.Loc?.lon)
 			return new Promise((resolve) => {resolve(_meteogramForecast)});
  	    	
 		console.log('getMeteogramForecastData()');
@@ -356,7 +356,7 @@
 		if (model == null || (overlay != 'clouds' && overlay != 'solarpower'))
 			return new Promise((resolve) => {resolve(null)});
 
-		if (valid && model == _sounding.model && overlay == _sounding.overlay && hour == _sounding.hour)
+		if (_interpolator != null && valid && model == _sounding.model && overlay == _sounding.overlay && hour == _sounding.hour)
 			return new Promise((resolve) => {resolve(_interpolator)});
 
 		console.log('getLatLonInterpolator()');
