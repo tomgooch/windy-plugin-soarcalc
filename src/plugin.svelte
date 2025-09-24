@@ -405,6 +405,7 @@
 		const w: number = Math.sqrt(x*x + y*y);
 		var a: number = 270 - (Math.atan2(y, x) * 180 / Math.PI);
 		if (a < 0) a += 360;
+		else if (a > 360) a -= 360;
 
 		return Math.round(a) + "/" + metrics.wind.convertNumber(w, 0);
     }
