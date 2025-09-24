@@ -7,7 +7,7 @@ const config: ExternalPluginConfig = {
     icon: '🌤️',
     description: 'Displays Thermal Soaring parameters as per RASP for any location on map.',
     author: '@tomA27',
-    repository: 'https://github.com/tomgooch/windy-plugin-soarcalc',
+    repository: 'https://github.com/tomgooch/windy-plugin-soarcalc/tree/master/docs#readme',
     desktopUI: 'embedded',
     mobileUI: 'small',
     desktopWidth: 400,
