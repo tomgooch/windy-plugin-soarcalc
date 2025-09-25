@@ -47,7 +47,7 @@ NOTE: Ignore the button inviting you to "Download App".
 
 ### Pre-Release Versions
 
-Pre-release versions are sometimes made available for test / user feedback purposes.  To install a pre-release version and have been given the url then it is possible to install directly from the URL...
+Pre-release versions are sometimes made available for test / user feedback purposes.  To install a pre-release version for which you have been given the url...
 
 1. Go to the Windy Plugins menu page either by selecting "Install Windy Plugin" within the Windy.com desktop main menu or by navigating to <https://windy.com/plugins>
 
