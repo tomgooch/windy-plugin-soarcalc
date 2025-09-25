@@ -1,5 +1,6 @@
 ---
-theme: jekyll-theme-primer
+layout: xdefault.html
+theme: jekyll-theme-minimal
 ---
 # SoarCalc plugin for Windy.com
 
