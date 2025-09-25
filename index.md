@@ -1,8 +1,4 @@
----
-layout: default
-include: ../docs/ReadMe.md
----
-# NOT SoarCalc plugin for Windy.com
+# NOT NOT SoarCalc plugin for Windy.com
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
 parameters in, as far as possible, exactly the same way as RASP.
