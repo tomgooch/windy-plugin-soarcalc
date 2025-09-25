@@ -1,3 +1,6 @@
+---
+theme: jekyll-theme-minimal
+---
 # SoarCalc plugin for Windy.com
 
 SoarCalc is a plugin for Windy.com that calculates and displays thermal soaring
