@@ -1,5 +1,5 @@
 # Where things are
-source              : .
+source              : ./docs
 destination         : ./_site
 collections_dir     : .
 plugins_dir         : _plugins # takes an array of strings and loads plugins in that order
@@ -69,3 +69,4 @@ kramdown:
   hard_wrap         : false
   footnote_nr       : 1
   show_warnings     : false
+  math_engine       : mathjax
