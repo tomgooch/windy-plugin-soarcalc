@@ -27,6 +27,8 @@ limit_posts         : 0
 future              : false
 unpublished         : false
 
+theme               : jekyll-theme-minimal
+
 # Plugins
 whitelist           : []
 plugins             : []
