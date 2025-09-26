@@ -5,75 +5,60 @@ parameters in, as far as possible, exactly the same way as RASP.
 
 ## Contents
 
-- [Installation](#installation)
-
 - [Getting Started](#getting-started)
+
+- [Top Tips](#top-tips)
 
 - [Change Log](#change-log)
 
+- [Source Code](#source-code)
+
 - [Discussion](#discussion)
+
+- [References](#references)
 
 ---
 
-## Installation
-
-The installation process is as follows (note that this differs for desktop vs mobile devices)...
-
-### Desktop
-
-1. Open [Windy.com](https://www.windy.com) within a browser on a laptop/PC
-
-2. Open the menu
-
-3. Select “Install Windy Plugin”, then select "SoarCalc" from the list of available plugins, then "Install plugin", then "Open plugin".
-
-4. SoarCalc is now installed and can be opened either from the main menu or the context menu (right mouse on the map).  Alternately, it may be opened directly by navigating to <https://windy.com/plugin/soarcalc>.
-
-### Mobile
-
-Note:  Windy plugins including SoarCalc are not compatible with the Windy mobile App but SoarCalc functions well within Chrome etc on mobile devices.
-
-1. Open Chrome or other browser on your mobile device.
-
-2. Navigate to <https://windy.com/plugin/soarcalc>  (do not go to windy.com as that will redirect you to the App which you do not want)
-
-3. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" menu page. Select "SoarCalc" from the list of available plugins, then select "Install plugin", then "Open plugin".
-
-4. If SoarCalc is already installed then navigating to <https://windy.com/plugin/soarcalc> will cause Windy to open with the SoarCalc plugin already active.
-
-5. It will always be necessary to use <https://windy.com/plugin/soarcalc> so you may want to create a shortcut to that.
-
-NOTE: Ignore the button inviting you to "Download App".
-
-### Pre-Release Versions
-
-Pre-release versions are sometimes made available for test / user feedback purposes.  To install a pre-release version for which you have been given the url...
-
-1. Go to the Windy Plugins menu page either by selecting "Install Windy Plugin" within the Windy.com desktop main menu or by navigating to <https://windy.com/plugins>
-
-2. Select “Load plugin directly from URL”
-
-3. Paste this string after the url already present in the input box:
-
-          12216047/windy-plugin-soarcalc/1.2.19/plugin.min.js
-
-4. Press "install untrusted plugin" and SoarCalc will be available on the main menu.
-
-NOTE: selecting SoarCalc within the "Windy Plugins" menu also gives you access to a link to the github repository for this plugin including this document (ReadMe.md).
-
 ## Getting Started
 
-Tooltips give a description of all the parameters displayed by SoarCalc.  Some of the parameters are only available in the "Clouds" or "SolarPower" overlays.
+To get started...
 
-Windy.com opens by default in the “Wind” layer. SoarCalc works better in the “clouds” layer and so it switches over to that automatically when opened.
+1. Open <https://windy.com/plugin/soarcalc>  
 
-On opening the location is always set either to the given coordinates from the url or to the centre of the map area and if available at that location the 'ukv' model is selected.
+2. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" menu page. Select "SoarCalc" from the list of available plugins, then select "Install plugin", then "Open plugin".
 
-One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are better high resolution models available.  In the UK we have the "UKV" model from the Met Office.  You will find that these give you a much better view of the soaring weather so please consider using these.
+3. If SoarCalc is already installed then Windy,com will open directly with the SoarCalc plugin already active.
 
-If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
+**Note:**  Windy plugins including SoarCalc are not compatible with the Windy mobile App but SoarCalc functions well within Chrome or other browsers on mobile devices.  For this reason you should not navigate to windy.com because you will be redirected to the Mobile App which you do not want.  You should also ignore the "Download App" button that appears on mobile devices.
 
-To gain a better understanding of the parameters that are being presented please take a little time to read the [Discussion](#discussion) section of this document.
+**Note:**  You may wish to set up a shortcut to <https://windy.com/plugin/soarcalc> or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
+
+### Windy Plugins Menu
+
+You can always get back to the "Windy Plugins" menu using this link <https://windy.com/plugins> (Or by selecting "Install Windy Plugin" within the Windy.com desktop menu).
+
+From here you can select SoarCalc wether or not it is already installed and you will be presented with some basic information including links to "Source code" and "Homepage" which directs you back to this document.
+
+## Top Tips
+
+- All the parameters displayed by SoarCalc have tooltips giving a brief description of their meaning. However, to gain a better understanding please take a little time to read the [Discussion](#discussion) section of this document.
+
+- The tooltips show the units in which the parameters are given.  These follow the current settings within Windy.com.
+
+- Some of the parameters are only available in the "Clouds" or "SolarPower" layers in which case they appear as '##' when any other layer is active.
+
+- On opening SoarCalc takes a few actions...
+  - The "Clouds" layer is selected.
+  - The current location is set either to the given coordinates from the url or to the centre of the map area.
+  - If available at that location the 'ukv' model from the Met Office is selected.
+
+- Windy.com is a great weather forecasting site in its own right and is definitely not restricted to displaying the forecast wind.  It is well worth investing a little time exploring its functionality.
+
+- If you are a Windy "Premium" user you will see the data with 1 hour time steps which is a considerably better experience than the default 3 hour steps seen by non-premium users.
+
+- One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are higher resolution models available.  You will find that these give you a much better view of the soaring weather so please consider switching to these.
+
+- Don't stick to one model even if it is the highest resolution and most recent forecast available.  Switch between the models, if they broadly agree then the forecast is likely to be reliable, if they differ substantially then it is likely that there is a lot of uncertainty in all of them.
 
 ---
 
@@ -88,42 +73,23 @@ To gain a better understanding of the parameters that are being presented please
 
 ### 1.2.15
 
-This release wraps up a number of important issues.
+The main purpose of this release is to make the plug-in work with the most recent update of Windy.com (August 2025).  It also contains the following changes since the previous published version...
 
+- The installation and "getting started" process is much simplified especially on mobile devices. 
 - Fixed problem with cloud cover data sometimes being missing when stepping though the hours of the day.
 - Fixed problem with synchronization with the time shown on the slider.
-- Updating of soaring parameters has been optimized. 
+- Updating of soaring parameters has been optimized.
 - Tooltips now work properly on mobile.
 - The "clouds" layer is automatically selected when the SoarCalc is opened.
-
-### 1.0.11
-
-The main purpose of this release is to make the plug-in work with the most recent update of Windy.com (August 2025).  Also...
-
 - Boundary Layer Average Wind parameter has been added.
 - Issues with time shown in plug-in being out of step with that shown on the slider are resolved.
 - Timeouts from getLatLongInterpolator() are handled gracefully.  The parameters are now all updated properly except that the values in the rightmost "cloud" column show as ## in this circumstance rather than continuing to show old data.
 
-### 1.0.6
+---
 
-This is the first publicly available version of this plugin.  Changes are mainly limited to documentation / tooltip texts etc.
+## Source Code
 
-- bug causing "cloud ratio" to go negative has been fixed.
-- current location now also follows selection of airports and the weather picker.
-
-### 1.0.2
-
-- 'detail' and 'sounding' plugins are closed on opening soarcalc (so that soarcalc will be able to see their onSingleClick events if they are reopened).
-- on opening 'detail' or 'sounding' plugins the current location for soarcalc is updated.
-
-### 1.0.1
-
-This version remains a private release but can be seen as the first candidate for public release.
-Important improvements from earlier private releases include...
-
-- Support for mobile devices
-- Descriptions of all parameters available as tooltips
-- Meaningful error messages in particular when there is no location selected on the map or the selected model does not provide the required data.
+The full source code for the SoarCalc plugin can be found in the following github repository: <https://github.com/tomgooch/windy-plugin-soarcalc>
 
 ---
 
@@ -202,8 +168,7 @@ Following RASP this is defined to be the level at which the buoyancy of a parcel
  is not unreasonable because we are interested primarily in what is going on either below
  the cumulous cloud base or up to the top of blue thermals.  A treatment of what is going on within
  convective cloud is complex and of little practical use in this context except to note that
- "cloud suck" is a real effect and thermal updraft strength is increased in the presence of
- substantial convective cloud.
+ "cloud suck" is a real effect and thermal updraft strength is increased in the presence of substantial / deep convective cloud.
 
  The calculation of this quantity starts with the calculation of the virtual (density) temperature at the
  surface and at every level in the data given to us by the model in order to allow for the fact that moist air is less dense than dry air.
@@ -316,7 +281,7 @@ RASP appears to use a version of this modified such that the maximum value of $W
 
 $W = 2.2z^{1/3}(1 - 1.1z)$
 
-We use this equation we find the altitude at which the updraft velocity falls to 0.9m/s or 1.75kts
+We use this equation to find the altitude at which the updraft velocity falls to 0.9m/s or 1.75kts
 in order to follow RASP as closely as possible.
 
 ### Further Comments
@@ -328,14 +293,11 @@ Currently LCL shown in the "Sounding forecast" pane is incorrect whenever the su
 
 So PLEASE do not look at the discrepancy and assume that SoarCalc is incorrect.  This is not the case.
 
-It remains to use the plugin and gain practical experience of its usefulness.  Unfortunately, the winter is currently upon
-us in the northern hemisphere.  I can only try to draw experience from comparison with RASP in Australia, New Zealand and South Africa.
-The usefulness of this is limited by the facts that high resolution models are not available for these locations and
-I am unable to compare with the actual soaring conditions.  However, the numbers do seem to correspond reasonably well. (Note: since writing the above the 1.5km resolution "ACCESS" models have become available in Australia)
+Practical experience gained over the past year comparing SoarCalc with other soaring forecasts and with reality suggests that it is indeed a useful tool.
 
 ### Further Development
 
-It would be useful to estimate the Solar Insolation more thoroughly involving the cloud opacity/thickness as well as the cloud cover.  The estimate of Thermal Updraft velocity ($W^*$) would then be available in all layers.  However, it is far from clear how much improvement this might make to the forecast value of $W^*$ given the other assumptions and approximations involved.
+It would be useful to estimate the Solar Insolation more thoroughly involving the cloud opacity/thickness as well as the cloud cover.  The estimate of Thermal Updraft velocity $(W^*)$ would then be available in all layers.  However, it is far from clear how much improvement this might make to the forecast value of $W^*$ given the other assumptions and approximations involved.
 
 ### Appendix 1 - Derivation of Virtual Potential Temperature Flux
 
