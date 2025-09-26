@@ -1,1 +1,2 @@
-theme: jekyll-theme-minimal
+# this is the default theme anyway but might as well be explicit
+theme: jekyll-theme-primer
