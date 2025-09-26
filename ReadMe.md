@@ -21,17 +21,17 @@ parameters in, as far as possible, exactly the same way as RASP.
 
 ## Getting Started
 
+**Note for mobile devices:**  SoarCalc (in common with all other Windy plugins) is not compatible with the Windy mobile App but it does function well within Chrome or other browsers on mobile devices just as it does on a laptop/PC.  If you already have the Windy mobile App installed then, unfortunately, it will be necessary to uninstall it before proceeding.  You will always have to use the links below to access SoarCalc to avoid being redirected to a page inviting you to install the App.  You should also ignore the "Download App" button that sometimes appears.
+
 To get started...
 
 1. Open <https://windy.com/plugin/soarcalc>  
 
 2. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" menu page. Select "SoarCalc" from the list of available plugins, then select "Install plugin", then "Open plugin".
 
-3. If SoarCalc is already installed then Windy,com will open directly with the SoarCalc plugin already active.
+3. If SoarCalc is already installed then Windy.com will open directly with the SoarCalc plugin already active.
 
-**Note:**  Windy plugins including SoarCalc are not compatible with the Windy mobile App but SoarCalc functions well within Chrome or other browsers on mobile devices.  For this reason you should not navigate to windy.com because you will be redirected to the Mobile App which you do not want.  You should also ignore the "Download App" button that appears on mobile devices.
-
-**Note:**  You may wish to set up a shortcut to <https://windy.com/plugin/soarcalc> or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
+4. You may wish to set up a shortcut to <https://windy.com/plugin/soarcalc> or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
 
 ### Windy Plugins Menu
 
@@ -58,11 +58,16 @@ From here you can select SoarCalc wether or not it is already installed and you 
 
 - One of the really great things about Windy.com is that it offers you a range of the best weather models available.  Windy defaults to the "ECMWF" (European Centre for Medium Range Weather Forecasting) model which is a great medium resolution global model.  However, in most regions of the world there are higher resolution models available.  You will find that these give you a much better view of the soaring weather so please consider switching to these.
 
-- Don't stick to one model even if it is the highest resolution and most recent forecast available.  Switch between the models, if they broadly agree then the forecast is likely to be reliable, if they differ substantially then it is likely that there is a lot of uncertainty in all of them.
+- Don't stick to one model even if it is the highest resolution and most recent forecast available.  Switch between the models, if they broadly agree then the forecast is likely to be reliable, if they differ substantially then it is likely that there is uncertainty even in the "best" forecast.
 
 ---
 
 ## Change Log
+
+### 1.2.19
+
+- Fixed bug with wind heading (was showing > 360 degrees when in the NE quadrant)
+- Substantially updated documentation and added link to it from the "Windy Plugins" menu.
 
 ### 1.2.18
 
