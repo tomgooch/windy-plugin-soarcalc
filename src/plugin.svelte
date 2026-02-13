@@ -302,26 +302,39 @@
 				var Qs: number | null = null;
 				if ((overlay == 'clouds' || overlay == 'solarpower') && _interpolator != null && isValidLatLonObj(_loc))
 				{
-					_interpolator(_loc).then((values: any) => {
-						console.log('interpolator(loc).then', values);
-						if (Array.isArray(values))
-						{
-							if (overlay == 'clouds')
+					var returnValue: any = _interpolator(_loc);
+					if (Array.isArray(returnValue))			// pre Windy 49
+					{
+						if (overlay == 'clouds')
+							cloud = returnValue[0] / 100;
+						else if (overlay == 'solarpower')
+							Qs = returnValue[0];
+						_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
+					}
+					else
+					{
+						returnValue.then((values: any)=> {
+						//_interpolator(_loc).then((values: any) => {
+							console.log('interpolator(loc).then', values);
+							if (Array.isArray(values))
 							{
-								cloud = values[0] / 100;
-								//rain = values[1];
+								if (overlay == 'clouds')
+								{
+									cloud = values[0] / 100;
+									//rain = values[1];
+								}
+								else if (overlay == 'solarpower')
+								{
+									Qs = values[0];
+								}
+								_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 							}
-							else if (overlay == 'solarpower')
-							{
-								Qs = values[0];
-							}
-							_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
-						}
-					}).catch((e: any) => {
-						console.log('interpolator(loc).catch', e.message);
-						_interpolator = null;
-						_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
-					});
+						}).catch((e: any) => {
+							console.log('interpolator(loc).catch', e.message);
+							_interpolator = null;
+							_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
+						});
+					}
 				}
 				else{
 					_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
