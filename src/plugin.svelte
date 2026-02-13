@@ -295,28 +295,37 @@
 			_meteogramForecast = meteogramForecast;
 
 			updateInterpolator(model, overlay, hour, valid).then((interpolator) => {
-				console.log('updateInterpolator.then', new Date().getTime(), interpolator != null);
+				console.log('updateInterpolator.then', new Date().getTime(), overlay, interpolator != null, isValidLatLonObj(_loc));
 				_interpolator = interpolator;
 
 				var cloud: number | null = null;
 				var Qs: number | null = null;
 				if ((overlay == 'clouds' || overlay == 'solarpower') && _interpolator != null && isValidLatLonObj(_loc))
 				{
-					const values = _interpolator(_loc);
-					if (Array.isArray(values))
-					{
-						if (overlay == 'clouds')
+					_interpolator(_loc).then((values: any) => {
+						console.log('interpolator(loc).then', values);
+						if (Array.isArray(values))
 						{
-							cloud = values[0] / 100;
-							//rain = values[1];
+							if (overlay == 'clouds')
+							{
+								cloud = values[0] / 100;
+								//rain = values[1];
+							}
+							else if (overlay == 'solarpower')
+							{
+								Qs = values[0];
+							}
+							_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 						}
-						else if (overlay == 'solarpower')
-						{
-							Qs = values[0];
-						}
-					}
+					}).catch((e: any) => {
+						console.log('interpolator(loc).catch', e.message);
+						_interpolator = null;
+						_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
+					});
 				}
-				_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
+				else{
+					_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
+				}
 			}).catch((e) => {
 				console.log('updateInterpolator.catch', e.message);
 				_interpolator = null;
