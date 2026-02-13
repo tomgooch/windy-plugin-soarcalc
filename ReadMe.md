@@ -21,23 +21,31 @@ parameters in, as far as possible, exactly the same way as RASP.
 
 ## Getting Started
 
-**Note for mobile devices:**  SoarCalc (in common with all other Windy plugins) is not compatible with the Windy mobile App but it does function well within Chrome or other browsers on mobile devices just as it does on a laptop/PC.  If you already have the Windy mobile App installed then, unfortunately, it will be necessary to uninstall it before proceeding.  You will always have to use the links below to access SoarCalc to avoid being redirected to a page inviting you to install the App.  You should also ignore the "Download App" button that sometimes appears.
+**Note for Mobile Device Users**  Windy.com have recently added support for plugins within the mobile app (Android and Apple IoS) which greatly improves the user experience.  If you have not already done so you will need to install the Windy App via <https://windy.com>.
 
 To get started...
 
-1. Open <https://windy.com/plugin/soarcalc>  
+Within the Windy Mobile App, open the main menu and scroll down to the "Extend you Windy" section.
 
-2. If SoarCalc is not yet installed you will be re-directed to the "Windy Plugins" menu page. Select "SoarCalc" from the list of available plugins, then select "Install plugin", then "Open plugin".
+Or
 
-3. If SoarCalc is already installed then Windy.com will open directly with the SoarCalc plugin already active.
+Within a Desktop Browser navigate to <https://windy.com> and open the main menu.
 
-4. You may wish to set up a shortcut to <https://windy.com/plugin/soarcalc> or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
+Then...
 
-### Windy Plugins Menu
+1.  Select "Install Windy Plugin"
 
-You can always get back to the "Windy Plugins" menu using this link <https://windy.com/plugins> (Or by selecting "Install Windy Plugin" within the Windy.com desktop menu).
+2.  Select "SoarCalc" from the list of available Plugins
 
-From here you can select SoarCalc wether or not it is already installed and you will be presented with some basic information including links to "Source code" and "Homepage" which directs you back to this document.
+(From here you will be presented with some basic information including links to "Source code" and "Homepage" which directs you back to this document on GitHub.)
+
+3.  Press "Install Plugin"
+
+4.  Once installed "Soar Calc" will appear directly on the main menu (or within the "Extend you Windy" section on mobile).  Simply tap on it (not the dustbin beside it!) to open.
+
+
+**Note for Desktop users**  Windy can be opened with SoarCalc already up and running by navigating to <https://windy.com/plugin/soarcalc>. You may wish to set up a shortcut to this url or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
+
 
 ## Top Tips
 
