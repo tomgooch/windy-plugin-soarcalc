@@ -149,7 +149,7 @@
 		_loc = location;
 		hideMarker();
 		
-	    marker = L.marker({lat:location.lat, lng:location.lon}, {
+	    marker = new L.Marker({lat:location.lat, lng:location.lon}, {
 	        draggable: true,
 	        icon: draggablePulsatingIcon,
 	    }).addTo(map);
