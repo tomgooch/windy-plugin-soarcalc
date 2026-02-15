@@ -53,7 +53,11 @@ Then...
 
 - The tooltips show the units in which the parameters are given.  These follow the current settings within Windy.com.
 
-- Some of the parameters are only available in the "Clouds" or "SolarPower" layers in which case they appear as '##' when any other layer is active.
+- A notification appears at the bottom of the window if it is not possible to calculate any or all of the parameters.
+
+- Notifications also have tool tips giving further information.
+
+- Some of the most important parameters are only available in the "Clouds" or "SolarPower" layers in which case they appear as '*' when any other layer is active.
 
 - On opening SoarCalc takes a few actions...
   - The "Clouds" layer is selected.
@@ -98,6 +102,13 @@ The main purpose of this release is to make the plug-in work with the most recen
 - Issues with time shown in plug-in being out of step with that shown on the slider are resolved.
 - Timeouts from getLatLongInterpolator() are handled gracefully.  The parameters are now all updated properly except that the values in the rightmost "cloud" column show as ## in this circumstance rather than continuing to show old data.
 
+### 1.3.2
+
+This version of SoarCalc is compatible with the most recent update of Windy.com (version 49, February 2026).  It also contains the following changes...
+
+- The "getting started" section of the documentation is updated to reflect the fact that SoarCalc now runs properly within the Windy Mobile App.
+- A "Notification" line has been added at the bottom of the window giving the reason why if some data cannot be shown.  Further information is always available as a tool tip.
+ 
 ---
 
 ## Source Code
@@ -130,7 +141,7 @@ However RASP does have some serious issues...
 
 1. It still uses GFS and only GFS which is no longer the best forecast available for the UK
 2. It is updated infrequently. Usually even in the morning we see a forecast for the current day that is already 12 hours old.
-3. It does not deal with cloud amounts very well. There are a significant number of days in the year when it predicts virtually no cloud cover and hence good (5*) conditions over large areas at variance with all other models / forecasting sites and with reality.
+3. It does not deal with cloud amounts very well. There are a significant number of days in the year when it predicts virtually no cloud cover and hence good (5 star) conditions over large areas at variance with all other models / forecasting sites and with reality.
 
 So the motivation to develop a plugin for Windy.com is simple. To make the RASP parameters available within Windy.com using the data from "UKV" or any of the other models that are available.
 
