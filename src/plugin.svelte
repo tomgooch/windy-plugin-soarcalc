@@ -7,11 +7,6 @@
 		<span class="tooltiptext">Time and Location</span>
 	</div>
 	
-	{#if _sounding.status < 0}
-	<div>{_sounding.message}</div>
-	{/if}
-
-	
 	<table style={isMobile ? "width:95%" : "width:100%" }>
 	<tr>
 	<td style=";text-align:right;vertical-align:top">
@@ -21,7 +16,7 @@
 		<br><div class="tooltipR">Tdew: {format_temp(_sounding.surface?.dewPoint)}
 			<span class="tooltiptext">Surface dew point temperature ({metrics.temp.metric})</span>
 		</div>
-		<br><div class="tooltipR">Elev: {format_height(_sounding.surface?.gh)}
+		<br><div class="tooltipR">Elev: {format_height(_sounding.modelElevation)}
 			<span class="tooltiptext">Model elevation ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltipR">ElevA: {format_height(_sounding.actualElevation)}
@@ -87,8 +82,13 @@
 	</tr>
 	</table>
 	<div class="tooltipR">
-		<span style="color:yellow;font-size:10px;vertical-align:top">{isMobile ? 'Tap' : 'Hover'} for descriptions</span>
-		<span class="tooltiptext">{isMobile ? 'Tap' : 'Hover'} individual parameters to see their descriptions</span>
+		{#if _sounding.message != null}
+			{format_na()} <span style="color:yellow;vertical-align:top">{_sounding.message}</span>
+			<span class="tooltiptext">{_sounding.toolTip}</span>
+		{:else}
+			<span style="color:yellow;font-size:10px;vertical-align:top">{isMobile ? 'Tap' : 'Hover'} for descriptions</span>
+			<span class="tooltiptext">{isMobile ? 'Tap' : 'Hover'} individual parameters to see their descriptions</span>
+		{/if}
 	</div>
 </div>
 
@@ -105,7 +105,7 @@
     import metrics from '@windy/metrics';
     import { onDestroy, onMount } from 'svelte';
     import config from './pluginConfig';
-     import { getLatLonInterpolator } from '@windy/interpolator';
+    import { getLatLonInterpolator } from '@windy/interpolator';
 	import broadcast from '@windy/broadcast';
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
@@ -128,6 +128,8 @@
 	let _mapLatitude: number = 0;
 	let _mapLongitude: number = 0;
 	let _mapZoom: number = 0;
+
+	let _na: string = '*'
 
     const { title, name, version } = config;
 
@@ -406,24 +408,28 @@
 		return new Promise((resolve) => {setTimeout(() => resolve(null), ms)});
 	}
 // **********************************************************
+	function format_na(): string
+	{
+    	return _na;
+	}
     function format_height(x: number | null | undefined): string
     {
-    	if (x == null) return '##';
+    	if (x == null) return _na;
     	return metrics.altitude.convertNumber(x, 0);
     }
     function format_temp(x: number | null | undefined): string
     {
-    	if (x == null) return '##';
+    	if (x == null) return _na;
     	return metrics.temp.convertNumber(x, 1).toFixed(1);
     }
     function format_wind(x: number | null | undefined, n: number): string
     {
-    	if (x == null) return '##';
+    	if (x == null) return _na;
 		return metrics.wind.convertNumber(x, n);
     }
     function format_vector_wind(x: number | null | undefined, y: number | null | undefined): string
     {
-    	if (x == null || y == null) return '##/##';
+    	if (x == null || y == null) return _na + '/' + _na;
 		const w: number = Math.sqrt(x*x + y*y);
 		var a: number = 270 - (Math.atan2(y, x) * 180 / Math.PI);
 		if (a < 0) a += 360;
@@ -433,7 +439,7 @@
     }
     function format_latlon(x: LatLon | null): string
     {
-    	if (x == null) return '##, ##';
+    	if (x == null) return _na + ', ' + _na;
 
 		var latitude: string;
     	var longitude: string;
@@ -457,7 +463,7 @@
     }
     function format_time(d: number | null | undefined): string
     {
-    	if (d == null) return '##';
+    	if (d == null) return _na;
     	const days: string[] = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
     	const dt = new Date(d);
 		//return days[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' - ' + dt.getUTCHours() + ':00';
@@ -465,7 +471,7 @@
     }
     function format_refTime(t: number | null | undefined): string
     {
-    	if (t == null) return '(##)';
+    	if (t == null) return '(' + _na + ')';
     	const hour = new Date(t).getUTCHours();
 		if (hour < 10)
 			return '(0' + hour + 'Z)';
@@ -474,7 +480,7 @@
     }
     function format_number(x: number | null | undefined, n: number): string
     {
-    	if (x == null) return '##';
+    	if (x == null) return _na;
 		return x.toFixed(n);
     }
 	function hoursAndMinutes(t: number): string

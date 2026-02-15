@@ -12,8 +12,8 @@ const Wcrit: number = 0.9;							// sink rate of thermalling glider (ms-1)
 
 export class Sounding
 {
-	status: number = 0;						// status
-	message: string = '';					// status message
+	message: string | null = null;			// status message
+	toolTip: string | null = null;			// corresponding tool tip message
 	hour: number | null = null;				// forecast time point
 	model: string | null = null;			// forecast model
 	refTime: number | null = null;			// forecast reference time
@@ -22,6 +22,7 @@ export class Sounding
 	Loc: LatLon | null;
 	latitude: number;
 	longitude: number;
+	modelElevation: number | null;			// model elevation
 	actualElevation: number;				// actual surface elevation
 	Qs0: number | null;						// heat flux in the absence of cloud
 	Qs: number | null;						// heat flux arriving at the surface (Wm-2)
@@ -61,20 +62,20 @@ export class Sounding
 		this.overlay = overlay;
 		if (loc == null)
 		{
-			this.status = -1;
 			this.message = 'no current location';
+			this.toolTip = 'Soaring parameters can only be calculated when a location has been selected';
 			return;
 		}
 		if (meteogramForecast == null)
 		{
-			this.status = -1;
-			this.message = 'no meteogramForecast';
+			this.message = 'no forecast available';
+			this.toolTip = 'The currently selected forecast model is not available at this location'
 			return;
 		}
 		if (meteogramForecast.status != 200)
 		{
-			this.status = -1;
-			this.message = 'invalid meteogramForecast, status=' + meteogramForecast.status;
+			this.message = 'invalid forecast, status=' + meteogramForecast.status;
+			this.toolTip = 'Invalid forecast data has been returned'
 			return;
 		}
 					
@@ -82,22 +83,29 @@ export class Sounding
         const t: number = getHourIndex(timestamp, md.hours);
         if (t < 0)
 		{
-			this.status = -1;
-			this.message = 'time point unavailable';							// user has requested a time beyond the limit of the forecast availability
+			this.message = 'time point unavailable';
+			this.toolTip = 'The requested time is beyond the limit of the forecast availability'
 			return;
 		}
 		this.hour = md.hours[t];
 		this.refTime = new Date(meteogramForecast.data.header.refTime).getTime();
 
-		var gh: number;
-        if (meteogramForecast.data.header.modelElevation == null)
+		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
+        this.modelElevation = meteogramForecast.data.header.modelElevation;
+
+		var gh: number;															// elevation that we will use in calculations
+		if (this.modelElevation == null)
 		{
-			this.status = -1;
 			this.message = 'model elevation unavailable';						// AROME does not give us the model elevation!
+			this.toolTip = 'All height parameters the forecast thermal strength are relative to the model elevation.  ' +
+			'The current model has not made this available so we are forced to use the actual elevation. ' +
+			'In mountianus regions this may differ considerably'
+			this.modelElevation = null;
 			gh = meteogramForecast.data.header.elevation;						// take the actual elevation (supplied by Windy - same for all models)???
 		}
 		else
 		{
+			this.modelElevation = meteogramForecast.data.header.modelElevation;
 			gh = meteogramForecast.data.header.modelElevation;					// surface geopotential height is provided in the header rather than the data
 		}
 
@@ -116,12 +124,11 @@ export class Sounding
 		}
 		else
 		{
+			this.message = 'only available in Clouds layer'
+			this.toolTip = 'This data is only available when the "Clouds" (or "Solar power") layer is active'
 			this.cloud = null;
 			this.Qs = null;
 		}
-
-
-		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
 
 		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
         const p: number = getPressure(seaLevelPressure, gh);
@@ -141,8 +148,8 @@ export class Sounding
 		}
 		if (this.levels.length == 1)
 		{
-			this.status = -1;
 			this.message = 'surface data only';						// AROME-HD only gives us surface data
+			this.toolTip = 'The current forecast model only provides surface data - no calculation of thermal parameters is possible.'
 			return;
 		}
 
