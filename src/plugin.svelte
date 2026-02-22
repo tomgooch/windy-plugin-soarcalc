@@ -59,13 +59,13 @@
 	</td>
 	<td style=";text-align:right;vertical-align:top">
 		<div class="tooltipL">Cloud: {format_number(_sounding.cloud, 2)}
-			<span class="tooltiptext">Total cloud cover [Clouds layer only]</span>
+			<span class="tooltiptext">Total cloud cover</span>
 		</div>
 		<br><div class="tooltipL">Qs: {format_number(_sounding.Qs, 0)}
-			<span class="tooltiptext">Surface insolation (W/m2) [Clouds layer only]</span>
+			<span class="tooltiptext">Surface insolation (W/m2)</span>
 		</div>
 		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar, 2)}
-			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric}) [Clouds layer only]</span>
+			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric})</span>
 		</div>
 		<br><div class="tooltipL">Hcrit: 
 			{#if _sounding.Hcrit == _sounding.surface?.gh}
@@ -73,10 +73,10 @@
 			{:else}
 				{format_height(_sounding.Hcrit)}
 			{/if}
-			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9, 2)} {metrics.wind.metric} ({metrics.altitude.metric} amsl) [Clouds layer only]</span>
+			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9, 2)} {metrics.wind.metric} ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
-			<span class="tooltiptext">Bouyancy/Shear ratio [Clouds layer only]</span>
+			<span class="tooltiptext">Bouyancy/Shear ratio</span>
 		</div>
 	</td>
 	</tr>
