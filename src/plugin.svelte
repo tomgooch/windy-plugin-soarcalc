@@ -110,7 +110,7 @@
 	import { Sounding } from './SoarCalc';
     import { HttpPayload } from '@windycom/plugin-devtools/types/client/http';
 	import plugins from '@windy/plugins';
-    import { MapCoordinates } from '@windy/client/d.ts.files/dataSpecifications';
+    //import { MapCoordinates } from '@windy/client/d.ts.files/dataSpecifications';
 	
     let marker: L.Marker | null = null;
     let _loc: LatLon;
@@ -152,78 +152,72 @@
 		hideMarker();
 		
 	    marker = new L.Marker({lat:location.lat, lng:location.lon}, {
-	        draggable: true,
+	        draggable: false,
 	        icon: draggablePulsatingIcon,
 	    }).addTo(map);
-	    
-	    marker.on('dragend', function (event) {
-	        const { lat, lng } = event.target.getLatLng();
-	        update('dragend', { lat, lon: lng });
-	    });
     }
 
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
     export const onopen = (location?: LatLon) => {
-		console.log('onOpen', location);
 		if(isMobile)
 		{
 			// without this the small window on mobile UI inherits pointerEvents = none;
 			const thisPlugin = plugins['windy-plugin-soarcalc'];
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
+		console.log('onOpen', location);
+		console.log('detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
+		console.log('pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
+		
+		var poiActive: any = plugins['airport'].isOpen || plugins['webcams-detail'].isOpen;
+		console.log('lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
+		console.log('mapCoords:', store.get('mapCoords'));
 
-		// first discover if ukv is available at the desired location and if so select it
-		console.log(store.get('product'));
 		var loc: LatLon | null = null;
-        if (location != null && isValidLatLonObj(location))
+        if (isValidLatLonObj(location))
 			loc = location;
+		else if (plugins['detail'].isOpen)
+			loc = store.get('detailLocation');
+		else if (plugins['picker'].isOpen)
+			loc = store.get('pickerLocation');
+		else if (plugins['webcams-detail'].isOpen)
+			loc = store.get('lastPoiLocation');
 		else
 			loc = store.get('mapCoords');
 
-		if (loc == null)
-			onOpen2(location);
-		else
-		{
-			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
-				console.log('ukv available');
-				store.set('product', 'ukv');
-				onOpen2(location);
-			}).catch((e) => {
-				console.log('ukv not available');
-				onOpen2(location);
-			});
-		}
-	}
-	function onOpen2(location: LatLon | undefined)
-	{
-		console.log('onOpen2', location);
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'detail');
 
 		store.set('overlay', 'clouds');
 
-		console.log('mapCoords:', store.get('mapCoords'));
-		console.log('availableProducts:', store.get('availProducts'));
-		
-		// if location is given we use it and centre the map on that location
-		// otherwise we set the location to the centre of the map
-
-		const mapCoords: MapCoordinates | null = store.get('mapCoords');
-        if (location != null && isValidLatLonObj(location) && (mapCoords?.lat != location.lat || mapCoords?.lon != location.lon))
-		{
-			// map.setView will eventually trigger an onRedrawFinished() so no need to update here
-			showMarker(location);
-			map.setView({lat: location.lat, lng: location.lon}, 8);
-		}
+		// discover if ukv is available at the desired location and if so select it
+		console.log('loc=', loc, store.get('product'));
+		if (loc == null)
+			update('onOpen', null);
 		else
-			update('onOpen', mapCoords);
-	};
+		{
+			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
+				console.log('ukv available');
+				store.set('product', 'ukv');
+				update('onOpen', loc);
+			}).catch((e) => {
+				console.log('ukv not available');
+				update('onOpen', loc);
+			});
+		}
+	}
+
+	export const onclose = () => {
+		console.log('onclose');
+	}
 
     onMount(() => {
 		console.log("onMount")
         broadcast.on('redrawFinished', onRedrawFinished);
 		broadcast.on('rqstOpen', onRqstOpen);
+		broadcast.on('closeAllPlugins', onCloseAllPlugins)
+		store.on('pickerLocation', onStorePickerLocation);
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClick);
 		singleclick.on('detail', onSingleClick);
@@ -233,18 +227,41 @@
         hideMarker();
         broadcast.off('redrawFinished', onRedrawFinished);
 		broadcast.off('rqstOpen', onRqstOpen);
+		broadcast.off('closeAllPlugins', onCloseAllPlugins);
+		store.off('pickerLocation', onStorePickerLocation);
         singleclick.off(name, onSingleClick);
 		singleclick.off('sounding', onSingleClick);
 		singleclick.off('detail', onSingleClick);
     });
+	function onStorePickerLocation(location: any)
+	{
+		console.log('onStorePickerLocation', location);
+		if (isValidLatLonObj(location))
+			update('onStorePickerLocation', location)
+	}
 	function onSingleClick(location: LatLon)
     {
 		update('onSingleClick', location);
     }
 	function onRqstOpen(plugin: any, location: LatLon)
     {
-        if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport' || plugin == 'picker') && isValidLatLonObj(location)) {
+        if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport') && isValidLatLonObj(location)) {
 			update('onRqstOpen', location);
+		}
+    }
+	function onCloseAllPlugins()
+    {
+		console.log('onCloseAllPlugins');
+		broadcast.on('pluginClosed', onPluginClosed);
+    }
+
+	function onPluginClosed(plugin: any)
+    {
+		console.log('onPluginClosed', plugin);
+		if (plugin == 'search')
+		{
+			broadcast.off('pluginClosed', onPluginClosed);
+			broadcast.emit('rqstOpen', 'windy-plugin-soarcalc');
 		}
     }
   

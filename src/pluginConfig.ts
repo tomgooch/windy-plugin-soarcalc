@@ -25,7 +25,7 @@ const config: ExternalPluginConfig = {
     // Whenever user clicks on map and plugin is opened,
     // singleclick events is emitted with name of this plugin
     listenToSingleclick: true,
-    
+
     private: false,
 };
 
