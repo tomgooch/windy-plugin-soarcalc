@@ -166,13 +166,13 @@
 			const thisPlugin = plugins['windy-plugin-soarcalc'];
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
-		console.log('onOpen', location);
-		console.log('detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
-		console.log('pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
+		console.log('SoarCalc: onOpen', location);
+		console.log('SoarCalc: detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
+		console.log('SoarCalc: pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
 		
 		var poiActive: any = plugins['airport'].isOpen || plugins['webcams-detail'].isOpen;
-		console.log('lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
-		console.log('mapCoords:', store.get('mapCoords'));
+		console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
+		console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
 
 		var loc: LatLon | null = null;
         if (isValidLatLonObj(location))
@@ -192,24 +192,24 @@
 		store.set('overlay', 'clouds');
 
 		// discover if ukv is available at the desired location and if so select it
-		console.log('loc=', loc, store.get('product'));
+		console.log('SoarCalc: loc=', loc, store.get('product'));
 		if (loc == null)
 			update('onOpen', null);
 		else
 		{
 			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
-				console.log('ukv available');
+				console.log('SoarCalc: ukv available');
 				store.set('product', 'ukv');
 				update('onOpen', loc);
 			}).catch((e) => {
-				console.log('ukv not available');
+				console.log('SoarCalc: ukv not available');
 				update('onOpen', loc);
 			});
 		}
 	}
 
 	export const onclose = () => {
-		console.log('onclose');
+		console.log('SoarCalc: onclose');
 	}
 
     onMount(() => {
@@ -235,7 +235,7 @@
     });
 	function onStorePickerLocation(location: any)
 	{
-		console.log('onStorePickerLocation', location);
+		console.log('SoarCalc: onStorePickerLocation', location);
 		if (isValidLatLonObj(location))
 			update('onStorePickerLocation', location)
 	}
@@ -251,13 +251,13 @@
     }
 	function onCloseAllPlugins()
     {
-		console.log('onCloseAllPlugins');
+		console.log('SoarCalc: onCloseAllPlugins');
 		broadcast.on('pluginClosed', onPluginClosed);
     }
 
 	function onPluginClosed(plugin: any)
     {
-		console.log('onPluginClosed', plugin);
+		console.log('SoarCalc: onPluginClosed', plugin);
 		if (plugin == 'search')
 		{
 			broadcast.off('pluginClosed', onPluginClosed);
@@ -286,7 +286,7 @@
 		if (location != null)
 			showMarker(location);
 
-		console.log('update:', tag, ts, model, overlay, hoursAndMinutes(hour), _loc?.lat, _loc?.lon);
+		console.log('SoarCalc: update:', tag, ts, model, overlay, hoursAndMinutes(hour), _loc?.lat, _loc?.lon);
 
 		// interpolator is also invalidated by zooming or panning map
 		var valid: boolean = mapCoords?.lat == _mapLatitude && mapCoords?.lon == _mapLongitude && mapCoords?.zoom == _mapZoom;
@@ -295,7 +295,7 @@
 		// if we were brave enough we could remove the timeout
 		if (ts < _timestamp + 60000 && valid && model == _model && overlay == _overlay && hour == _hour && _loc?.lat == _latitude && _loc?.lon == _longitude)
 		{
-			console.log('duplicate');
+			console.log('SoarCalc: duplicate');
 			return;
 		}
 
@@ -310,11 +310,11 @@
 		_mapZoom = mapCoords?.zoom!;
 
 		updateMeteogramForecast(model, _loc).then((meteogramForecast) => {
-			console.log('updateMeteogramForecast.then', new Date().getTime(), meteogramForecast != null);
+			console.log('SoarCalc: updateMeteogramForecast.then', new Date().getTime(), meteogramForecast != null);
 			_meteogramForecast = meteogramForecast;
 
 			updateInterpolator(model, overlay, hour, valid).then((interpolator) => {
-				console.log('updateInterpolator.then', new Date().getTime(), overlay, interpolator != null, isValidLatLonObj(_loc));
+				console.log('SoarCalc: updateInterpolator.then', new Date().getTime(), overlay, interpolator != null, isValidLatLonObj(_loc));
 				_interpolator = interpolator;
 
 				var cloud: number | null = null;
@@ -334,7 +334,7 @@
 					{
 						returnValue.then((values: any)=> {
 						//_interpolator(_loc).then((values: any) => {
-							console.log('interpolator(loc).then', values);
+							console.log('SoarCalc: interpolator(loc).then', values);
 							if (Array.isArray(values))
 							{
 								if (overlay == 'clouds')
@@ -349,7 +349,7 @@
 								_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 							}
 						}).catch((e: any) => {
-							console.log('interpolator(loc).catch', e.message);
+							console.log('SoarCalc: interpolator(loc).catch', e.message);
 							_interpolator = null;
 							_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
 						});
@@ -359,12 +359,12 @@
 					_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 				}
 			}).catch((e) => {
-				console.log('updateInterpolator.catch', e.message);
+				console.log('SoarCalc: updateInterpolator.catch', e.message);
 				_interpolator = null;
 				_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
 			});
 		}).catch((e) => {
-			console.log('updateMeteogramForecast.catch', e.message);
+			console.log('SoarCalc: updateMeteogramForecast.catch', e.message);
 			_meteogramForecast = null;
 			_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, null, null);
 		});
@@ -378,7 +378,7 @@
 		if (_meteogramForecast != null && model == _sounding.model && loc.lat == _sounding.Loc?.lat && loc.lon == _sounding.Loc?.lon)
 			return new Promise((resolve) => {resolve(_meteogramForecast)});
  	    	
-		console.log('getMeteogramForecastData()');
+		console.log('SoarCalc: getMeteogramForecastData()');
 		return getMeteogramForecastData(model, {lat:loc.lat, lon:loc.lon, step:1});
 	}
 	// function updatePointForecast(model: string | null, loc: LatLon | null): Promise<HttpPayload<WeatherDataPayload> | null>
@@ -387,20 +387,20 @@
 	// 	if (model == null || loc == null)
 	// 		return new Promise((resolve) => {resolve(null)});
 
-	// 	console.log('getPointForecastData()');
+	// 	console.log('SoarCalc: getPointForecastData()');
 	// 	return getPointForecastData(model, {lat:loc.lat, lon:loc.lon, step:1});
 	// }
 
 	function updateInterpolator(model: string | null, overlay: string | null, hour: number, valid: boolean): Promise<any>
 	{
-		//console.log('updateInterpolator:', model, _sounding.model, overlay, _sounding.overlay, hour, _sounding.hour);
+		//console.log('SoarCalc: updateInterpolator:', model, _sounding.model, overlay, _sounding.overlay, hour, _sounding.hour);
 		if (model == null || (overlay != 'clouds' && overlay != 'solarpower'))
 			return new Promise((resolve) => {resolve(null)});
 
 		if (_interpolator != null && valid && model == _sounding.model && overlay == _sounding.overlay && hour == _sounding.hour)
 			return new Promise((resolve) => {resolve(_interpolator)});
 
-		console.log('getLatLonInterpolator()');
+		console.log('SoarCalc: getLatLonInterpolator()');
 		return Promise.race([getLatLonInterpolator(), pause(1000)]);
 
 		// pause(120).then(() => {
@@ -410,7 +410,7 @@
 		// 		else
 		// 		{
 		// 			// retry once after first timeout.
-		// 			console.log('retrying getLatLonInterpolator()');
+		// 			console.log('SoarCalc: retrying getLatLonInterpolator()');
 		// 			Promise.race([getLatLonInterpolator(), pause(1000)]).then((interpolator) => {
 		// 				setInterpolator(interpolator);
 		// 			});
