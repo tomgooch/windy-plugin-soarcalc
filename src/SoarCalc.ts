@@ -54,7 +54,7 @@ export class Sounding
 
 	constructor(meteogramForecast: any, model: string | null, loc: LatLon | null, timestamp: number | null, overlay: string | null, Qs: number | null, cloud: number | null)
 	{
-    	console.log("Sounding.constructor:", model, overlay, timestamp, loc?.lat, loc?.lon, Qs, cloud, meteogramForecast);
+    	console.log("SoarCalc: Sounding.constructor:", model, overlay, timestamp, loc?.lat, loc?.lon, Qs, cloud, meteogramForecast);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		this.Loc = loc;
@@ -212,7 +212,7 @@ export class Sounding
 		if (this.odBase != null)
 			this.odPossible = this.odBase.gh < this.blTop.gh;
 
-		console.log("/Sounding.constructor:", this);
+		console.log("SoarCalc: /Sounding.constructor:", this);
 	}
 	getBlAverageWindAndMixingRatio(): void
 	{
@@ -321,7 +321,7 @@ function getQs0(hour: number, loc: LatLon): number
 	var sunAltitude: number = SunCalc.getPosition(new Date(hour), loc.lat, loc.lon).altitude;
 	if (sunAltitude <= 0) sunAltitude = 0;
 	const Qs0: number = 1000 * Math.sin(sunAltitude);
-	//console.log("/getQs0:", format_angle(sunAltitude), Qs0);
+	//console.log("SoarCalc: /getQs0:", format_angle(sunAltitude), Qs0);
 	return Qs0;
 }
 
@@ -336,7 +336,7 @@ function getInterpolatedLevel2(levels: SoundingLevel[], gh: number, name: string
 }
 function getInterpolatedLevel(level1: SoundingLevel, level0: SoundingLevel, gh: number, name: string): SoundingLevel
 {
-	//console.log("getInterpolatedLevel:", level1, level0, gh, name);
+	//console.log("SoarCalc:getInterpolatedLevel:", level1, level0, gh, name);
 	const x = (gh - level0.gh) / (level1.gh - level0.gh);
 	const P =  level0.P + (level1.P - level0.P) * x;
 	const T =  level0.T + (level1.T - level0.T) * x;
@@ -391,7 +391,7 @@ function getSaturatedVapourPressure(T: number): number
 }
 function getWstar(Qs: number, blDepth: number, mixingRatio: number): number
 {
-	//console.log("getWstar:", Qs);
+	//console.log("SoarCalc:getWstar:", Qs);
 	const temperatureBar: number = 288;											// average surface temperature
 	const beta: number = 6;														// Bowen ratio sensible/latent heat flux
 	const Qg: number = 0.1 * Qs;												// heat flux into the ground
@@ -399,7 +399,7 @@ function getWstar(Qs: number, blDepth: number, mixingRatio: number): number
 	const Qh: number = QhTilde / (rho * Cp);									// kinematic sensible heat flux
 	const Qov: number = Qh * ( 1 + ((Rv - Rd) / Rd) * mixingRatio);				// Qov kinematic virtual sensible heat flux
 	const Wstar = Math.pow(Qov * blDepth * g / temperatureBar, 1/3);			// characteristic updraft velocity
-	//console.log("/getWstar:", Qov, Qov/Qs, Wstar);
+	//console.log("SoarCalc:/getWstar:", Qov, Qov/Qs, Wstar);
 	return Wstar;
 }
 function getPotentialTemperature(T: number, P: number, P0: number): number
@@ -409,7 +409,7 @@ function getPotentialTemperature(T: number, P: number, P0: number): number
 function getZcrit(wCrit: number, wStar: number): number
 {
 	// employ Newton–Raphson method to find z (z/blDepth) for given value of w (Wcrit/Wstar)
-	//console.log("getZcrit:", wCrit, wStar);
+	//console.log("SoarCalc:getZcrit:", wCrit, wStar);
 	var z: number;
 	if (wCrit > wStar)
 	{
@@ -420,7 +420,7 @@ function getZcrit(wCrit: number, wStar: number): number
 /*		for (var i=0; i<101; i++)
 		{
 			z = 0.01 * i;
-			console.log("i=", i, "w=", Math.pow(z, 1/3) * (1 - 1.1*z), "dzdw=", 1/3 * Math.pow(z, -2/3) * (1 - 1.1*z) - 1.1 * Math.pow(z, 1/3))
+			console.log("SoarCalc:i=", i, "w=", Math.pow(z, 1/3) * (1 - 1.1*z), "dzdw=", 1/3 * Math.pow(z, -2/3) * (1 - 1.1*z) - 1.1 * Math.pow(z, 1/3))
 		}
 
 */
@@ -434,11 +434,11 @@ function getZcrit(wCrit: number, wStar: number): number
 			w = 2.2 * Math.pow(z, 1/3) * (1 - 1.1*z);
 			dwdz = 2.2 * (1/3 * Math.pow(z, -2/3) * (1 - 1.1*z) - 1.1 * Math.pow(z, 1/3));
 			dz = (w - w0)/dwdz;
-			//console.log("z=", z, "w=", w, "dwdz=", dwdz, "dz=", dz);
+			//console.log("SoarCalc:z=", z, "w=", w, "dwdz=", dwdz, "dz=", dz);
 			z = z - dz;
 		} while (Math.abs(dz) > 0.001);
 	}
-	//console.log("/getZcrit:", z);
+	//console.log("SoarCalc:/getZcrit:", z);
 	return z;
 }
 function getCondensationLevel(levels: SoundingLevel[], U: number, name: string): SoundingLevel
