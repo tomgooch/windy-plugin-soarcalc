@@ -118,6 +118,7 @@
     let _loc: LatLon;
 
     let _sounding: Sounding = new Sounding(null, null, null, null, null, null, null);
+
     let _meteogramForecast: any = null;
     let _interpolator: any = null;
 
@@ -161,7 +162,7 @@
 
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
-    export const onopen = (location?: LatLon) => {
+    export const onopen = (location?: any) => {
 		if(isMobile)
 		{
 			// without this the small window on mobile UI inherits pointerEvents = none;
@@ -169,21 +170,22 @@
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
 		console.log('SoarCalc: onOpen', location);
-		var poiActive: any = plugins['airport'].isOpen || plugins['webcams-detail'].isOpen;
 		// console.log('SoarCalc: detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
 		// console.log('SoarCalc: pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
-		// console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
+		// console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), usePoi);
 		// console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
 
 		var loc: LatLon | null = null;
-        if (isValidLatLonObj(location))
+        if (isValidLatLonObj(location) && location?.source != 'soarcalc')
 			loc = location;
 		else if (plugins['detail'].isOpen)
 			loc = store.get('detailLocation');
 		else if (plugins['picker'].isOpen)
 			loc = store.get('pickerLocation');
-		else if (poiActive)
+		else if (!isMobile && (plugins['airport'].isOpen || plugins['webcams-detail'].isOpen))
 			loc = store.get('lastPoiLocation');
+		else if (isValidLatLonObj(location) && location?.source == 'soarcalc')
+			loc = location;
 		else
 			loc = store.get('mapCoords');
 
@@ -198,11 +200,9 @@
 		else
 		{
 			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
-				console.log('SoarCalc: ukv available');
 				store.set('product', 'ukv');
 				update('onOpen', loc);
 			}).catch((e) => {
-				console.log('SoarCalc: ukv not available');
 				update('onOpen', loc);
 			});
 		}
@@ -240,7 +240,7 @@
 
 		if (searchPluginActive && closeAllPlugins)
 		{
-			// defer the rqstOpen until location is available
+			// defer the rqstOpen until search plugin closes and location is available
 			broadcast.on('pluginClosed', onPluginClosed);
 		}
     });
@@ -265,7 +265,6 @@
 			update('onRqstOpen ' + plugin, location);
 		}
     }
-
 	function onPluginOpened(plugin: any)
     {
 		// this is only confirming what onRqstOpen has already told us
@@ -291,7 +290,7 @@
 			console.log('SoarCalc: onPluginClosed', plugin);
 			searchPluginActive = false;
 			broadcast.off('pluginClosed', onPluginClosed);
-			broadcast.emit('rqstOpen', 'windy-plugin-soarcalc');
+			broadcast.emit('rqstOpen', 'windy-plugin-soarcalc', {lat:_loc.lat, lon:_loc.lon, source:'soarcalc'});
 		}
     }
   
@@ -301,6 +300,7 @@
 		pause(200).then(() => {update('onRedrawFinished', null)});
 	}
 
+//=======================================================================================================================================================
 	function update(tag: string, location: LatLon | null)
 	{
 		const model = store.get('product');
@@ -308,7 +308,8 @@
 		const timestamp: number | null = store.get('timestamp');
 		const mapCoords = store.get('mapCoords');
 
-		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated (not rounded) value that corresponds to the map / forecast point
+		// the slider shows the timestamp that it stores truncated to the hour and it is this truncated (not rounded) value
+		// that corresponds to the map / forecast point
 		const hour = 3600000 * Math.trunc(timestamp/3600000);
 
 		const ts: number = new Date().getTime();

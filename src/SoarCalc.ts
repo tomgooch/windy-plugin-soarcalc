@@ -54,7 +54,7 @@ export class Sounding
 
 	constructor(meteogramForecast: any, model: string | null, loc: LatLon | null, timestamp: number | null, overlay: string | null, Qs: number | null, cloud: number | null)
 	{
-    	console.log("SoarCalc: Sounding.constructor:", model, overlay, timestamp, loc?.lat, loc?.lon, Qs, cloud, meteogramForecast);
+    	console.log("SoarCalc: Sounding.constructor:", model, overlay, timestamp, loc, Qs, cloud, meteogramForecast);
 		this.Qs = Qs;
 		this.cloud = cloud;
 		this.Loc = loc;

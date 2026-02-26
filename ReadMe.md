@@ -76,6 +76,21 @@ Then...
 
 ## Change Log
 
+### 1.3.4
+
+The most important change in this release is that SoarCalc interacts properly with the "Search location" window.  It also contains the following changes...
+
+- SoarCalc now interacts properly with the "Search location" feature in Windy.  It is no longer closed and moves to the new location.
+- The marker is no longer draggable (so as not to allow SoarCalc's location to differ from the "detail forecast" location).
+- SoarCalc now follows the weather picker location.
+ 
+### 1.3.2
+
+This version of SoarCalc is compatible with the most recent update of Windy.com (version 49, February 2026).  It also contains the following changes...
+
+- The "getting started" section of the documentation is updated to reflect the fact that SoarCalc now runs properly within the Windy Mobile App.
+- A "Notification" line has been added at the bottom of the window giving the reason why if some data cannot be shown.  Further information is always available as a tool tip.
+
 ### 1.2.19
 
 - Fixed bug with wind heading (was showing > 360 degrees when in the NE quadrant)
@@ -102,21 +117,6 @@ The main purpose of this release is to make the plug-in work with the most recen
 - Issues with time shown in plug-in being out of step with that shown on the slider are resolved.
 - Timeouts from getLatLongInterpolator() are handled gracefully.  The parameters are now all updated properly except that the values in the rightmost "cloud" column show as ## in this circumstance rather than continuing to show old data.
 
-### 1.3.2
-
-This version of SoarCalc is compatible with the most recent update of Windy.com (version 49, February 2026).  It also contains the following changes...
-
-- The "getting started" section of the documentation is updated to reflect the fact that SoarCalc now runs properly within the Windy Mobile App.
-- A "Notification" line has been added at the bottom of the window giving the reason why if some data cannot be shown.  Further information is always available as a tool tip.
-
-### 1.3.3
-
-The most important change in this release is that SoarCalc interacts properly with the "Search location" window.  It also contains the following changes...
-
-- SoarCalc now interacts properly with the "Search location" feature in Windy.  It is no longer closed and moves to the new location.
-- The marker is no longer draggable (so as not to allow SoarCalc's location to differ from the "detail forecast" location).
-- SoarCalc now follows the weather picker location.
- 
 ---
 
 ## Source Code
