@@ -76,7 +76,7 @@ Then...
 
 ## Change Log
 
-### 1.3.4
+### 1.3.5
 
 The most important change in this release is that SoarCalc interacts properly with the "Search location" window.  It also contains the following changes...
 

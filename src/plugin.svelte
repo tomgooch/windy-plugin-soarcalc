@@ -184,6 +184,8 @@
 			loc = store.get('pickerLocation');
 		else if (!isMobile && (plugins['airport'].isOpen || plugins['webcams-detail'].isOpen))
 			loc = store.get('lastPoiLocation');
+		else if (isMobile && plugins['webcams-detail'].isOpen)
+			loc = store.get('lastPoiLocation');
 		else if (isValidLatLonObj(location) && location?.source == 'soarcalc')
 			loc = location;
 		else
