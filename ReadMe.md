@@ -25,6 +25,8 @@ parameters in, as far as possible, exactly the same way as RASP.
 
 To get started...
 
+To install any plugin, Windy.com now requires you to log in so you will need to do that.  (creating a free account is very straightforward)
+
 Within the Windy Mobile App, open the main menu and scroll down to the "Extend you Windy" section.
 
 Or
@@ -37,14 +39,12 @@ Then...
 
 2.  Select "SoarCalc" from the list of available Plugins
 
-(From here you will be presented with some basic information including links to "Source code" and "Homepage" which directs you back to this document on GitHub.)
+(From here you will be presented with some basic information including links to "Source code" and to "Homepage" which directs you back to this document on GitHub.)
 
 3.  Press "Install Plugin"
 
 4.  Once installed "Soar Calc" will appear directly on the main menu (or within the "Extend you Windy" section on mobile).  Simply tap on it (not the dustbin beside it!) to open.
 
-
-**Note for Desktop users**  Windy can be opened with SoarCalc already up and running by navigating to <https://windy.com/plugin/soarcalc>. You may wish to set up a shortcut to this url or perhaps to one or more like this <https://windy.com/plugin/soarcalc/51.705/-2.130> i.e. the same thing but also specifying the starting location (latitude/longitude).
 
 
 ## Top Tips
@@ -108,6 +108,14 @@ This version of SoarCalc is compatible with the most recent update of Windy.com 
 
 - The "getting started" section of the documentation is updated to reflect the fact that SoarCalc now runs properly within the Windy Mobile App.
 - A "Notification" line has been added at the bottom of the window giving the reason why if some data cannot be shown.  Further information is always available as a tool tip.
+
+### 1.3.3
+
+The most important change in this release is that SoarCalc interacts properly with the "Search location" window.  It also contains the following changes...
+
+- SoarCalc now interacts properly with the "Search location" feature in Windy.  It is no longer closed and moves to the new location.
+- The marker is no longer draggable (so as not to allow SoarCalc's location to differ from the "detail forecast" location).
+- SoarCalc now follows the weather picker location.
  
 ---
 
