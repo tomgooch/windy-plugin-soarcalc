@@ -112,6 +112,8 @@
 	import plugins from '@windy/plugins';
     //import { MapCoordinates } from '@windy/client/d.ts.files/dataSpecifications';
 	
+	let closeAllPlugins: boolean = false;
+	let searchPluginActive: boolean = false;
     let marker: L.Marker | null = null;
     let _loc: LatLon;
 
@@ -167,12 +169,11 @@
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
 		console.log('SoarCalc: onOpen', location);
-		console.log('SoarCalc: detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
-		console.log('SoarCalc: pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
-		
 		var poiActive: any = plugins['airport'].isOpen || plugins['webcams-detail'].isOpen;
-		console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
-		console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
+		// console.log('SoarCalc: detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
+		// console.log('SoarCalc: pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
+		// console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), poiActive);
+		// console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
 
 		var loc: LatLon | null = null;
         if (isValidLatLonObj(location))
@@ -181,7 +182,7 @@
 			loc = store.get('detailLocation');
 		else if (plugins['picker'].isOpen)
 			loc = store.get('pickerLocation');
-		else if (plugins['webcams-detail'].isOpen)
+		else if (poiActive)
 			loc = store.get('lastPoiLocation');
 		else
 			loc = store.get('mapCoords');
@@ -192,7 +193,6 @@
 		store.set('overlay', 'clouds');
 
 		// discover if ukv is available at the desired location and if so select it
-		console.log('SoarCalc: loc=', loc, store.get('product'));
 		if (loc == null)
 			update('onOpen', null);
 		else
@@ -208,34 +208,44 @@
 		}
 	}
 
-	export const onclose = () => {
-		console.log('SoarCalc: onclose');
-	}
+	// export const onclose = () => {
+	// 	console.log('SoarCalc: onclose');
+	// }
 
     onMount(() => {
-		console.log("onMount")
+		console.log('SoarCalc: onMount');
         broadcast.on('redrawFinished', onRedrawFinished);
 		broadcast.on('rqstOpen', onRqstOpen);
+		broadcast.on('pluginOpened', onPluginOpened);
 		broadcast.on('closeAllPlugins', onCloseAllPlugins)
 		store.on('pickerLocation', onStorePickerLocation);
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClick);
 		singleclick.on('detail', onSingleClick);
+
+		//thisPlugin.window.node.querySelector(':scope > .closing-x').addEventListener('click', () => (closeButtonClicked = true));
 	});
 
     onDestroy(() => {
+		console.log('SoarCalc: onDestroy');
         hideMarker();
         broadcast.off('redrawFinished', onRedrawFinished);
 		broadcast.off('rqstOpen', onRqstOpen);
+		broadcast.off('pluginOpened', onPluginOpened);
 		broadcast.off('closeAllPlugins', onCloseAllPlugins);
 		store.off('pickerLocation', onStorePickerLocation);
         singleclick.off(name, onSingleClick);
 		singleclick.off('sounding', onSingleClick);
 		singleclick.off('detail', onSingleClick);
+
+		if (searchPluginActive && closeAllPlugins)
+		{
+			// defer the rqstOpen until location is available
+			broadcast.on('pluginClosed', onPluginClosed);
+		}
     });
 	function onStorePickerLocation(location: any)
 	{
-		console.log('SoarCalc: onStorePickerLocation', location);
 		if (isValidLatLonObj(location))
 			update('onStorePickerLocation', location)
 	}
@@ -245,21 +255,41 @@
     }
 	function onRqstOpen(plugin: any, location: LatLon)
     {
-        if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport') && isValidLatLonObj(location)) {
-			update('onRqstOpen', location);
+		if (plugin == 'search')
+		{
+			console.log('SoarCalc: onRqstOpen:', plugin);
+			searchPluginActive = true;
+		}
+        else if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport') && isValidLatLonObj(location))
+		{
+			update('onRqstOpen ' + plugin, location);
+		}
+    }
+
+	function onPluginOpened(plugin: any)
+    {
+		// this is only confirming what onRqstOpen has already told us
+		if (plugin == 'search')
+		{
+			console.log('SoarCalc: onPluginOpened', plugin);
+			searchPluginActive = true;
 		}
     }
 	function onCloseAllPlugins()
     {
+		// the search plugin closes everyone else
+		// but does not succeed if this plugin was opened directly from url
 		console.log('SoarCalc: onCloseAllPlugins');
-		broadcast.on('pluginClosed', onPluginClosed);
+		closeAllPlugins = true;
     }
 
 	function onPluginClosed(plugin: any)
     {
-		console.log('SoarCalc: onPluginClosed', plugin);
+		// we need to wait until this point to emit the rqstOpen so that onOpen will find detailLocation or lastPoiLocation
 		if (plugin == 'search')
 		{
+			console.log('SoarCalc: onPluginClosed', plugin);
+			searchPluginActive = false;
 			broadcast.off('pluginClosed', onPluginClosed);
 			broadcast.emit('rqstOpen', 'windy-plugin-soarcalc');
 		}
@@ -286,7 +316,7 @@
 		if (location != null)
 			showMarker(location);
 
-		console.log('SoarCalc: update:', tag, ts, model, overlay, hoursAndMinutes(hour), _loc?.lat, _loc?.lon);
+		console.log('SoarCalc: update:', tag, location, ts, model, overlay, hoursAndMinutes(hour));
 
 		// interpolator is also invalidated by zooming or panning map
 		var valid: boolean = mapCoords?.lat == _mapLatitude && mapCoords?.lon == _mapLongitude && mapCoords?.zoom == _mapZoom;
