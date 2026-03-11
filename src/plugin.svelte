@@ -321,7 +321,8 @@
 		{
 			// somewhat draconian but otherwise soarcalc will not be visible and simply by clicking too near a label will open detail by accident
 			// user can always close soarcalc if they want to see detail
-			broadcast.emit('rqstClose', 'detail');
+			//broadcast.emit('rqstClose', 'detail');
+			pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
 		}
     }
 	function onCloseAllPlugins()
