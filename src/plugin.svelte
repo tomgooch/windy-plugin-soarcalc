@@ -143,23 +143,30 @@
         iconAnchor: [5, 5],
     });
 
-    const hideMarker = () => {
+    function hideMarker()
+	{
         if (marker) {
             marker.remove();
             marker = null;
         }
     };
-    function showMarker(location: LatLon)
+    function showMarker()
     {
+		marker = new L.Marker({lat:_loc.lat, lng:_loc.lon}, {
+			draggable: false,
+			icon: draggablePulsatingIcon,
+		}).addTo(map);
+    }
+
+    function setLocation(location: LatLon)
+    {
+		console.log('SoarCalc: setLocation: ', location, plugins['detail'].isOpen);
 		_loc = location;
 		hideMarker();
 		
-	    marker = new L.Marker({lat:location.lat, lng:location.lon}, {
-	        draggable: false,
-	        icon: draggablePulsatingIcon,
-	    }).addTo(map);
-    }
-
+		if (isMobile || !plugins['detail'].isOpen)
+			showMarker();
+	}
     // If plugin is opened from RH menu, it is called with location
     // if not, the location param is undefined
     export const onopen = (location?: any) => {
@@ -176,22 +183,27 @@
 		// console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
 
 		var loc: LatLon | null = null;
-        if (isValidLatLonObj(location) && location?.source != 'soarcalc')
+		const explicitLocation: boolean = location?.source != 'soarcalc' && isValidLatLonObj(location);
+
+		if (explicitLocation)
 			loc = location;
 		else if (plugins['detail'].isOpen)
 			loc = store.get('detailLocation');
 		else if (plugins['picker'].isOpen)
 			loc = store.get('pickerLocation');
-		else if (!isMobile && (plugins['airport'].isOpen || plugins['webcams-detail'].isOpen))
+		else if (!isMobile && (plugins['airport'].isOpen))
 			loc = store.get('lastPoiLocation');
-		else if (isMobile && plugins['webcams-detail'].isOpen)
+		else if (plugins['webcams-detail'].isOpen)
 			loc = store.get('lastPoiLocation');
-		else if (isValidLatLonObj(location) && location?.source == 'soarcalc')
+		else if (isValidLatLonObj(location))			// previously open location (should not happen)
 			loc = location;
 		else
-			loc = store.get('mapCoords');
+			loc = store.get('mapCoords');				// final fallback is centre of map
 
+		// to avoid multiple locations simultaneously active and stealing the single click events from them this means
+		// we need to close detail, sounding and picker
 		broadcast.emit('rqstClose', 'sounding');
+		broadcast.emit('rqstClose', 'picker');
 		broadcast.emit('rqstClose', 'detail');
 
 		store.set('overlay', 'clouds');
@@ -219,11 +231,16 @@
         broadcast.on('redrawFinished', onRedrawFinished);
 		broadcast.on('rqstOpen', onRqstOpen);
 		broadcast.on('pluginOpened', onPluginOpened);
+		broadcast.on('pluginClosed', onPluginClosed);
+
 		broadcast.on('closeAllPlugins', onCloseAllPlugins)
-		store.on('pickerLocation', onStorePickerLocation);
+		if (!isMobile)
+		{
+			store.on('pickerLocation', onStorePickerLocation);
+			store.on('detailLocation', onStoreDetailLocation);
+			singleclick.on('sounding', onSingleClickSounding);
+		}
         singleclick.on(name, onSingleClick);
-		singleclick.on('sounding', onSingleClick);
-		singleclick.on('detail', onSingleClick);
 
 		//thisPlugin.window.node.querySelector(':scope > .closing-x').addEventListener('click', () => (closeButtonClicked = true));
 	});
@@ -235,25 +252,50 @@
 		broadcast.off('rqstOpen', onRqstOpen);
 		broadcast.off('pluginOpened', onPluginOpened);
 		broadcast.off('closeAllPlugins', onCloseAllPlugins);
-		store.off('pickerLocation', onStorePickerLocation);
-        singleclick.off(name, onSingleClick);
-		singleclick.off('sounding', onSingleClick);
-		singleclick.off('detail', onSingleClick);
-
-		if (searchPluginActive && closeAllPlugins)
+		if (!isMobile)
 		{
-			// defer the rqstOpen until search plugin closes and location is available
-			broadcast.on('pluginClosed', onPluginClosed);
+			store.off('pickerLocation', onStorePickerLocation);
+			store.off('detailLocation', onStoreDetailLocation);
+			singleclick.off('sounding', onSingleClickSounding);
 		}
+        singleclick.off(name, onSingleClick);
+
+		if (!(searchPluginActive || closeAllPlugins))
+			broadcast.off('pluginClosed', onPluginClosed);
     });
 	function onStorePickerLocation(location: any)
 	{
+		if (!plugins['detail'].isOpen)
+			if (isValidLatLonObj(location) && !store.get('pickerDragging'))
+				update('onStorePickerLocation', location)
+	}
+	function onStoreDetailLocation(location: any)
+	{
 		if (isValidLatLonObj(location))
-			update('onStorePickerLocation', location)
+			update('onStoreDetailLocation', location)
 	}
 	function onSingleClick(location: LatLon)
     {
-		update('onSingleClick', location);
+		if (isMobile)
+		{
+			update('onSingleClick', location);
+		}
+		else
+		{
+			// if the detail plugin is open then we will have / are just about to get the onStoreDetailLocation()
+			if(!plugins['detail'].isOpen)
+				update('onSingleClick', location);
+
+			// if we got the singleClick event then the picker did not so kill it rather than continue to show it in the wrong place
+			if (plugins['picker'].isOpen)
+				broadcast.emit('rqstClose', 'picker');
+		}
+    }
+	function onSingleClickSounding(location: LatLon)
+    {
+		// if the detail plugin is open then we will have / are just about to get the onStoreDetailLocation()
+		if(!plugins['detail'].isOpen)
+			update('onSingleClickSounding', location);
     }
 	function onRqstOpen(plugin: any, location: LatLon)
     {
@@ -262,18 +304,24 @@
 			console.log('SoarCalc: onRqstOpen:', plugin);
 			searchPluginActive = true;
 		}
-        else if ((plugin == 'detail' || plugin == 'sounding' || plugin == 'airport') && isValidLatLonObj(location))
+        else if ((plugin == 'sounding' || plugin == 'airport') && isValidLatLonObj(location))
 		{
 			update('onRqstOpen ' + plugin, location);
 		}
     }
 	function onPluginOpened(plugin: any)
     {
-		// this is only confirming what onRqstOpen has already told us
 		if (plugin == 'search')
 		{
 			console.log('SoarCalc: onPluginOpened', plugin);
+			// this is only confirming what onRqstOpen has already told us
 			searchPluginActive = true;
+		}
+		else if (isMobile && plugin == 'detail' && !searchPluginActive)
+		{
+			// somewhat draconian but otherwise soarcalc will not be visible and simply by clicking too near a label will open detail by accident
+			// user can always close soarcalc if they want to see detail
+			broadcast.emit('rqstClose', 'detail');
 		}
     }
 	function onCloseAllPlugins()
@@ -286,19 +334,26 @@
 
 	function onPluginClosed(plugin: any)
     {
-		// we need to wait until this point to emit the rqstOpen so that onOpen will find detailLocation or lastPoiLocation
-		if (plugin == 'search')
+		if (plugin == 'search' && searchPluginActive && closeAllPlugins)
 		{
-			console.log('SoarCalc: onPluginClosed', plugin);
+			console.log('SoarCalc: onPluginClosed', plugin, searchPluginActive, closeAllPlugins);
+			// we need to wait until this point to emit the rqstOpen so that onOpen will find detailLocation or lastPoiLocation
 			searchPluginActive = false;
+			closeAllPlugins = false;
 			broadcast.off('pluginClosed', onPluginClosed);
 			broadcast.emit('rqstOpen', 'windy-plugin-soarcalc', {lat:_loc.lat, lon:_loc.lon, source:'soarcalc'});
+		}
+		else if ((plugin == 'detail') && _loc != null)
+		{
+			// may need to show the marker
+			setLocation(_loc);
 		}
     }
   
 	function onRedrawFinished(params: any)
 	{
 		// still need this to avoid conflict with internal use of getLatLonInterpolator()
+		// is this still true since version 49?????
 		pause(200).then(() => {update('onRedrawFinished', null)});
 	}
 
@@ -316,10 +371,10 @@
 
 		const ts: number = new Date().getTime();
 
-		if (location != null)
-			showMarker(location);
-
 		console.log('SoarCalc: update:', tag, location, ts, model, overlay, hoursAndMinutes(hour));
+
+		if (location != null)
+			setLocation(location);
 
 		// interpolator is also invalidated by zooming or panning map
 		var valid: boolean = mapCoords?.lat == _mapLatitude && mapCoords?.lon == _mapLongitude && mapCoords?.zoom == _mapZoom;
