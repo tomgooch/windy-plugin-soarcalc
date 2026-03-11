@@ -232,15 +232,14 @@
 		broadcast.on('rqstOpen', onRqstOpen);
 		broadcast.on('pluginOpened', onPluginOpened);
 		broadcast.on('pluginClosed', onPluginClosed);
-
 		broadcast.on('closeAllPlugins', onCloseAllPlugins)
+		store.on('detailLocation', onStoreDetailLocation);
+        singleclick.on(name, onSingleClick);
 		if (!isMobile)
 		{
 			store.on('pickerLocation', onStorePickerLocation);
-			store.on('detailLocation', onStoreDetailLocation);
 			singleclick.on('sounding', onSingleClickSounding);
 		}
-        singleclick.on(name, onSingleClick);
 
 		//thisPlugin.window.node.querySelector(':scope > .closing-x').addEventListener('click', () => (closeButtonClicked = true));
 	});
@@ -252,13 +251,13 @@
 		broadcast.off('rqstOpen', onRqstOpen);
 		broadcast.off('pluginOpened', onPluginOpened);
 		broadcast.off('closeAllPlugins', onCloseAllPlugins);
+		store.off('detailLocation', onStoreDetailLocation);
+        singleclick.off(name, onSingleClick);
 		if (!isMobile)
 		{
 			store.off('pickerLocation', onStorePickerLocation);
-			store.off('detailLocation', onStoreDetailLocation);
 			singleclick.off('sounding', onSingleClickSounding);
 		}
-        singleclick.off(name, onSingleClick);
 
 		if (!(searchPluginActive || closeAllPlugins))
 			broadcast.off('pluginClosed', onPluginClosed);
