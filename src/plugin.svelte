@@ -272,7 +272,10 @@
 	function onStoreDetailLocation(location: any)
 	{
 		if (isValidLatLonObj(location))
-			update('onStoreDetailLocation', location)
+			update('onStoreDetailLocation', location);
+
+		if (isMobile && location?.source == 'label')
+			pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
 	}
 	function onSingleClick(location: LatLon)
     {
@@ -317,13 +320,13 @@
 			// this is only confirming what onRqstOpen has already told us
 			searchPluginActive = true;
 		}
-		else if (isMobile && plugin == 'detail' && !searchPluginActive)
-		{
-			// somewhat draconian but otherwise soarcalc will not be visible and simply by clicking too near a label will open detail by accident
-			// user can always close soarcalc if they want to see detail
-			//broadcast.emit('rqstClose', 'detail');
-			pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
-		}
+		// else if (isMobile && plugin == 'detail' && !searchPluginActive)
+		// {
+		// 	// somewhat draconian but otherwise soarcalc will not be visible and simply by clicking too near a label will open detail by accident
+		// 	// user can always close soarcalc if they want to see detail
+		// 	//broadcast.emit('rqstClose', 'detail');
+		// 	pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
+		// }
     }
 	function onCloseAllPlugins()
     {
