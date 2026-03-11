@@ -271,23 +271,19 @@
 
 		if (isMobile && location?.source == 'label')
 			broadcast.emit('rqstClose', 'detail');
+
+		if (!isMobile && plugins['picker'].isOpen)
+			broadcast.emit('rqstClose', 'picker');
 	}
 	function onSingleClick(location: LatLon)
     {
-		if (isMobile)
-		{
+		// if the detail plugin is open then we will have / are just about to get the onStoreDetailLocation()
+		if(!plugins['detail'].isOpen)
 			update('onSingleClick', location);
-		}
-		else
-		{
-			// if the detail plugin is open then we will have / are just about to get the onStoreDetailLocation()
-			if(!plugins['detail'].isOpen)
-				update('onSingleClick', location);
-
-			// if we got the singleClick event then the picker did not so kill it rather than continue to show it in the wrong place
-			if (plugins['picker'].isOpen)
-				broadcast.emit('rqstClose', 'picker');
-		}
+		
+		// if we got the singleClick event then the picker did not so kill it rather than continue to show it in the wrong place
+		if (!isMobile && plugins['picker'].isOpen)
+			broadcast.emit('rqstClose', 'picker');
     }
 	function onSingleClickSounding(location: LatLon)
     {
