@@ -272,7 +272,7 @@
 		if (isMobile && location?.source == 'label')
 			broadcast.emit('rqstClose', 'detail');
 
-		if (!isMobile && plugins['picker'].isOpen)
+		if (location?.source == 'label' && plugins['picker'].isOpen)
 			broadcast.emit('rqstClose', 'picker');
 	}
 	function onSingleClick(location: LatLon)

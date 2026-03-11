@@ -76,7 +76,7 @@ Then...
 
 ## Change Log
 
-### 1.3.11
+### 1.3.12
 
 This release addresses unfortunate interactions between SoarCalc and the 'detail' and 'picker' plugins with a focus on making sure that the user is never confused by the presence of 2 active markers on the map surface.
 
