@@ -164,7 +164,7 @@
 		_loc = location;
 		hideMarker();
 		
-		if (isMobile || !plugins['detail'].isOpen)
+		if (!plugins['detail'].isOpen)
 			showMarker();
 	}
     // If plugin is opened from RH menu, it is called with location
@@ -177,10 +177,6 @@
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
 		console.log('SoarCalc: onOpen', location);
-		// console.log('SoarCalc: detailLocation:', store.get('detailLocation'), plugins['detail'].isOpen);
-		// console.log('SoarCalc: pickerLocation:', store.get('pickerLocation'), plugins['picker'].isOpen);
-		// console.log('SoarCalc: lastPoiLocation:', store.get('lastPoiLocation'), usePoi);
-		// console.log('SoarCalc: mapCoords:', store.get('mapCoords'));
 
 		var loc: LatLon | null = null;
 		const explicitLocation: boolean = location?.source != 'soarcalc' && isValidLatLonObj(location);
@@ -274,7 +270,7 @@
 			update('onStoreDetailLocation', location);
 
 		if (isMobile && location?.source == 'label')
-			pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
+			broadcast.emit('rqstClose', 'detail');
 	}
 	function onSingleClick(location: LatLon)
     {
@@ -319,13 +315,6 @@
 			// this is only confirming what onRqstOpen has already told us
 			searchPluginActive = true;
 		}
-		// else if (isMobile && plugin == 'detail' && !searchPluginActive)
-		// {
-		// 	// somewhat draconian but otherwise soarcalc will not be visible and simply by clicking too near a label will open detail by accident
-		// 	// user can always close soarcalc if they want to see detail
-		// 	//broadcast.emit('rqstClose', 'detail');
-		// 	pause(1000).then(() => {broadcast.emit('rqstClose', 'detail')});
-		// }
     }
 	function onCloseAllPlugins()
     {

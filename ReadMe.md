@@ -76,13 +76,13 @@ Then...
 
 ## Change Log
 
-### 1.3.6
+### 1.3.10
 
 This release addresses unfortunate interactions between SoarCalc and the 'detail' and 'picker' plugins with a focus on making sure that the user is never confused by the presence of 2 active markers on the map surface.
 
 - The picker is now closed when the SoarCalc marker is moved away from the picker marker.
 
-- **Mobile only:** SoarCalc now closes the 'detail' plugin when it is opened as a result of clicking on a label.  This is simply so that the behaviour is the same whether the user clicks on empty space on the map or on the label.
+- **Mobile only:** SoarCalc now closes the 'detail' plugin when it is opened as a result of clicking on a label.  This is simply so that the behaviour is the same whether the user clicks on empty space on the map or on the label and SoarCalc will not be hidden.
 
 - **Desktop only:** SoarCalc now follows the 'detail' plugin indirectly via the value of 'detailLocation' rather than by subscribing to the singleClick event.  This avoids the presence of 2 markers at very similar but not identical locations.
 
