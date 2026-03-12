@@ -231,11 +231,9 @@
 		broadcast.on('closeAllPlugins', onCloseAllPlugins)
 		store.on('detailLocation', onStoreDetailLocation);
         singleclick.on(name, onSingleClick);
-		if (!isMobile)
-		{
+		singleclick.on('sounding', onSingleClickSounding);
+		// if (!isMobile)
 			store.on('pickerLocation', onStorePickerLocation);
-			singleclick.on('sounding', onSingleClickSounding);
-		}
 
 		//thisPlugin.window.node.querySelector(':scope > .closing-x').addEventListener('click', () => (closeButtonClicked = true));
 	});
@@ -249,11 +247,9 @@
 		broadcast.off('closeAllPlugins', onCloseAllPlugins);
 		store.off('detailLocation', onStoreDetailLocation);
         singleclick.off(name, onSingleClick);
-		if (!isMobile)
-		{
+		singleclick.off('sounding', onSingleClickSounding);
+		// if (!isMobile)
 			store.off('pickerLocation', onStorePickerLocation);
-			singleclick.off('sounding', onSingleClickSounding);
-		}
 
 		if (!(searchPluginActive || closeAllPlugins))
 			broadcast.off('pluginClosed', onPluginClosed);
@@ -269,11 +265,14 @@
 		if (isValidLatLonObj(location))
 			update('onStoreDetailLocation', location);
 
-		if (isMobile && location?.source == 'label')
-			broadcast.emit('rqstClose', 'detail');
+		if (location?.source == 'label')
+		{
+			if (isMobile)
+				broadcast.emit('rqstClose', 'detail');
 
-		if (location?.source == 'label' && plugins['picker'].isOpen)
-			broadcast.emit('rqstClose', 'picker');
+			if (plugins['picker'].isOpen)
+				broadcast.emit('rqstClose', 'picker');
+		}
 	}
 	function onSingleClick(location: LatLon)
     {
@@ -282,7 +281,8 @@
 			update('onSingleClick', location);
 		
 		// if we got the singleClick event then the picker did not so kill it rather than continue to show it in the wrong place
-		if (!isMobile && plugins['picker'].isOpen)
+		//if (!isMobile && plugins['picker'].isOpen)
+		if (plugins['picker'].isOpen)
 			broadcast.emit('rqstClose', 'picker');
     }
 	function onSingleClickSounding(location: LatLon)
