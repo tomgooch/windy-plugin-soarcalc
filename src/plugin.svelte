@@ -184,7 +184,16 @@
 		if (explicitLocation)
 			loc = location;
 		else if (plugins['detail'].isOpen)
+		{
 			loc = store.get('detailLocation');
+			broadcast.emit('rqstClose', 'detail');
+			if (!isMobile)
+			{
+				// on desktop we can re-open 'detail' but it must be the last opened plugin
+				// otherwise it will not see the singleClick events which it depends on
+				pause(1000).then(() => {broadcast.emit('rqstOpen', 'detail', loc)});
+			}
+		}
 		else if (plugins['picker'].isOpen)
 			loc = store.get('pickerLocation');
 		else if (!isMobile && (plugins['airport'].isOpen))
@@ -196,11 +205,10 @@
 		else
 			loc = store.get('mapCoords');				// final fallback is centre of map
 
-		// to avoid multiple locations simultaneously active and stealing the single click events from them this means
+		// to avoid multiple locations simultaneously active and stealing the single click events from them 
 		// we need to close detail, sounding and picker
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'picker');
-		broadcast.emit('rqstClose', 'detail');
 
 		store.set('overlay', 'clouds');
 
@@ -232,8 +240,7 @@
 		store.on('detailLocation', onStoreDetailLocation);
         singleclick.on(name, onSingleClick);
 		singleclick.on('sounding', onSingleClickSounding);
-		// if (!isMobile)
-			store.on('pickerLocation', onStorePickerLocation);
+		store.on('pickerLocation', onStorePickerLocation);
 
 		//thisPlugin.window.node.querySelector(':scope > .closing-x').addEventListener('click', () => (closeButtonClicked = true));
 	});
@@ -248,8 +255,7 @@
 		store.off('detailLocation', onStoreDetailLocation);
         singleclick.off(name, onSingleClick);
 		singleclick.off('sounding', onSingleClickSounding);
-		// if (!isMobile)
-			store.off('pickerLocation', onStorePickerLocation);
+		store.off('pickerLocation', onStorePickerLocation);
 
 		if (!(searchPluginActive || closeAllPlugins))
 			broadcast.off('pluginClosed', onPluginClosed);
@@ -281,7 +287,6 @@
 			update('onSingleClick', location);
 		
 		// if we got the singleClick event then the picker did not so kill it rather than continue to show it in the wrong place
-		//if (!isMobile && plugins['picker'].isOpen)
 		if (plugins['picker'].isOpen)
 			broadcast.emit('rqstClose', 'picker');
     }
