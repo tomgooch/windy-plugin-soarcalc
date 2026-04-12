@@ -206,7 +206,7 @@
 			loc = store.get('mapCoords');				// final fallback is centre of map
 
 		// to avoid multiple locations simultaneously active and stealing the single click events from them 
-		// we need to close detail, sounding and picker
+		// we need to close sounding and picker
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'picker');
 
@@ -414,19 +414,13 @@
 					else
 					{
 						returnValue.then((values: any)=> {
-						//_interpolator(_loc).then((values: any) => {
 							console.log('SoarCalc: interpolator(loc).then', values);
 							if (Array.isArray(values))
 							{
 								if (overlay == 'clouds')
-								{
 									cloud = values[0] / 100;
-									//rain = values[1];
-								}
 								else if (overlay == 'solarpower')
-								{
 									Qs = values[0];
-								}
 								_sounding = new Sounding(_meteogramForecast, model, _loc, hour, overlay, Qs, cloud);
 							}
 						}).catch((e: any) => {

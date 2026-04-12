@@ -112,8 +112,16 @@ export class Sounding
 		this.Qs0 = getQs0(this.hour!, this.Loc!);
 		if (cloud != null)
 		{
-			this.cloud = cloud;
-			this.Qs = (1-cloud) * this.Qs0;
+			if (cloud >= 1.0)
+			{
+				this.cloud = 1.0;
+				this.Qs = 0.0;
+			}
+			else
+			{
+				this.cloud = cloud;
+				this.Qs = (1-cloud) * this.Qs0;
+			}
 		}
 		else if (Qs != null)
 		{
