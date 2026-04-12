@@ -176,13 +176,16 @@
 			const thisPlugin = plugins['windy-plugin-soarcalc'];
 			thisPlugin.window.node.style.pointerEvents = "initial";
 		}
-		console.log('SoarCalc: onOpen', location);
+		console.log('SoarCalc: onOpen', location, store.get('product'));
 
 		var loc: LatLon | null = null;
-		const explicitLocation: boolean = location?.source != 'soarcalc' && isValidLatLonObj(location);
+		const reOpening: boolean = location?.source == 'soarcalc' && isValidLatLonObj(location);
 
-		if (explicitLocation)
+		if (isValidLatLonObj(location) && !reOpening)
+		{
+			// location explicity supplied (on URL or from context menu)
 			loc = location;
+		}
 		else if (plugins['detail'].isOpen)
 		{
 			loc = store.get('detailLocation');
@@ -200,7 +203,7 @@
 			loc = store.get('lastPoiLocation');
 		else if (plugins['webcams-detail'].isOpen)
 			loc = store.get('lastPoiLocation');
-		else if (isValidLatLonObj(location))			// previously open location (should not happen)
+		else if (isValidLatLonObj(location))			// previously open location (should not get here as detail should be open at this point)
 			loc = location;
 		else
 			loc = store.get('mapCoords');				// final fallback is centre of map
@@ -210,19 +213,28 @@
 		broadcast.emit('rqstClose', 'sounding');
 		broadcast.emit('rqstClose', 'picker');
 
-		store.set('overlay', 'clouds');
-
-		// discover if ukv is available at the desired location and if so select it
-		if (loc == null)
-			update('onOpen', null);
+		if (reOpening)
+		{
+			// re-opening after search for location don't mess with overlay or model
+			update('onOpen', loc);
+		}
 		else
 		{
-			getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
-				store.set('product', 'ukv');
+			// opened directly by user
+			// set to clouds overlay and discover if ukv is available at the desired location and if so select it
+			store.set('overlay', 'clouds');
+
+			if (loc == null)
 				update('onOpen', loc);
-			}).catch((e) => {
-				update('onOpen', loc);
-			});
+			else
+			{
+				getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
+					store.set('product', 'ukv');
+					update('onOpen', loc);
+				}).catch((e) => {
+					update('onOpen', loc);
+				});
+			}
 		}
 	}
 
