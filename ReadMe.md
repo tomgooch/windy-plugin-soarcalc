@@ -76,7 +76,7 @@ Then...
 
 ## Change Log
 
-### 1.3.15
+### 1.3.16
 
 This release addresses unfortunate interactions between SoarCalc and the 'detail' and 'picker' plugins with a focus on making sure that the user is never confused by the presence of 2 active markers on the map surface.
 
@@ -87,6 +87,10 @@ This release addresses unfortunate interactions between SoarCalc and the 'detail
 - SoarCalc no longer switches to clouds layer and ukv model (if available) when being re-opened as a result of clicking on a label or using the 'Search Location' feature.  It now only does this when first opened in order to respect the user's choice.
 
 - Defensive code has been added to cope with the value of the cloud cover exceeding 100% (due to rounding errors - previously this caused W* to appear as 'NaN' on rare occaisions).
+
+- Improved error handling.
+
+- Status message now available as ToolTip on time and location message.
 
 - **Mobile only:** SoarCalc now closes the 'detail' plugin when it is opened as a result of clicking on a label.  This is simply so that the behaviour is the same whether the user clicks on empty space on the map or on the label and SoarCalc will not be hidden.
 
