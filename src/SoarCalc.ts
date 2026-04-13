@@ -55,171 +55,179 @@ export class Sounding
 	constructor(meteogramForecast: any, model: string | null, loc: LatLon | null, timestamp: number | null, overlay: string | null, Qs: number | null, cloud: number | null)
 	{
     	console.log("SoarCalc: Sounding.constructor:", model, overlay, timestamp, loc, Qs, cloud, meteogramForecast);
-		this.Qs = Qs;
-		this.cloud = cloud;
-		this.Loc = loc;
-		this.model = model;
-		this.overlay = overlay;
-		if (loc == null)
+		try
 		{
-			this.message = 'no current location';
-			this.toolTip = 'Soaring parameters can only be calculated when a location has been selected';
-			return;
-		}
-		if (meteogramForecast == null)
-		{
-			this.message = 'no forecast available';
-			this.toolTip = 'The currently selected forecast model is not available at this location'
-			return;
-		}
-		if (meteogramForecast.status != 200)
-		{
-			this.message = 'invalid forecast, status=' + meteogramForecast.status;
-			this.toolTip = 'Invalid forecast data has been returned'
-			return;
-		}
-					
-        const md = meteogramForecast.data.data;
-        const t: number = getHourIndex(timestamp, md.hours);
-        if (t < 0)
-		{
-			this.message = 'time point unavailable';
-			this.toolTip = 'The requested time is beyond the limit of the forecast availability'
-			return;
-		}
-		this.hour = md.hours[t];
-		this.refTime = new Date(meteogramForecast.data.header.refTime).getTime();
-
-		this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
-        this.modelElevation = meteogramForecast.data.header.modelElevation;
-
-		var gh: number;															// elevation that we will use in calculations
-		if (this.modelElevation == null)
-		{
-			this.message = 'model elevation unavailable';						// AROME does not give us the model elevation!
-			this.toolTip = 'All height parameters the forecast thermal strength are relative to the model elevation.  ' +
-			'The current model has not made this available so we are forced to use the actual elevation. ' +
-			'In mountianus regions this may differ considerably'
-			this.modelElevation = null;
-			gh = meteogramForecast.data.header.elevation;						// take the actual elevation (supplied by Windy - same for all models)???
-		}
-		else
-		{
-			this.modelElevation = meteogramForecast.data.header.modelElevation;
-			gh = meteogramForecast.data.header.modelElevation;					// surface geopotential height is provided in the header rather than the data
-		}
-
-		this.Qs0 = getQs0(this.hour!, this.Loc!);
-		if (cloud != null)
-		{
-			if (cloud >= 1.0)
+			this.Qs = Qs;
+			this.cloud = cloud;
+			this.Loc = loc;
+			this.model = model;
+			this.overlay = overlay;
+			if (loc == null)
 			{
-				this.cloud = 1.0;
-				this.Qs = 0.0;
+				this.message = 'no current location';
+				this.toolTip = 'Soaring parameters can only be calculated when a location has been selected';
+				return;
+			}
+			if (meteogramForecast == null)
+			{
+				this.message = 'no forecast available';
+				this.toolTip = 'The currently selected forecast model is not available at this location'
+				return;
+			}
+			if (meteogramForecast.status != 200)
+			{
+				this.message = 'invalid forecast, status=' + meteogramForecast.status;
+				this.toolTip = 'Invalid forecast data has been returned'
+				return;
+			}
+						
+			const md = meteogramForecast.data.data;
+			const t: number = getHourIndex(timestamp, md.hours);
+			if (t < 0)
+			{
+				this.message = 'time point unavailable';
+				this.toolTip = 'The requested time is beyond the limit of the forecast availability'
+				return;
+			}
+			this.hour = md.hours[t];
+			this.refTime = new Date(meteogramForecast.data.header.refTime).getTime();
+
+			this.actualElevation = meteogramForecast.data.header.elevation;			// actual elevation not used in calculations but presented for sanity check
+			this.modelElevation = meteogramForecast.data.header.modelElevation;
+
+			var gh: number;															// elevation that we will use in calculations
+			if (this.modelElevation == null)
+			{
+				this.message = 'model elevation unavailable';						// AROME does not give us the model elevation!
+				this.toolTip = 'All height parameters the forecast thermal strength are relative to the model elevation.  ' +
+				'The current model has not made this available so we are forced to use the actual elevation. ' +
+				'In mountianus regions this may differ considerably'
+				this.modelElevation = null;
+				gh = meteogramForecast.data.header.elevation;						// take the actual elevation (supplied by Windy - same for all models)???
 			}
 			else
 			{
-				this.cloud = cloud;
-				this.Qs = (1-cloud) * this.Qs0;
+				this.modelElevation = meteogramForecast.data.header.modelElevation;
+				gh = meteogramForecast.data.header.modelElevation;					// surface geopotential height is provided in the header rather than the data
 			}
-		}
-		else if (Qs != null)
-		{
-			this.Qs = Qs;
-			this.cloud = 1 - (this.Qs / this.Qs0);
-			if (this.cloud < 0)
-				this.cloud = 0;
-		}
-		else
-		{
-			this.message = 'only available in Clouds layer'
-			this.toolTip = 'This data is only available when the "Clouds" (or "Solar power") layer is active'
-			this.cloud = null;
-			this.Qs = null;
-		}
 
-		const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
-        const p: number = getPressure(seaLevelPressure, gh);
-        this.surface = new SoundingLevel('surface', gh, p, md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
-
-		this.levels = Array<SoundingLevel>();
-		this.levels[0] = this.surface;
-
-		for (const x of ['1000h', '950h', '925h', '900h', '850h', '800h', '700h', '600h', '500h', '400h', '300h', '200h', '150h'])
-		{
-			const gh = md['gh-' + x][t];
-			if (gh > this.levels[0].gh)
+			this.Qs0 = getQs0(this.hour!, this.Loc!);
+			if (cloud != null)
 			{
-				const p = Number(x.substring(0, x.length - 1)) * 100;	// infer pressure from name of level
-				this.levels[this.levels.length] = new SoundingLevel(x, gh, p, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
-			}
-		}
-		if (this.levels.length == 1)
-		{
-			this.message = 'surface data only';						// AROME-HD only gives us surface data
-			this.toolTip = 'The current forecast model only provides surface data - no calculation of thermal parameters is possible.'
-			return;
-		}
-
-		for(var i=1; i<this.levels.length; i++)
-		{
-			const level1: SoundingLevel = this.levels[i];
-			const level0: SoundingLevel = this.levels[i-1];
-			const packetTv: number = this.surface.Tv + adiabaticLapseRate * (level1.gh - this.surface.gh);
-			const eLR = (level1.Tv - level0.Tv) / (level1.gh - level0.gh);
-			if (level1.Tv > packetTv)
-			{
-				const gh = (this.surface.Tv - level0.Tv + level0.gh * eLR - this.surface.gh * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
-				if (gh - this.surface.gh > 10)
-					this.blTop = getInterpolatedLevel(level1, level0, gh, 'blTop');
+				if (cloud >= 1.0)
+				{
+					this.cloud = 1.0;
+					this.Qs = 0.0;
+				}
 				else
-					this.blTop = this.surface;
-				break;
+				{
+					this.cloud = cloud;
+					this.Qs = (1-cloud) * this.Qs0;
+				}
 			}
+			else if (Qs != null)
+			{
+				this.Qs = Qs;
+				this.cloud = 1 - (this.Qs / this.Qs0);
+				if (this.cloud < 0)
+					this.cloud = 0;
+			}
+			else
+			{
+				this.message = 'only available in Clouds layer'
+				this.toolTip = 'This data is only available when the "Clouds" (or "Solar power") layer is active'
+				this.cloud = null;
+				this.Qs = null;
+			}
+
+			const seaLevelPressure = getSeaLevelPressure(95000, md['gh-950h'][t]);	// surface pressure is not directly supplied so we infer it from a known level
+			const p: number = getPressure(seaLevelPressure, gh);
+			this.surface = new SoundingLevel('surface', gh, p, md['temp-surface'][t], md['rh-surface'][t]/100, md['dewpoint-surface'][t], md['wind_u-surface'][t], md['wind_v-surface'][t]);
+
+			this.levels = Array<SoundingLevel>();
+			this.levels[0] = this.surface;
+
+			for (const x of ['1000h', '950h', '925h', '900h', '850h', '800h', '700h', '600h', '500h', '400h', '300h', '200h', '150h'])
+			{
+				const gh = md['gh-' + x][t];
+				if (gh > this.levels[0].gh)
+				{
+					const p = Number(x.substring(0, x.length - 1)) * 100;	// infer pressure from name of level
+					this.levels[this.levels.length] = new SoundingLevel(x, gh, p, md['temp-' + x][t], md['rh-' + x][t]/100, md['dewpoint-' + x][t], md['wind_u-' + x][t], md['wind_v-' + x][t]);
+				}
+			}
+			if (this.levels.length == 1)
+			{
+				this.message = 'surface data only';						// AROME-HD only gives us surface data
+				this.toolTip = 'The current forecast model only provides surface data - no calculation of thermal parameters is possible.'
+				return;
+			}
+
+			for(var i=1; i<this.levels.length; i++)
+			{
+				const level1: SoundingLevel = this.levels[i];
+				const level0: SoundingLevel = this.levels[i-1];
+				const packetTv: number = this.surface.Tv + adiabaticLapseRate * (level1.gh - this.surface.gh);
+				const eLR = (level1.Tv - level0.Tv) / (level1.gh - level0.gh);
+				if (level1.Tv > packetTv)
+				{
+					const gh = (this.surface.Tv - level0.Tv + level0.gh * eLR - this.surface.gh * adiabaticLapseRate) / (eLR - adiabaticLapseRate);
+					if (gh - this.surface.gh > 10)
+						this.blTop = getInterpolatedLevel(level1, level0, gh, 'blTop');
+					else
+						this.blTop = this.surface;
+					break;
+				}
+			}
+			if (this.blTop == null)
+				this.blTop = this.levels[this.levels.length-1];
+
+			this.getBlAverageWindAndMixingRatio();
+
+			//this.ccl = getCondensationLevel(this.levels, this.surface.U, 'ccl');
+			this.ccl = getCCLFromDewPoint(this.levels, 'ccl');
+			this.Tcon = getPotentialTemperature(this.ccl.T, this.ccl.P, this.surface.P);
+			
+			if (this.blU != null)
+				this.odBase = getCondensationLevel(this.levels, this.blU, 'odbase');
+
+			this.blDepth = this.blTop.gh - this.surface.gh;
+			if (this.blDepth <= 0) this.blDepth = 0;
+			
+			const cuBase: number = this.surface.gh + getCuBase(this.surface.T, this.surface.dewPoint);
+			this.lcl = getInterpolatedLevel2(this.levels, cuBase, 'lcl');
+			this.cuBase = this.lcl;
+			
+			if (this.Qs != null)
+			{
+				this.Wstar = getWstar(this.Qs, this.blDepth, this.surface.U);
+				this.Hcrit = this.surface.gh + getZcrit(Wcrit, this.Wstar) * this.blDepth;
+			}
+			
+			// Buoyancy/Shear ratio
+			// we take wind half way between surface and blTop
+			const dVx: number = (this.blTop.Vx - this.surface.Vx);
+			const dVy: number = (this.blTop.Vy - this.surface.Vy);
+			const dV2: number = dVx * dVx + dVy * dVy;
+			this.blShear = Math.sqrt(dV2);
+			if (this.Wstar != null)
+			{
+				if (this.Wstar == 0)
+					this.Ri = 0;
+				else if (dV2 > 0.000001)
+					this.Ri = this.Wstar * this.Wstar / (4 * dV2);
+			}
+
+			this.cuPossible = this.cuBase.gh < this.blTop.gh;
+			if (this.odBase != null)
+				this.odPossible = this.odBase.gh < this.blTop.gh;
 		}
-		if (this.blTop == null)
-			this.blTop = this.levels[this.levels.length-1];
-
-		this.getBlAverageWindAndMixingRatio();
-
-		//this.ccl = getCondensationLevel(this.levels, this.surface.U, 'ccl');
-		this.ccl = getCCLFromDewPoint(this.levels, 'ccl');
-		this.Tcon = getPotentialTemperature(this.ccl.T, this.ccl.P, this.surface.P);
-		
-		if (this.blU != null)
-			this.odBase = getCondensationLevel(this.levels, this.blU, 'odbase');
-
-		this.blDepth = this.blTop.gh - this.surface.gh;
-		if (this.blDepth <= 0) this.blDepth = 0;
-		
-		const cuBase: number = this.surface.gh + getCuBase(this.surface.T, this.surface.dewPoint);
-		this.lcl = getInterpolatedLevel2(this.levels, cuBase, 'lcl');
-		this.cuBase = this.lcl;
-		
-		if (this.Qs != null)
+		catch (error)
 		{
-			this.Wstar = getWstar(this.Qs, this.blDepth, this.surface.U);
-			this.Hcrit = this.surface.gh + getZcrit(Wcrit, this.Wstar) * this.blDepth;
+			console.log("SoarCalc: error: ", error);
+			this.message = "error";
+			this.toolTip = error.toString();
 		}
-		
-		// Buoyancy/Shear ratio
-		// we take wind half way between surface and blTop
-		const dVx: number = (this.blTop.Vx - this.surface.Vx);
-		const dVy: number = (this.blTop.Vy - this.surface.Vy);
-		const dV2: number = dVx * dVx + dVy * dVy;
-		this.blShear = Math.sqrt(dV2);
-		if (this.Wstar != null)
-		{
-			if (this.Wstar == 0)
-				this.Ri = 0;
-			else if (dV2 > 0.000001)
-				this.Ri = this.Wstar * this.Wstar / (4 * dV2);
-		}
-
-		this.cuPossible = this.cuBase.gh < this.blTop.gh;
-		if (this.odBase != null)
-			this.odPossible = this.odBase.gh < this.blTop.gh;
-
 		console.log("SoarCalc: /Sounding.constructor:", this);
 	}
 	getBlAverageWindAndMixingRatio(): void

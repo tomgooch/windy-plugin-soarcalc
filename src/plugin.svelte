@@ -4,7 +4,8 @@
 	</div>
 	<br><div class="tooltipR">
 		<span style="font-size:10px;vertical-align:top">{format_time(_sounding.hour)}, {format_latlon(_sounding.Loc)}</span>
-		<span class="tooltiptext">Time and Location</span>
+		<!-- <span class="tooltiptext">Time and Location</span> -->
+		<span class="tooltiptext">{format_status(_stsOpenType, _stsUpdateType)}</span>
 	</div>
 	
 	<table style={isMobile ? "width:95%" : "width:100%" }>
@@ -118,6 +119,8 @@
     let _loc: LatLon;
 
     let _sounding: Sounding = new Sounding(null, null, null, null, null, null, null);
+	let _stsOpenType: number = 0;
+	let _stsUpdateType: string | null = null;
 
     let _meteogramForecast: any = null;
     let _interpolator: any = null;
@@ -179,7 +182,8 @@
 		console.log('SoarCalc: onOpen', location, store.get('product'));
 
 		var loc: LatLon | null = null;
-		const reOpening: boolean = location?.source == 'soarcalc' && isValidLatLonObj(location);
+		const reOpening: boolean = location?.source == 'soarcalc';
+			_stsOpenType = reOpening ? 2 : 1;
 
 		if (isValidLatLonObj(location) && !reOpening)
 		{
@@ -216,7 +220,7 @@
 		if (reOpening)
 		{
 			// re-opening after search for location don't mess with overlay or model
-			update('onOpen', loc);
+			update('onOpen1', loc);
 		}
 		else
 		{
@@ -225,14 +229,14 @@
 			store.set('overlay', 'clouds');
 
 			if (loc == null)
-				update('onOpen', loc);
+				update('onOpen2', loc);
 			else
 			{
 				getMeteogramForecastData('ukv', {lat:loc.lat, lon:loc.lon, step:1}).then((meteogramForecast) => {
 					store.set('product', 'ukv');
-					update('onOpen', loc);
+					update('onOpen3', loc);
 				}).catch((e) => {
-					update('onOpen', loc);
+					update('onOpen4', loc);
 				});
 			}
 		}
@@ -365,6 +369,7 @@
 //=======================================================================================================================================================
 	function update(tag: string, location: LatLon | null)
 	{
+		_stsUpdateType = tag;
 		const model = store.get('product');
 		const overlay = store.get('overlay');
 		const timestamp: number | null = store.get('timestamp');
@@ -388,7 +393,7 @@
 		// if we were brave enough we could remove the timeout
 		if (ts < _timestamp + 60000 && valid && model == _model && overlay == _overlay && hour == _hour && _loc?.lat == _latitude && _loc?.lon == _longitude)
 		{
-			console.log('SoarCalc: duplicate');
+			console.log('SoarCalc: update: duplicate');
 			return;
 		}
 
@@ -511,7 +516,11 @@
 		// return a promise that resolves with null after specified number of milliseconds
 		return new Promise((resolve) => {setTimeout(() => resolve(null), ms)});
 	}
-// **********************************************************
+// ********************************************************************************************************************
+	function format_status(openType: number, updateType: string | null): string
+	{
+		return 'Status: open=' + openType + ', update=' + updateType;
+	}
 	function format_na(): string
 	{
     	return _na;
