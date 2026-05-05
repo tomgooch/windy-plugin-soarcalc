@@ -8,7 +8,6 @@ const Cp: number = 1004.67;						// Specific heat at constant pressure of dry ai
 const rho: number = 1.21;							// density of air at surface (kg m-3)
 const zeroC: number = 273.16;						// freezing point in Kelvin (K)
 const adiabaticLapseRate: number = -0.00975;		// adiabatic lapse rate g/Cp (K m-1)
-const Wcrit: number = 0.9;							// sink rate of thermalling glider (ms-1)
 
 export class Sounding
 {
@@ -38,7 +37,12 @@ export class Sounding
 	blShear: number | null = null;			// boundary layer wind shear (ms-1)
 	blDepth: number | null = null;			// boundary layer depth i.e. blTop - surface (m)
 	Wstar: number | null = null;			// characteristic thermal updraft velocity (ms-2)
+	Wstar0: number | null = null;			// characteristic thermal updraft velocity (ms-2) in the absence of cloud
+	Wcrit: number = 0.9;					// sink rate of thermalling glider (ms-1)
+	Climb: number | null = null;		// corresponding glider climb rate
+	Climb0: number | null = null;		// corresponding glider climb rate in the absence of cloud
 	Hcrit: number | null = null;			// height of critical updraft strength
+	Hcrit0: number | null = null;			// height of critical updraft strength in the absence of cloud
 	Ri: number | null = null;				// B/S ratio (Richardson number)
 	blU: number | null = null;				// BL average mixing ratio
 	blVx: number | null = null;			// BL average wind x
@@ -198,10 +202,14 @@ export class Sounding
 			this.lcl = getInterpolatedLevel2(this.levels, cuBase, 'lcl');
 			this.cuBase = this.lcl;
 			
+			this.Wstar0 = getWstar(this.Qs0, this.blDepth, this.surface.U);
+			this.Hcrit0 = this.surface.gh + getZcrit(this.Wcrit, this.Wstar0) * this.blDepth;
+			this.Climb0 = this.Wstar0 > this.Wcrit ? this.Wstar0 - this.Wcrit : 0;
 			if (this.Qs != null)
 			{
 				this.Wstar = getWstar(this.Qs, this.blDepth, this.surface.U);
-				this.Hcrit = this.surface.gh + getZcrit(Wcrit, this.Wstar) * this.blDepth;
+				this.Climb = this.Wstar > this.Wcrit ? this.Wstar - this.Wcrit : 0;
+				this.Hcrit = this.surface.gh + getZcrit(this.Wcrit, this.Wstar) * this.blDepth;
 			}
 			
 			// Buoyancy/Shear ratio

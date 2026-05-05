@@ -76,6 +76,12 @@ Then...
 
 ## Change Log
 
+### 1.3.17
+
+- "Glider climb rate" is now shown rather than "Thermal updraft"
+
+- More details (including "Thermal updraft") are available within tooltips
+
 ### 1.3.16
 
 This release addresses unfortunate interactions between SoarCalc and the 'detail' and 'picker' plugins with a focus on making sure that the user is never confused by the presence of 2 active markers on the map surface.

@@ -17,11 +17,13 @@
 		<br><div class="tooltipR">Tdew: {format_temp(_sounding.surface?.dewPoint)}
 			<span class="tooltiptext">Surface dew point temperature ({metrics.temp.metric})</span>
 		</div>
-		<br><div class="tooltipR">Elev: {format_height(_sounding.modelElevation)}
-			<span class="tooltiptext">Model elevation ({metrics.altitude.metric} amsl)</span>
+		<br><div class="tooltipR">Elev: {format_height(_sounding.actualElevation)}
+			<span class="tooltiptext">Actual elevation ({metrics.altitude.metric} amsl)
+				 [Model {format_height(_sounding.modelElevation)}{metrics.altitude.metric} amsl]
+			</span>
 		</div>
-		<br><div class="tooltipR">ElevA: {format_height(_sounding.actualElevation)}
-			<span class="tooltiptext">Actual elevation ({metrics.altitude.metric} amsl)</span>
+		<br><div class="tooltipR">BL av: {format_vector_wind(_sounding.blVx, _sounding.blVy)}
+			<span class="tooltiptext">BL average Wind (degrees/{metrics.wind.metric})</span>
 		</div>
 	</td>
 	<td style=";text-align:right;vertical-align:top">
@@ -49,24 +51,30 @@
 			{/if}
 			<span class="tooltiptext">Overdeveloped / Spreadout cloud base ({metrics.altitude.metric} amsl)</span>
 		</div>
-		<br><div class="tooltip">BL avg: 
-			{format_vector_wind(_sounding.blVx, _sounding.blVy)}
-			<span class="tooltiptext">BL average Wind (degrees/{metrics.wind.metric})</span>
-		</div>
-		<br><div class="tooltip">Shear: 
+		<br><div class="tooltip">BL shear: 
 			{format_wind(_sounding.blShear, 0)}
 			<span class="tooltiptext">Wind shear BL top vs surface ({metrics.wind.metric})</span>
 		</div>
 	</td>
 	<td style=";text-align:right;vertical-align:top">
-		<div class="tooltipL">Cloud: {format_number(_sounding.cloud, 2)}
-			<span class="tooltiptext">Total cloud cover</span>
+		<div class="tooltipL">Cloud: {format_percent(_sounding.cloud)}
+			<span class="tooltiptext">Total cloud cover (%)
+				{#if (_sounding.cloud == null)}
+				[0% cloud would give Qs {format_number(_sounding.Qs0, 0)}, climb {format_wind(_sounding.Climb0, 1)}, Hcrit {format_height(_sounding.Hcrit0)}]
+				{:else}
+				[Surface insolation Qs {format_number(_sounding.Qs, 0)}W/m2]
+				{/if}
+			</span>
 		</div>
-		<br><div class="tooltipL">Qs: {format_number(_sounding.Qs, 0)}
-			<span class="tooltiptext">Surface insolation (W/m2)</span>
-		</div>
-		<br><div class="tooltipL">W*: {format_wind(_sounding.Wstar, 2)}
-			<span class="tooltiptext">Thermal updraft velocity ({metrics.wind.metric})</span>
+		<br><div class="tooltipL">Climb: 
+			{#if _sounding.Climb == 0}
+				<span style="opacity:0.6">{format_wind(_sounding.Climb, 1)}</span>
+			{:else}
+				{format_wind(_sounding.Climb, 1)}
+			{/if}
+			<span class="tooltiptext">Glider climb rate ({metrics.wind.metric})
+				[Thermal updraft velocity {format_wind(_sounding.Wstar, 1)}{metrics.wind.metric}, glider sink rate {format_wind(_sounding.Wcrit, 1)}{metrics.wind.metric}]
+			</span>
 		</div>
 		<br><div class="tooltipL">Hcrit: 
 			{#if _sounding.Hcrit == _sounding.surface?.gh}
@@ -74,7 +82,7 @@
 			{:else}
 				{format_height(_sounding.Hcrit)}
 			{/if}
-			<span class="tooltiptext">Height at which updraft falls below {format_wind(0.9, 2)} {metrics.wind.metric} ({metrics.altitude.metric} amsl)</span>
+			<span class="tooltiptext">Height at which climb rate falls to zero ({metrics.altitude.metric} amsl)</span>
 		</div>
 		<br><div class="tooltipL">B/S: {format_number(_sounding.Ri, 2)}
 			<span class="tooltiptext">Bouyancy/Shear ratio</span>
@@ -82,13 +90,14 @@
 	</td>
 	</tr>
 	</table>
+	<br>
 	<div class="tooltipR">
 		{#if _sounding.message != null}
 			{format_na()} <span style="color:yellow;vertical-align:top">{_sounding.message}</span>
 			<span class="tooltiptext">{_sounding.toolTip}</span>
 		{:else}
-			<span style="color:yellow;font-size:10px;vertical-align:top">{isMobile ? 'Tap' : 'Hover'} for descriptions</span>
-			<span class="tooltiptext">{isMobile ? 'Tap' : 'Hover'} individual parameters to see their descriptions</span>
+			<span style="color:yellow;font-size:10px;vertical-align:top">{isMobile ? 'Tap' : 'Hover'} for details</span>
+			<span class="tooltiptext">{isMobile ? 'Tap' : 'Hover'} individual parameters for details</span>
 		{/if}
 	</div>
 </div>
@@ -525,6 +534,11 @@
 	{
     	return _na;
 	}
+	function format_percent(x: number | null | undefined): string
+	{
+    	if (x == null) return _na;
+		return (x * 100).toFixed(0);
+	}
     function format_height(x: number | null | undefined): string
     {
     	if (x == null) return _na;
@@ -538,7 +552,7 @@
     function format_wind(x: number | null | undefined, n: number): string
     {
     	if (x == null) return _na;
-		return metrics.wind.convertNumber(x, n);
+		return metrics.wind.convertNumber(x, n).toFixed(n);
     }
     function format_vector_wind(x: number | null | undefined, y: number | null | undefined): string
     {
@@ -601,7 +615,7 @@
 			const d = new Date(t);
 			return d.getHours() + ":" + d.getMinutes();
 	}
-
+// ********************************************************************************************************************
 </script>
 
 <style lang="less">
@@ -628,7 +642,7 @@
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
-  
+ 
   /* Position the tooltip */
   position: absolute;
   z-index: 1;
