@@ -78,11 +78,13 @@ Then...
 
 ### 1.3.17
 
+This release simplifies the parameters shown making sure the details are still available on tooltips
+
 - "Glider climb rate" is now shown rather than "Thermal updraft"
 
 - More details (including "Thermal updraft") are available within tooltips
 
-- Make sure marker is always removed on close of SoarCalc
+- Fix problem with marker sometimes not being removed on close of SoarCalc
 
 ### 1.3.16
 
