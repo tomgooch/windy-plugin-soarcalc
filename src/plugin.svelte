@@ -251,9 +251,10 @@
 		}
 	}
 
-	// export const onclose = () => {
-	// 	console.log('SoarCalc: onclose');
-	// }
+	export const onclose = () => {
+		console.log('SoarCalc: onclose');
+		hideMarker();
+	}
 
     onMount(() => {
 		console.log('SoarCalc: onMount');

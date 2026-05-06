@@ -82,6 +82,8 @@ Then...
 
 - More details (including "Thermal updraft") are available within tooltips
 
+- Make sure marker is always removed on close of SoarCalc
+
 ### 1.3.16
 
 This release addresses unfortunate interactions between SoarCalc and the 'detail' and 'picker' plugins with a focus on making sure that the user is never confused by the presence of 2 active markers on the map surface.
